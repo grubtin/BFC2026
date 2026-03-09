@@ -28,7 +28,7 @@ jobs:
         env:
           F1_EMAIL:    ${{ secrets.F1_EMAIL }}
           F1_PASSWORD: ${{ secrets.F1_PASSWORD }}
-        run: python fetch_f1_data.py
+        run: python scripts/fetch_f1_data.py
 
       - name: Commit and Push history.json
         uses: stefanzweifel/git-auto-commit-action@v5
