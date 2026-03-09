@@ -2,7 +2,10 @@ name: Sync F1 Fantasy Data
 
 on:
   schedule:
-    - cron: '0 10 * * 2'  # Every Tuesday 10:00 AM UTC
+    - cron: '0 14 * * 1'   # Monday  12:00 AM Sydney (AEDT UTC+11) = Sun 13:00 UTC  → Mon 14:00 UTC (AEST UTC+10)
+    - cron: '0 2  * * 1'   # Monday  12:00 PM Sydney (AEDT UTC+11) = Mon 01:00 UTC  → Mon 02:00 UTC (AEST UTC+10)
+    - cron: '0 14 * * 2'   # Tuesday 12:00 AM Sydney (AEDT UTC+11) = Mon 13:00 UTC  → Tue 14:00 UTC (AEST UTC+10)
+    - cron: '0 11 * * 0'   # Sunday   9:00 PM Sydney (AEDT UTC+11) = Sun 10:00 UTC  → Sun 11:00 UTC (AEST UTC+10)
   workflow_dispatch:        # Manual trigger from Actions tab
 
 jobs:
