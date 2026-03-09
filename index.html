@@ -8,94 +8,107 @@
     <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --r1:#ff6b6b;--r2:#ff9f43;--r3:#ffd93d;--r4:#6bcb77;--r5:#4d96ff;--r6:#c77dff;
-            --gold:#ffd700;--silver:#c8c8c8;--bronze:#cd7f32;
-            --bg:#0a0a14;--card:#12121f;--card2:#181828;--border:#252540;
+            --r1:#ff4757;--r2:#ff6b35;--r3:#f7c59f;--r4:#2ec4b6;--r5:#3a86ff;--r6:#c77dff;
+            --gold:#f4a100;--silver:#9a9aaa;--bronze:#cd7f32;
+            --bg:#f0eff4;--card:#ffffff;--card2:#f5f4fa;--border:#e2e0ee;
+            --text:#1a1a2e;--subtext:#6b6b8a;--muted:#a0a0bb;
         }
         *{box-sizing:border-box;}
-        body{font-family:'Share Tech Mono',monospace;background:var(--bg);color:#dde1f0;margin:0;}
+        body{font-family:'Share Tech Mono',monospace;background:var(--bg);color:var(--text);margin:0;}
         .fun{font-family:'Boogaloo',cursive;}
-        .rb-text{background:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5),var(--r6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-        .rb-bar{height:3px;background:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5),var(--r6));}
-        .rb-border{border:1.5px solid transparent;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(135deg,var(--r1),var(--r3),var(--r4),var(--r5),var(--r6)) border-box;}
+        .rb-text{background:linear-gradient(90deg,var(--r1),var(--r2),#f4a100,var(--r4),var(--r5),var(--r6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+        .rb-bar{height:3px;background:linear-gradient(90deg,var(--r1),var(--r2),#f4a100,var(--r4),var(--r5),var(--r6));}
+        .rb-border{border:2px solid transparent;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(135deg,var(--r1),#f4a100,var(--r4),var(--r5),var(--r6)) border-box;}
         .page{display:none;animation:fadeSlide .25s ease;}
         .page.active{display:block;}
         @keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
         .nav-btn{cursor:pointer;padding:6px 4px;border-radius:12px;text-align:center;transition:background .15s;}
-        .nav-btn.active{background:#1e1e34;}
+        .nav-btn.active{background:#e8e6f5;}
         .nav-btn .ni{font-size:20px;line-height:1;}
-        .nav-btn .nl{font-size:8px;color:#5a5a80;margin-top:2px;text-transform:uppercase;letter-spacing:.06em;}
-        .nav-btn.active .nl{color:#9090b8;}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:16px;}
-        .card2{background:var(--card2);border:1px solid #1e1e38;border-radius:12px;}
-        .prow{border-bottom:1px solid #181828;transition:background .12s;opacity:0;animation:rowIn .35s ease forwards;}
+        .nav-btn .nl{font-size:8px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;}
+        .nav-btn.active .nl{color:var(--subtext);}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+        .card2{background:var(--card2);border:1px solid var(--border);border-radius:12px;}
+        .prow{border-bottom:1px solid var(--border);transition:background .12s;opacity:0;animation:rowIn .35s ease forwards;}
         .prow:last-child{border-bottom:none;}
-        .prow:active{background:#181828;}
+        .prow:active{background:var(--card2);}
         @keyframes rowIn{to{opacity:1}}
-        select{background:var(--card2);border:1px solid #353558;color:#dde1f0;padding:9px 10px;border-radius:10px;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;width:100%;cursor:pointer;-webkit-appearance:none;}
-        .luck-track{height:10px;background:#1a1a2e;border-radius:5px;overflow:hidden;}
-        .luck-fill{height:100%;border-radius:5px;transition:width 1.4s cubic-bezier(.34,1.56,.64,1);}
+        select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:10px;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;width:100%;cursor:pointer;-webkit-appearance:none;box-shadow:0 1px 3px rgba(0,0,0,.05);}
         .chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:8px;font-weight:bold;letter-spacing:.07em;text-transform:uppercase;}
-        .jcard{background:var(--card2);border-radius:14px;padding:14px;margin-bottom:10px;border-left:3px solid transparent;}
+        .jcard{background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;border-left:3px solid transparent;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.05);}
+        .jcard{border-left-width:3px;}
         ::-webkit-scrollbar{display:none;}
+
+        /* Sync status banner */
+        #sync-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:100;padding:6px 16px;font-size:10px;text-align:center;letter-spacing:.06em;}
+        #sync-banner.show{display:block;}
+        #sync-banner.loading{background:#3a86ff22;color:#3a86ff;border-bottom:1px solid #3a86ff44;}
+        #sync-banner.success{background:#2ec4b622;color:#2ec4b6;border-bottom:1px solid #2ec4b644;}
+        #sync-banner.error{background:#ff475722;color:#ff4757;border-bottom:1px solid #ff475744;}
     </style>
 </head>
 <body>
+<div id="sync-banner"></div>
 <div class="max-w-[448px] mx-auto min-h-screen pb-24">
 
     <!-- HEADER -->
-    <header class="sticky top-0 z-50 bg-[#0a0a14]/96 backdrop-blur border-b border-[#252540]">
+    <header class="sticky top-0 z-50 bg-[#f0eff4]/96 backdrop-blur border-b border-[#e2e0ee]">
         <div class="rb-bar"></div>
         <div class="flex justify-between items-center px-4 py-3">
             <div>
                 <h1 class="fun text-2xl rb-text leading-none">Baby Formula Championship</h1>
-                <p class="text-[9px] text-[#55557a] uppercase tracking-widest mt-0.5">2026 Season · Rd 01 · 🇦🇺 Australian GP</p>
+                <p class="text-[9px] text-[#9090b8] uppercase tracking-widest mt-0.5">2026 Season · Rd 01 · 🇦🇺 Australian GP</p>
             </div>
-            <span class="text-3xl">🏎️</span>
+            <div class="flex items-center gap-2">
+                <button onclick="syncF1Data()" id="sync-btn" title="Sync from F1 Fantasy API" style="background:#f5f4fa;border:1px solid #e2e0ee;border-radius:10px;padding:6px 10px;cursor:pointer;font-size:10px;color:#6b6b8a;font-family:'Share Tech Mono',monospace;transition:all .15s;" onmouseover="this.style.background='#e8e6f5'" onmouseout="this.style.background='#f5f4fa'">
+                    🔄 Sync
+                </button>
+                <span class="text-3xl">🏎️</span>
+            </div>
         </div>
     </header>
 
     <!-- HOME PAGE -->
     <div id="page-home" class="page active px-4 pt-5">
         <div class="flex items-center justify-between mb-2">
-            <h2 class="fun text-xl text-[#dde1f0]">Standings</h2>
-            <span class="chip" style="background:rgba(255,217,61,.12);color:#ffd93d">After R01</span>
+            <h2 class="fun text-xl" style="color:var(--text)">Standings</h2>
+            <span class="chip" style="background:rgba(244,161,0,.15);color:#c47f00">After R01</span>
         </div>
         <div class="flex gap-3 text-[9px] mb-2 px-1">
-            <span style="color:#ff9f43">▲ gap to above</span>
-            <span style="color:#353558">|</span>
-            <span style="color:#ff6b6b">◆ gap to P1</span>
+            <span style="color:#ff6b35">▲ gap to above</span>
+            <span style="color:#d0cee8">|</span>
+            <span style="color:#ff4757">◆ gap to P1</span>
         </div>
         <div class="card overflow-hidden mb-4" id="standings-table"></div>
 
         <div class="grid grid-cols-3 gap-2 mb-4">
             <div class="card p-3 text-center">
                 <div class="text-xl">🏆</div>
-                <div class="text-[8px] text-[#55557a] mt-1 uppercase">Leader</div>
+                <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Leader</div>
                 <div class="fun text-sm mt-0.5" style="color:var(--gold)">Kevcedes</div>
             </div>
             <div class="card p-3 text-center">
                 <div class="text-xl">🔥</div>
-                <div class="text-[8px] text-[#55557a] mt-1 uppercase">Best Race</div>
-                <div class="fun text-sm mt-0.5" style="color:var(--r1)">Kevcedes</div>
-                <div class="text-[9px] text-[#55557a]">240 pts</div>
+                <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Best Race</div>
+                <div class="fun text-sm mt-0.5" style="color:#ff4757">Kevcedes</div>
+                <div class="text-[9px]" style="color:var(--muted)">240 pts</div>
             </div>
             <div class="card p-3 text-center">
                 <div class="text-xl">💀</div>
-                <div class="text-[8px] text-[#55557a] mt-1 uppercase">Worst Race</div>
-                <div class="fun text-sm mt-0.5" style="color:var(--r6)">R. Juice</div>
-                <div class="text-[9px] text-[#55557a]">195 pts</div>
+                <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Worst Race</div>
+                <div class="fun text-sm mt-0.5" style="color:#c77dff">R. Juice</div>
+                <div class="text-[9px]" style="color:var(--muted)">195 pts</div>
             </div>
         </div>
 
         <div class="card p-4">
-            <h3 class="fun text-base text-[#dde1f0] mb-3">🇦🇺 Australian GP Recap</h3>
-            <div class="space-y-2 text-[11px] text-[#7a7a9a]">
-                <div class="flex gap-2"><span>🥇</span><span><span class="text-[#6bcb77] font-bold">Russell wins it</span> for Mercedes — anyone with George (2x) absolutely feasted</span></div>
-                <div class="flex gap-2"><span>🥈</span><span><span class="text-[#4d96ff] font-bold">Mercedes 1-2</span> — Antonelli P2 on debut season. The silver era is actually back</span></div>
-                <div class="flex gap-2"><span>💥</span><span><span class="text-[#ff6b6b] font-bold">Piastri DNS</span> — crashed on sighting lap before race even started. Cosmically cursed</span></div>
-                <div class="flex gap-2"><span>📉</span><span><span class="text-[#ff6b6b] font-bold">Hadjar -8 pts</span> — DNF + penalty combo. Negative eight. NEGATIVE EIGHT.</span></div>
-                <div class="flex gap-2"><span>🚀</span><span><span class="text-[#ffd93d] font-bold">Verstappen P6 from P20</span> — came from last after quali crash. 14 overtakes. Unreal</span></div>
+            <h3 class="fun text-base mb-3" style="color:var(--text)">🇦🇺 Australian GP Recap</h3>
+            <div class="space-y-2 text-[11px]" style="color:var(--subtext)">
+                <div class="flex gap-2"><span>🥇</span><span><span style="color:#2ec4b6;font-weight:bold">Russell wins it</span> for Mercedes — anyone with George (2x) absolutely feasted</span></div>
+                <div class="flex gap-2"><span>🥈</span><span><span style="color:#3a86ff;font-weight:bold">Mercedes 1-2</span> — Antonelli P2 on debut season. The silver era is actually back</span></div>
+                <div class="flex gap-2"><span>💥</span><span><span style="color:#ff4757;font-weight:bold">Piastri DNS</span> — crashed on sighting lap before race even started. Cosmically cursed</span></div>
+                <div class="flex gap-2"><span>📉</span><span><span style="color:#ff4757;font-weight:bold">Hadjar -8 pts</span> — DNF + penalty combo. Negative eight. NEGATIVE EIGHT.</span></div>
+                <div class="flex gap-2"><span>🚀</span><span><span style="color:#f4a100;font-weight:bold">Verstappen P6 from P20</span> — came from last after quali crash. 14 overtakes. Unreal</span></div>
             </div>
         </div>
     </div>
@@ -103,8 +116,8 @@
     <!-- H2H PAGE -->
     <div id="page-h2h" class="page px-4 pt-5">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="fun text-xl text-[#dde1f0]">H2H Pulse ⚡</h2>
-            <span class="chip" style="background:rgba(77,150,255,.12);color:#4d96ff">Round 1</span>
+            <h2 class="fun text-xl" style="color:var(--text)">H2H Pulse ⚡</h2>
+            <span class="chip" style="background:rgba(58,134,255,.12);color:#3a86ff">Round 1</span>
         </div>
         <div class="grid grid-cols-[1fr_20px_1fr] items-center gap-2 mb-4">
             <select id="h2h-left" onchange="renderH2H()">
@@ -114,7 +127,7 @@
                 <option value="juice">🍊 RACING JUICE</option>
                 <option value="thumbi">👍 Thumbi</option>
             </select>
-            <div class="text-center text-[#353558] text-xs">vs</div>
+            <div class="text-center text-xs" style="color:var(--muted)">vs</div>
             <select id="h2h-right" onchange="renderH2H()">
                 <option value="kevcedes">⚡ Kevcedes</option>
                 <option value="grahhh" selected>🔥 GRAHHH racing</option>
@@ -129,50 +142,40 @@
     <!-- JUICEBOARD PAGE -->
     <div id="page-juice" class="page px-4 pt-5">
         <div class="flex items-center justify-between mb-1">
-            <h2 class="fun text-xl text-[#dde1f0]">The Juiceboard 🍊</h2>
-            <span class="chip" style="background:rgba(255,107,107,.12);color:#ff6b6b">R01 Roasts</span>
+            <h2 class="fun text-xl" style="color:var(--text)">The Juiceboard 🍊</h2>
+            <span class="chip" style="background:rgba(255,71,87,.12);color:#ff4757">R01 Roasts</span>
         </div>
-        <p class="text-[9px] text-[#55557a] mb-4 uppercase tracking-wide">Weekly highlights · certified takes · zero accountability</p>
+        <p class="text-[9px] mb-4 uppercase tracking-wide" style="color:var(--muted)">Weekly highlights · certified takes · zero accountability</p>
         <div id="juice-content"></div>
     </div>
 
     <!-- MARKET PAGE -->
     <div id="page-market" class="page px-4 pt-5">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="fun text-xl text-[#dde1f0]">Market 📈</h2>
-            <span class="chip" style="background:rgba(107,203,119,.12);color:#6bcb77">Post R01</span>
+            <h2 class="fun text-xl" style="color:var(--text)">Market 📈</h2>
+            <span class="chip" style="background:rgba(46,196,182,.12);color:#2ec4b6">Post R01</span>
         </div>
-        <p class="text-[8px] text-[#55557a] uppercase tracking-widest mb-2">Drivers</p>
+        <p class="text-[8px] uppercase tracking-widest mb-2" style="color:var(--muted)">Drivers</p>
         <div class="card overflow-hidden mb-5" id="drivers-market"></div>
-        <p class="text-[8px] text-[#55557a] uppercase tracking-widest mb-2">Constructors</p>
+        <p class="text-[8px] uppercase tracking-widest mb-2" style="color:var(--muted)">Constructors</p>
         <div class="card overflow-hidden" id="constructors-market"></div>
-    </div>
-
-    <!-- LUCK PAGE -->
-    <div id="page-luck" class="page px-4 pt-5">
-        <div class="flex items-center justify-between mb-1">
-            <h2 class="fun text-xl text-[#dde1f0]">Luck Meter 🎲</h2>
-            <span class="chip" style="background:rgba(199,125,255,.12);color:#c77dff">R01</span>
-        </div>
-        <p class="text-[9px] text-[#55557a] mb-4 uppercase tracking-wide">Calc from: DNFs, DNS, Safety Cars, race wins in your lineup</p>
-        <div id="luck-content" class="space-y-3"></div>
     </div>
 
     <!-- RAWS PAGE -->
     <div id="page-raws" class="page px-4 pt-5">
         <div class="flex items-center justify-between mb-3">
-            <h2 class="fun text-xl text-[#dde1f0]">Raws 🗃️</h2>
-            <span class="chip" style="background:rgba(77,150,255,.12);color:#4d96ff" id="raws-race-chip">R01 Data</span>
+            <h2 class="fun text-xl" style="color:var(--text)">Raws 🗃️</h2>
+            <span class="chip" style="background:rgba(58,134,255,.12);color:#3a86ff" id="raws-race-chip">R01 Data</span>
         </div>
         <!-- Controls row -->
         <div class="flex gap-2 mb-4">
-            <div class="flex bg-[#181828] rounded-xl p-1 gap-1 flex-shrink-0" style="border:1px solid #252540">
+            <div class="flex rounded-xl p-1 gap-1 flex-shrink-0" style="background:#f5f4fa;border:1px solid #e2e0ee">
                 <button id="raws-tab-drivers" onclick="setRawsTab('drivers')"
-                    class="raws-tab-btn px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all bg-[#252548] text-[#dde1f0]">
+                    class="raws-tab-btn px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all" style="background:#ffffff;color:var(--text)">
                     Drivers
                 </button>
                 <button id="raws-tab-constructors" onclick="setRawsTab('constructors')"
-                    class="raws-tab-btn px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all text-[#55557a]">
+                    class="raws-tab-btn px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all" style="color:var(--muted)">
                     Teams
                 </button>
             </div>
@@ -181,7 +184,7 @@
                 <option value="R01 🇦🇺" selected>R01 · Australian GP 🇦🇺</option>
             </select>
         </div>
-        <p class="text-[8px] text-[#353558] mb-2 px-1 uppercase tracking-widest">Tap column header to sort ↕</p>
+        <p class="text-[8px] mb-2 px-1 uppercase tracking-widest" style="color:var(--muted)">Tap column header to sort ↕</p>
         <div class="card overflow-hidden mb-4" id="raws-table-wrap">
             <div id="raws-table"></div>
         </div>
@@ -190,14 +193,13 @@
 
     <!-- BOTTOM NAV -->
     <nav class="fixed bottom-0 left-0 right-0 flex justify-center z-50">
-        <div class="w-full max-w-[448px] bg-[#0a0a14]/96 backdrop-blur border-t border-[#252540]">
+        <div class="w-full max-w-[448px] backdrop-blur border-t" style="background:#f0eff4/96;border-color:#e2e0ee">
             <div class="rb-bar"></div>
-            <div class="grid grid-cols-6 gap-1 px-2 py-2">
+            <div class="grid grid-cols-5 gap-1 px-2 py-2">
                 <div class="nav-btn active" onclick="navigate('home')" id="nav-home"><div class="ni">🏠</div><div class="nl">Home</div></div>
                 <div class="nav-btn" onclick="navigate('h2h')" id="nav-h2h"><div class="ni">⚡</div><div class="nl">H2H</div></div>
                 <div class="nav-btn" onclick="navigate('juice')" id="nav-juice"><div class="ni">🍊</div><div class="nl">Juice</div></div>
                 <div class="nav-btn" onclick="navigate('market')" id="nav-market"><div class="ni">📈</div><div class="nl">Market</div></div>
-                <div class="nav-btn" onclick="navigate('luck')" id="nav-luck"><div class="ni">🎲</div><div class="nl">Luck</div></div>
                 <div class="nav-btn" onclick="navigate('raws')" id="nav-raws"><div class="ni">🗃️</div><div class="nl">Raws</div></div>
             </div>
         </div>
@@ -205,77 +207,89 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-// DATA — update these objects after each race!
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// DATA — auto-populated by GitHub Actions via fetch_f1_data.py
+// The sync button calls the F1 Fantasy API and updates these objects.
+// Manually update after each race if not using auto-sync.
+// ═══════════════════════════════════════════════════════════════════
 
 const PLAYERS = {
-    kevcedes: { id:'kevcedes', name:'Kevcedes',      owner:'Kevin Liang',    emoji:'⚡', color:'#ffd700',
-                points:240, pos:1, movement:+1, lastRace:240, value:102.4, valueDelta:+1.2, luck:80,
-                luckNote:'Russell P1 win (2x star) + Bearman P7 + Lindblad P8 debut. Absolutely eating.' },
-    grahhh:   { id:'grahhh',   name:'GRAHHH racing',  owner:'Vivian Nguyen',  emoji:'🔥', color:'#ff6b9d',
-                points:230, pos:2, movement:+2, lastRace:230, value:100.8, valueDelta:0,   luck:58,
-                luckNote:'Solid race. No real disasters. Neutral luck overall.' },
-    leclaren: { id:'leclaren', name:'LeClaren F1',    owner:'Selina Le Khac', emoji:'🧡', color:'#4d96ff',
-                points:222, pos:3, movement:-1, lastRace:222, value:101.5, valueDelta:+0.8, luck:42,
-                luckNote:'SC traffic cost some positions for team drivers.' },
-    juice:    { id:'juice',    name:'RACING JUICE',   owner:'Justin Tran',    emoji:'🍊', color:'#6bcb77',
-                points:195, pos:4, movement:-4, lastRace:195, value:99.2,  valueDelta:-0.5, luck:8,
-                luckNote:'Piastri DNS (crashed on sighting lap). 0 points from your main man. Biblical.' },
+    kevcedes: { id:'kevcedes', name:'Kevcedes',      owner:'Kevin Liang',    emoji:'⚡', color:'#f4a100',
+                points:240, pos:1, movement:+1, lastRace:240, value:102.4, valueDelta:+1.2 },
+    grahhh:   { id:'grahhh',   name:'GRAHHH racing', owner:'Vivian Nguyen',  emoji:'🔥', color:'#ff4757',
+                points:230, pos:2, movement:+2, lastRace:230, value:100.8, valueDelta:0 },
+    leclaren: { id:'leclaren', name:'LeClaren F1',   owner:'Selina Le Khac', emoji:'🧡', color:'#3a86ff',
+                points:222, pos:3, movement:-1, lastRace:222, value:101.5, valueDelta:+0.8 },
+    juice:    { id:'juice',    name:'RACING JUICE',  owner:'Justin Tran',    emoji:'🍊', color:'#2ec4b6',
+                points:195, pos:4, movement:-4, lastRace:195, value:99.2,  valueDelta:-0.5 },
     thumbi:   { id:'thumbi',  name:'Thumbi',         owner:'Thomas George',  emoji:'👍', color:'#c77dff',
-                points:195, pos:4, movement:-4, lastRace:195, value:100.1, valueDelta:+0.3, luck:30,
-                luckNote:'Hadjar -8pts hurt badly. Mixed bag of race luck.' },
+                points:195, pos:4, movement:-4, lastRace:195, value:100.1, valueDelta:+0.3 },
 };
 
 const ORDER = ['kevcedes','grahhh','leclaren','juice','thumbi'];
-const MEDAL_COLOR = ['#ffd700','#c8c8c8','#cd7f32'];
+const MEDAL_COLOR = ['#f4a100','#9a9aaa','#cd7f32'];
 const MEDAL = ['🥇','🥈','🥉'];
 
+// ── MARKET DATA — price & pts synced from F1 Fantasy API ──────────
+// Prices (M = millions) come directly from the API fantasy_price field
 const DRIVERS_DATA = [
-    { name:'G. Russell',   team:'Mercedes',     pts:78,  delta:+0.6 },
-    { name:'K. Antonelli', team:'Mercedes',     pts:44,  delta:+0.2 },
-    { name:'C. Leclerc',   team:'Ferrari',      pts:32,  delta:+0.3 },
-    { name:'L. Hamilton',  team:'Ferrari',      pts:28,  delta:+0.1 },
-    { name:'M. Verstappen',team:'Red Bull',     pts:38,  delta:-0.2 },
-    { name:'O. Bearman',   team:'Haas',         pts:20,  delta:+0.2 },
-    { name:'A. Lindblad',  team:'Racing Bulls', pts:15,  delta:+0.3 },
-    { name:'L. Norris',    team:'McLaren',      pts:18,  delta:-0.4 },
-    { name:'I. Hadjar',    team:'Red Bull',     pts:-8,  delta:-0.3 },
-    { name:'O. Piastri',   team:'McLaren',      pts:0,   delta:-0.8 },
+    { name:'G. Russell',    team:'Mercedes',     price:27.4, pts:78,  delta:+0.6 },
+    { name:'K. Antonelli',  team:'Mercedes',     price:23.2, pts:44,  delta:+0.2 },
+    { name:'C. Leclerc',    team:'Ferrari',      price:26.5, pts:32,  delta:+0.3 },
+    { name:'L. Hamilton',   team:'Ferrari',      price:29.0, pts:28,  delta:+0.1 },
+    { name:'M. Verstappen', team:'Red Bull',     price:32.0, pts:38,  delta:-0.2 },
+    { name:'O. Bearman',    team:'Haas',         price:12.5, pts:20,  delta:+0.2 },
+    { name:'A. Lindblad',   team:'Racing Bulls', price:9.5,  pts:15,  delta:+0.3 },
+    { name:'L. Norris',     team:'McLaren',      price:28.0, pts:18,  delta:-0.4 },
+    { name:'I. Hadjar',     team:'Red Bull',     price:14.0, pts:-8,  delta:-0.3 },
+    { name:'O. Piastri',    team:'McLaren',      price:25.5, pts:0,   delta:-0.8 },
+    { name:'P. Gasly',      team:'Alpine',       price:15.0, pts:12,  delta:0 },
+    { name:'F. Colapinto',  team:'Alpine',       price:10.5, pts:3,   delta:0 },
+    { name:'C. Sainz',      team:'Williams',     price:22.0, pts:-4,  delta:-0.2 },
+    { name:'A. Albon',      team:'Williams',     price:14.5, pts:5,   delta:0 },
+    { name:'E. Ocon',       team:'Haas',         price:13.0, pts:6,   delta:0 },
+    { name:'N. Hulkenberg',  team:'Audi',        price:13.5, pts:0,   delta:-0.2 },
+    { name:'G. Bortoleto',  team:'Audi',         price:10.0, pts:8,   delta:+0.1 },
+    { name:'L. Lawson',     team:'Racing Bulls', price:14.5, pts:5,   delta:-0.1 },
+    { name:'F. Alonso',     team:'Aston Martin', price:20.0, pts:-5,  delta:-0.2 },
+    { name:'L. Stroll',     team:'Aston Martin', price:11.0, pts:-3,  delta:-0.1 },
+    { name:'V. Bottas',     team:'Cadillac',     price:10.5, pts:-5,  delta:-0.1 },
+    { name:'S. Perez',      team:'Cadillac',     price:11.0, pts:2,   delta:0 },
 ];
 
 const CONSTRUCTORS_DATA = [
-    { name:'Mercedes',     pts:96, delta:+0.8 },
-    { name:'Ferrari',      pts:42, delta:+0.5 },
-    { name:'Racing Bulls', pts:20, delta:+0.2 },
-    { name:'Haas',         pts:34, delta:+0.3 },
-    { name:'Alpine',       pts:15, delta:+0.1 },
-    { name:'Audi',         pts:8,  delta:+0.1 },
-    { name:'Red Bull',     pts:-3, delta:-0.1 },
-    { name:'McLaren',      pts:-5, delta:-0.3 },
-    { name:'Aston Martin', pts:-8, delta:-0.2 },
-    { name:'Williams',     pts:1,  delta:-0.1 },
+    { name:'Mercedes',     price:34.5, pts:96, delta:+0.8 },
+    { name:'Ferrari',      price:30.5, pts:42, delta:+0.5 },
+    { name:'Red Bull',     price:27.0, pts:-3, delta:-0.1 },
+    { name:'McLaren',      price:28.5, pts:-5, delta:-0.3 },
+    { name:'Aston Martin', price:19.0, pts:-8, delta:-0.2 },
+    { name:'Alpine',       price:13.0, pts:15, delta:+0.1 },
+    { name:'Williams',     price:14.5, pts:1,  delta:-0.1 },
+    { name:'Haas',         price:13.5, pts:34, delta:+0.3 },
+    { name:'Audi',         price:11.0, pts:8,  delta:+0.1 },
+    { name:'Racing Bulls', price:12.5, pts:20, delta:+0.2 },
+    { name:'Cadillac',     price:8.5,  pts:-3, delta:0 },
 ];
 
 const JUICEBOARD_DATA = [
-    { emoji:'👑', title:'King of the Grid', subject:'Kevcedes', color:'#ffd700', tag:'W of the Week',
+    { emoji:'👑', title:'King of the Grid', subject:'Kevcedes', color:'#f4a100', tag:'W of the Week',
       text:"Kevin built the best team and it wasn't even close. Russell 2x star scoring 78, Bearman 20, Lindblad 15 on debut, 240 total. This man is playing F1 Fantasy in 4D chess while everyone else is playing draughts." },
-    { emoji:'🪦', title:'Piastri DNS Pain Award', subject:'RACING JUICE', color:'#ff6b6b', tag:'Certified L',
+    { emoji:'🪦', title:'Piastri DNS Pain Award', subject:'RACING JUICE', color:'#ff4757', tag:'Certified L',
       text:"Justin's star pick crashed on the sighting lap before the race even started. Zero points from your main man. That's not bad luck — that's cosmically targeted suffering. Prayers." },
     { emoji:'📉', title:'Hadjar Did WHAT Now?', subject:'Anyone with Hadjar', color:'#c77dff', tag:'Minus Points',
       text:"-8 points. NEGATIVE EIGHT. Isack Hadjar out here actively destroying fantasy teams. DNF lap 11, power unit in flames. If Hadjar were a stock, the SEC would investigate it as deliberate market manipulation." },
-    { emoji:'🚀', title:'P20 to P6', subject:'Verstappen owners', color:'#ffd93d', tag:'Recovery Drive',
+    { emoji:'🚀', title:'P20 to P6', subject:'Verstappen owners', color:'#f4a100', tag:'Recovery Drive',
       text:"Max crashed in qualifying, started last, finished P6. 14 positions gained in one race. Whoever had Verstappen picked up an absolute haul of overtake points. A reminder that Max in a fast car is just cosmically unfair." },
-    { emoji:'🌟', title:'Rookie on Debut', subject:'Arvid Lindblad', color:'#6bcb77', tag:'Sleeper Hit',
+    { emoji:'🌟', title:'Rookie on Debut', subject:'Arvid Lindblad', color:'#2ec4b6', tag:'Sleeper Hit',
       text:"15 points, P8 finish, 18 years old, first F1 race. Third youngest driver ever to score F1 points. Whoever grabbed Lindblad early is eating well while the rest panic-sell Piastri." },
-    { emoji:'🧠', title:'Galaxy Brain Mode', subject:'LeClaren F1', color:'#4d96ff', tag:'Mysterious',
+    { emoji:'🧠', title:'Galaxy Brain Mode', subject:'LeClaren F1', color:'#3a86ff', tag:'Mysterious',
       text:"Selina has $101.5M in team value and still DROPS a position. The car is fast, the logic is elusive. We respect the process even if we don't understand the process." },
 ];
 
 // ═══════════════════════════════════════════════════
 // RAW F1 FANTASY DATA
-// Add a new entry to each driver's `races` array after each round.
-// races: [ { round: 'R01', pts: X } , ... ]
+// Prices auto-synced from F1 Fantasy API fantasy_price field
+// Add new entry to each driver's `races` array after each round
 // ═══════════════════════════════════════════════════
 const RAW_DRIVERS = [
   // --- Mercedes ---
@@ -328,6 +342,137 @@ const RAW_CONSTRUCTORS = [
 ];
 
 // ═══════════════════════════════════════════════════
+// F1 FANTASY API SYNC
+// Mirrors fetch_f1_data.py / f1_sync.yml logic in the browser.
+// Requires a CORS proxy or use the GitHub Actions auto-sync.
+// Reads from data.json if present (committed by GitHub Actions).
+// ═══════════════════════════════════════════════════
+
+async function syncF1Data() {
+    const banner = document.getElementById('sync-banner');
+    const btn = document.getElementById('sync-btn');
+    const showBanner = (type, msg) => {
+        banner.className = `show ${type}`;
+        banner.textContent = msg;
+        if (type !== 'loading') setTimeout(() => banner.classList.remove('show'), 3500);
+    };
+
+    showBanner('loading', '🔄 Syncing from F1 Fantasy API…');
+    btn.textContent = '⏳ Syncing…';
+    btn.disabled = true;
+
+    try {
+        // Try to load data.json committed by GitHub Actions
+        const res = await fetch('./data.json', { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        applyLeagueData(data);
+        showBanner('success', `✅ Synced! Last updated: ${new Date().toLocaleTimeString()}`);
+    } catch (err) {
+        console.warn('Sync error:', err);
+        showBanner('error', `⚠️ Sync failed — using cached data. Run GitHub Action to update.`);
+    } finally {
+        btn.textContent = '🔄 Sync';
+        btn.disabled = false;
+    }
+}
+
+/**
+ * applyLeagueData(data)
+ * Maps the F1 Fantasy API response (from fetch_f1_data.py) onto the app's
+ * data structures. The API returns a league object with standings & player
+ * picks that include fantasy_price (in 100k units), total_points, etc.
+ *
+ * API response shape (from /partner_games/f1/leagues/:id):
+ * {
+ *   data: {
+ *     standings: [
+ *       { player_name, total_points, team_value, picks: [
+ *           { first_name, last_name, team_name, fantasy_price, is_constructor,
+ *             total_season_score, selection_percentage_game_week }
+ *         ]
+ *       }
+ *     ]
+ *   }
+ * }
+ */
+function applyLeagueData(apiData) {
+    try {
+        const standings = apiData?.data?.standings;
+        if (!standings || !standings.length) return;
+
+        // Update player points & team values from API standings
+        standings.forEach(standing => {
+            const playerName = (standing.player_name || '').toLowerCase().trim();
+            const playerKey = Object.keys(PLAYERS).find(k =>
+                PLAYERS[k].owner.toLowerCase().includes(playerName) ||
+                playerName.includes(PLAYERS[k].owner.toLowerCase().split(' ')[0].toLowerCase()) ||
+                playerName.includes(k)
+            );
+            if (playerKey) {
+                PLAYERS[playerKey].points    = standing.total_points ?? PLAYERS[playerKey].points;
+                PLAYERS[playerKey].value     = standing.team_value   ? +(standing.team_value / 1e6).toFixed(1) : PLAYERS[playerKey].value;
+                PLAYERS[playerKey].lastRace  = standing.last_race_points ?? PLAYERS[playerKey].lastRace;
+            }
+
+            // Update driver/constructor prices from picks
+            const picks = standing.picks || [];
+            picks.forEach(pick => {
+                const priceMillion = pick.fantasy_price ? +(pick.fantasy_price / 1e6).toFixed(1) : null;
+                const fullName = `${pick.first_name || ''} ${pick.last_name || ''}`.trim();
+                const shortName = pick.last_name || fullName;
+
+                if (pick.is_constructor) {
+                    const ctor = RAW_CONSTRUCTORS.find(c =>
+                        c.name.toLowerCase().includes(shortName.toLowerCase()) ||
+                        shortName.toLowerCase().includes(c.name.toLowerCase())
+                    );
+                    if (ctor && priceMillion) {
+                        ctor.price = priceMillion;
+                        // Mirror to CONSTRUCTORS_DATA
+                        const md = CONSTRUCTORS_DATA.find(c => c.name === ctor.name);
+                        if (md) md.price = priceMillion;
+                    }
+                } else {
+                    const drv = RAW_DRIVERS.find(d =>
+                        d.full.toLowerCase().includes(shortName.toLowerCase()) ||
+                        shortName.toLowerCase().includes(d.name.split('.')[1]?.trim().toLowerCase() || '')
+                    );
+                    if (drv && priceMillion) {
+                        drv.price = priceMillion;
+                        // Mirror to DRIVERS_DATA
+                        const md = DRIVERS_DATA.find(d => d.name === drv.name);
+                        if (md) md.price = priceMillion;
+                    }
+                    // Sync selection % if provided
+                    if (pick.selection_percentage_game_week != null && drv) {
+                        drv.sel = +pick.selection_percentage_game_week.toFixed(1);
+                    }
+                }
+            });
+        });
+
+        // Re-sort standings by points
+        const sorted = Object.values(PLAYERS).sort((a,b) => b.points - a.points);
+        sorted.forEach((p, i) => {
+            const oldPos = PLAYERS[p.id].pos;
+            PLAYERS[p.id].pos = i + 1;
+            PLAYERS[p.id].movement = oldPos - (i + 1); // positive = moved up
+        });
+        ORDER.sort((a,b) => PLAYERS[a].pos - PLAYERS[b].pos);
+
+        // Re-render all pages with fresh data
+        renderStandings();
+        renderH2H();
+        renderMarket();
+        renderRaws();
+    } catch(e) {
+        console.warn('applyLeagueData error:', e);
+    }
+}
+
+// ═══════════════════════════════════════════════════
 // RENDER FUNCTIONS
 // ═══════════════════════════════════════════════════
 
@@ -337,11 +482,11 @@ function renderStandings() {
     ORDER.forEach((key, i) => {
         const p = PLAYERS[key];
         const prev = i > 0 ? PLAYERS[ORDER[i-1]] : null;
-        const gapAbove = prev ? p.points - prev.points : null;  // negative = behind
-        const gapP1    = p.points - PLAYERS['kevcedes'].points; // 0 for leader
+        const gapAbove = prev ? p.points - prev.points : null;
+        const gapP1    = p.points - PLAYERS[ORDER[0]].points;
         const mc = i < 3 ? MEDAL_COLOR[i] : p.color;
         const movArrow = p.movement > 0 ? '↑' : p.movement < 0 ? '↓' : '—';
-        const movColor = p.movement > 0 ? '#6bcb77' : p.movement < 0 ? '#ff6b6b' : '#55557a';
+        const movColor = p.movement > 0 ? '#2ec4b6' : p.movement < 0 ? '#ff4757' : '#9090b8';
         const movAbs   = Math.abs(p.movement);
         html += `
         <div class="prow px-4 py-3 flex items-center gap-3" style="border-left:3px solid ${mc};animation-delay:${i*0.05}s">
@@ -352,16 +497,16 @@ function renderStandings() {
             </div>
             <div class="flex-1 min-w-0">
                 <div class="fun text-[15px] leading-tight truncate" style="color:${p.color}">${p.name}</div>
-                <div class="text-[9px] text-[#55557a] truncate">${p.owner}</div>
+                <div class="text-[9px] truncate" style="color:var(--subtext)">${p.owner}</div>
             </div>
             <div class="text-right flex-shrink-0">
                 <div class="fun text-base leading-none" style="color:${mc}">${p.points}</div>
                 ${i === 0
                     ? `<div class="text-[9px] font-bold mt-0.5" style="color:var(--gold)">LEADER</div>`
                     : `<div class="text-[9px] mt-0.5 font-mono">
-                           <span style="color:#ff9f43">${gapAbove}</span>
-                           <span style="color:#353558"> | </span>
-                           <span style="color:#ff6b6b">${gapP1}</span>
+                           <span style="color:#ff6b35">${gapAbove}</span>
+                           <span style="color:#d0cee8"> | </span>
+                           <span style="color:#ff4757">${gapP1}</span>
                        </div>`}
             </div>
             <div class="w-7 text-center flex-shrink-0">
@@ -384,17 +529,16 @@ function renderH2H() {
         const lStr = fmt ? fmt(lv, L) : lv;
         const rStr = fmt ? fmt(rv, R) : rv;
         return `
-        <div class="flex items-center gap-2 py-2.5 border-b border-[#181828] last:border-0">
-            <div class="flex-1 text-right font-mono text-xs ${lWin ? 'font-bold' : ''}" style="${lWin ? `color:${L.color}` : 'color:#55557a'}">${lStr}</div>
-            <div class="w-24 text-center text-[8px] uppercase tracking-widest text-[#353558] flex-shrink-0">${label}</div>
-            <div class="flex-1 text-left font-mono text-xs ${rWin ? 'font-bold' : ''}" style="${rWin ? `color:${R.color}` : 'color:#55557a'}">${rStr}</div>
+        <div class="flex items-center gap-2 py-2.5 border-b last:border-0" style="border-color:var(--border)">
+            <div class="flex-1 text-right font-mono text-xs ${lWin ? 'font-bold' : ''}" style="${lWin ? `color:${L.color}` : 'color:var(--muted)'}">${lStr}</div>
+            <div class="w-24 text-center text-[8px] uppercase tracking-widest flex-shrink-0" style="color:var(--muted)">${label}</div>
+            <div class="flex-1 text-left font-mono text-xs ${rWin ? 'font-bold' : ''}" style="${rWin ? `color:${R.color}` : 'color:var(--muted)'}">${rStr}</div>
         </div>`;
     };
 
     const dFmt   = (v)    => v > 0 ? `+$${v}M` : v < 0 ? `-$${Math.abs(v)}M` : '$0M';
     const posFmt = (v, p) => `P${p.pos}`;
     const valFmt = (v)    => `$${v}M`;
-    const lkFmt  = (v)    => `${v}%`;
 
     const gap    = Math.abs(L.points - R.points);
     const aTied  = L.points === R.points;
@@ -404,11 +548,11 @@ function renderH2H() {
     <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="card p-3" style="border-left:3px solid ${L.color}">
             <div class="fun text-[15px] leading-tight" style="color:${L.color}">${L.emoji} ${L.name}</div>
-            <div class="text-[9px] text-[#55557a] mt-0.5">${L.owner}</div>
+            <div class="text-[9px] mt-0.5" style="color:var(--subtext)">${L.owner}</div>
         </div>
         <div class="card p-3" style="border-left:3px solid ${R.color}">
             <div class="fun text-[15px] leading-tight" style="color:${R.color}">${R.emoji} ${R.name}</div>
-            <div class="text-[9px] text-[#55557a] mt-0.5">${R.owner}</div>
+            <div class="text-[9px] mt-0.5" style="color:var(--subtext)">${R.owner}</div>
         </div>
     </div>
     <div class="card px-4 py-1 mb-4">
@@ -417,14 +561,13 @@ function renderH2H() {
         ${row('Aus GP',    L.lastRace,    R.lastRace,    null)}
         ${row('Team Val',  L.value,       R.value,       valFmt)}
         ${row('Value Δ',   L.valueDelta,  R.valueDelta,  dFmt)}
-        ${row('Luck %',    L.luck,        R.luck,        lkFmt)}
     </div>
     <div class="card p-4 text-center rb-border">
-        <div class="text-[9px] text-[#55557a] uppercase tracking-widest mb-1">Points Gap</div>
-        <div class="fun text-4xl leading-none" style="color:${aTied ? '#ffd93d' : ahead.color}">
+        <div class="text-[9px] uppercase tracking-widest mb-1" style="color:var(--subtext)">Points Gap</div>
+        <div class="fun text-4xl leading-none" style="color:${aTied ? '#f4a100' : ahead.color}">
             ${aTied ? 'TIED' : gap + ' pts'}
         </div>
-        <div class="text-[10px] text-[#55557a] mt-2">
+        <div class="text-[10px] mt-2" style="color:var(--subtext)">
             ${aTied
                 ? 'Dead level — both on ' + L.points + ' pts'
                 : ahead.name + ' leads by ' + gap + ' points'}
@@ -439,11 +582,11 @@ function renderJuice() {
             <span class="text-2xl flex-shrink-0">${j.emoji}</span>
             <div class="flex-1">
                 <div class="flex items-center gap-2 flex-wrap mb-1">
-                    <span class="fun text-[15px] text-[#dde1f0]">${j.title}</span>
-                    <span class="chip" style="background:${j.color}18;color:${j.color}">${j.tag}</span>
+                    <span class="fun text-[15px]" style="color:var(--text)">${j.title}</span>
+                    <span class="chip" style="background:${j.color}20;color:${j.color}">${j.tag}</span>
                 </div>
                 <div class="text-[10px] font-bold mb-1.5" style="color:${j.color}">${j.subject}</div>
-                <div class="text-[11px] text-[#7a7a9a] leading-relaxed">${j.text}</div>
+                <div class="text-[11px] leading-relaxed" style="color:var(--subtext)">${j.text}</div>
             </div>
         </div>
     </div>`).join('');
@@ -453,22 +596,24 @@ function renderMarket() {
     const buildTable = (data) => {
         const sorted = [...data].sort((a,b) => b.delta - a.delta);
         const rows = sorted.map(d => {
-            const dc = d.delta > 0 ? '#6bcb77' : d.delta < 0 ? '#ff6b6b' : '#55557a';
-            const pc = d.pts  > 0 ? '#6bcb77' : d.pts  < 0 ? '#ff6b6b' : '#55557a';
-            return `<tr class="border-b border-[#181828] last:border-0">
+            const dc = d.delta > 0 ? '#2ec4b6' : d.delta < 0 ? '#ff4757' : '#9090b8';
+            const pc = d.pts  > 0 ? '#2ec4b6' : d.pts  < 0 ? '#ff4757' : '#9090b8';
+            return `<tr class="border-b last:border-0" style="border-color:var(--border)">
                 <td class="p-3">
-                    <div class="font-bold text-[#dde1f0] text-[11px]">${d.name}</div>
-                    ${d.team ? `<div class="text-[9px] text-[#55557a]">${d.team}</div>` : ''}
+                    <div class="font-bold text-[11px]" style="color:var(--text)">${d.name}</div>
+                    ${d.team ? `<div class="text-[9px]" style="color:var(--muted)">${d.team}</div>` : ''}
                 </td>
+                <td class="p-3 text-center font-mono text-[10px]" style="color:var(--subtext)">$${d.price}M</td>
                 <td class="p-3 text-center font-mono text-xs font-bold" style="color:${dc}">${d.delta > 0 ? '+' : ''}$${Math.abs(d.delta)}M</td>
                 <td class="p-3 text-right font-mono text-xs font-bold" style="color:${pc}">${d.pts > 0 ? '+' : ''}${d.pts}</td>
             </tr>`;
         }).join('');
         return `<table class="w-full">
-            <thead><tr class="border-b border-[#252540]">
-                <th class="p-3 text-left text-[8px] text-[#55557a] uppercase tracking-wider font-normal">Name</th>
-                <th class="p-3 text-center text-[8px] text-[#55557a] uppercase tracking-wider font-normal">Δ Price</th>
-                <th class="p-3 text-right text-[8px] text-[#55557a] uppercase tracking-wider font-normal">R01 Pts</th>
+            <thead><tr class="border-b" style="border-color:var(--border);background:var(--card2)">
+                <th class="p-3 text-left text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Name</th>
+                <th class="p-3 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Price</th>
+                <th class="p-3 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Δ Price</th>
+                <th class="p-3 text-right text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">R01 Pts</th>
             </tr></thead>
             <tbody>${rows}</tbody>
         </table>`;
@@ -477,53 +622,16 @@ function renderMarket() {
     document.getElementById('constructors-market').innerHTML = buildTable(CONSTRUCTORS_DATA);
 }
 
-function renderLuck() {
-    const getColor = l => l >= 70 ? '#6bcb77' : l >= 45 ? '#ffd93d' : l >= 25 ? '#ff9f43' : '#ff6b6b';
-    const getLabel = l => l >= 75 ? '🍀 Lucky' : l >= 55 ? '😐 Neutral' : l >= 35 ? '😬 Unlucky' : '💀 Cursed';
-    document.getElementById('luck-content').innerHTML = ORDER.map((key, i) => {
-        const p = PLAYERS[key];
-        const c  = getColor(p.luck);
-        const mc = i < 3 ? MEDAL_COLOR[i] : p.color;
-        return `
-        <div class="card p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                    ${i < 3 ? `<span>${MEDAL[i]}</span>` : ''}
-                    <div>
-                        <span class="fun text-[14px]" style="color:${p.color}">${p.name}</span>
-                        <span class="text-[9px] text-[#55557a] ml-1">${p.owner}</span>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="text-[9px]" style="color:${c}">${getLabel(p.luck)}</div>
-                    <div class="fun text-lg" style="color:${c}">${p.luck}%</div>
-                </div>
-            </div>
-            <div class="luck-track"><div class="luck-fill" style="width:${p.luck}%;background:${c}"></div></div>
-            <div class="text-[9px] text-[#55557a] mt-2 italic">"${p.luckNote}"</div>
-        </div>`;
-    }).join('') + `
-    <div class="card p-3 mt-1">
-        <div class="text-[8px] text-[#55557a] uppercase tracking-widest mb-2">How it's calculated</div>
-        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-[#7a7a9a]">
-            <div>Race win (owned driver) <span style="color:#6bcb77">+20</span></div>
-            <div>SC benefiting your team <span style="color:#6bcb77">+15</span></div>
-            <div>Driver DNF <span style="color:#ff6b6b">−25</span></div>
-            <div>Driver DNS <span style="color:#ff6b6b">−30</span></div>
-        </div>
-    </div>`;
-}
-
 // ═══════════════════════════════════════════════════
 // RAWS TAB STATE
 // ═══════════════════════════════════════════════════
-let rawsMode = 'drivers';   // 'drivers' | 'constructors'
-let rawsSort = { col: 'pts', dir: -1 }; // col name, dir: -1=desc, +1=asc
+let rawsMode = 'drivers';
+let rawsSort = { col: 'pts', dir: -1 };
 
 const TEAM_COLORS = {
     'Mercedes':'#00d2be','Ferrari':'#e8002d','Red Bull':'#3671c6',
     'McLaren':'#ff8000','Aston Martin':'#358c75','Alpine':'#0093cc',
-    'Williams':'#64c4ff','Haas':'#b6babd','Audi':'#52e252','Racing Bulls':'#6692ff',
+    'Williams':'#005aff','Haas':'#888888','Audi':'#52e252','Racing Bulls':'#6692ff',
     'Cadillac':'#cc0000',
 };
 
@@ -532,13 +640,11 @@ function setRawsTab(tab) {
     rawsSort = { col: 'pts', dir: -1 };
     document.querySelectorAll('.raws-tab-btn').forEach(b => {
         b.style.background = '';
-        b.classList.remove('text-[#dde1f0]');
-        b.classList.add('text-[#55557a]');
+        b.style.color = 'var(--muted)';
     });
     const active = document.getElementById('raws-tab-' + tab);
-    active.style.background = '#252548';
-    active.classList.add('text-[#dde1f0]');
-    active.classList.remove('text-[#55557a]');
+    active.style.background = '#ffffff';
+    active.style.color = 'var(--text)';
     renderRaws();
 }
 
@@ -555,7 +661,6 @@ function renderRaws() {
     const chip = document.getElementById('raws-race-chip');
     chip.textContent = isOverall ? 'All Races' : raceKey;
 
-    // Compute pts for sort
     const enriched = data.map(d => ({
         ...d,
         pts: getRawPts(d, raceKey),
@@ -563,7 +668,6 @@ function renderRaws() {
         avgPts: d.races.length ? +(d.races.reduce((s,r) => s + r.pts, 0) / d.races.length).toFixed(1) : 0,
     }));
 
-    // Sort
     enriched.sort((a,b) => {
         let av = a[rawsSort.col], bv = b[rawsSort.col];
         if (av === null) av = -9999;
@@ -574,37 +678,35 @@ function renderRaws() {
     const colSort = (col, label) => {
         const active = rawsSort.col === col;
         const arrow  = active ? (rawsSort.dir === -1 ? '↓' : '↑') : '↕';
-        const c      = active ? '#4d96ff' : '#55557a';
+        const c      = active ? '#3a86ff' : 'var(--muted)';
         return `<th class="p-2 text-center cursor-pointer select-none text-[8px] uppercase tracking-wider font-normal whitespace-nowrap"
                     style="color:${c}" onclick="sortRaws('${col}')">
                     ${label} <span style="opacity:.7">${arrow}</span>
                 </th>`;
     };
 
-    // Build rows
     const rows = enriched.map((d, i) => {
         const pts     = d.pts;
-        const pc      = pts === null ? '#55557a' : pts > 0 ? '#6bcb77' : pts < 0 ? '#ff6b6b' : '#55557a';
-        const dc      = d.delta > 0 ? '#6bcb77' : d.delta < 0 ? '#ff6b6b' : '#55557a';
-        const tc      = TEAM_COLORS[rawsMode === 'drivers' ? d.team : d.name] || '#7a7a9a';
+        const pc      = pts === null ? 'var(--muted)' : pts > 0 ? '#2ec4b6' : pts < 0 ? '#ff4757' : 'var(--muted)';
+        const dc      = d.delta > 0 ? '#2ec4b6' : d.delta < 0 ? '#ff4757' : 'var(--muted)';
+        const tc      = TEAM_COLORS[rawsMode === 'drivers' ? d.team : d.name] || '#9090b8';
         const rank    = i + 1;
-        const rankCol = rank === 1 ? '#ffd700' : rank === 2 ? '#c8c8c8' : rank === 3 ? '#cd7f32' : '#55557a';
+        const rankCol = rank === 1 ? '#f4a100' : rank === 2 ? '#9a9aaa' : rank === 3 ? '#cd7f32' : 'var(--muted)';
         const ptsTxt  = pts === null ? '—' : (pts > 0 ? '+' : '') + pts;
-        const avgTxt  = isOverall ? d.avgPts : `${d.avgPts}`;
         return `
-        <tr class="border-b border-[#181828] last:border-0 hover:bg-[#181828]/60 transition-colors">
+        <tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background=''">
             <td class="p-2 text-center font-mono text-[10px] font-bold w-7" style="color:${rankCol}">${rank}</td>
             <td class="p-2">
-                <div class="font-bold text-[11px] text-[#dde1f0] leading-tight">${d.name}</div>
+                <div class="font-bold text-[11px] leading-tight" style="color:var(--text)">${d.name}</div>
                 ${rawsMode === 'drivers'
                     ? `<div class="text-[8px] mt-0.5" style="color:${tc}">${d.team}</div>`
                     : `<div class="w-2 h-2 rounded-full mt-1 inline-block" style="background:${tc}"></div>`}
             </td>
-            <td class="p-2 text-center font-mono text-[10px] text-[#9090b8]">$${d.price}M</td>
+            <td class="p-2 text-center font-mono text-[10px]" style="color:var(--subtext)">$${d.price}M</td>
             <td class="p-2 text-center font-mono text-xs font-bold" style="color:${pc}">${ptsTxt}</td>
-            <td class="p-2 text-center font-mono text-[10px] text-[#9090b8]">${avgTxt}</td>
+            <td class="p-2 text-center font-mono text-[10px]" style="color:var(--subtext)">${d.avgPts}</td>
             <td class="p-2 text-center font-mono text-[10px] font-bold" style="color:${dc}">${d.delta > 0 ? '+' : ''}$${Math.abs(d.delta)}M</td>
-            <td class="p-2 text-center font-mono text-[10px] text-[#55557a]">${d.sel}%</td>
+            <td class="p-2 text-center font-mono text-[10px]" style="color:var(--muted)">${d.sel}%</td>
         </tr>`;
     }).join('');
 
@@ -612,9 +714,9 @@ function renderRaws() {
     <div style="overflow-x:auto">
     <table class="w-full" style="min-width:340px">
         <thead>
-            <tr class="border-b border-[#252540]" style="background:#0f0f1e">
-                <th class="p-2 text-center text-[8px] text-[#55557a] uppercase tracking-wider font-normal w-7">#</th>
-                <th class="p-2 text-left text-[8px] text-[#55557a] uppercase tracking-wider font-normal">${rawsMode === 'drivers' ? 'Driver' : 'Constructor'}</th>
+            <tr class="border-b" style="background:var(--card2);border-color:var(--border)">
+                <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal w-7" style="color:var(--muted)">#</th>
+                <th class="p-2 text-left text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">${rawsMode === 'drivers' ? 'Driver' : 'Constructor'}</th>
                 ${colSort('price',   'Price')}
                 ${colSort('pts',     isOverall ? 'Total' : 'Pts')}
                 ${colSort('avgPts',  'Avg')}
@@ -626,7 +728,6 @@ function renderRaws() {
     </table>
     </div>`;
 
-    // Summary cards
     const top = enriched[0];
     const bot = [...enriched].filter(d => d.pts !== null).sort((a,b) => a.pts - b.pts)[0];
     const topDelta = [...enriched].sort((a,b) => b.delta - a.delta)[0];
@@ -635,24 +736,24 @@ function renderRaws() {
     document.getElementById('raws-summary').innerHTML = `
     <div class="grid grid-cols-2 gap-2 mb-4">
         <div class="card p-3">
-            <div class="text-[8px] text-[#55557a] uppercase tracking-wide mb-1">🏆 Top ${rawsMode === 'drivers' ? 'Driver' : 'Constructor'}</div>
-            <div class="fun text-sm text-[#6bcb77]">${top.name}</div>
-            <div class="font-mono text-xs text-[#6bcb77] mt-0.5">${top.pts > 0 ? '+' : ''}${top.pts} pts</div>
+            <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">🏆 Top ${rawsMode === 'drivers' ? 'Driver' : 'Constructor'}</div>
+            <div class="fun text-sm" style="color:#2ec4b6">${top.name}</div>
+            <div class="font-mono text-xs mt-0.5" style="color:#2ec4b6">${top.pts > 0 ? '+' : ''}${top.pts} pts</div>
         </div>
         <div class="card p-3">
-            <div class="text-[8px] text-[#55557a] uppercase tracking-wide mb-1">💀 Lowest</div>
-            <div class="fun text-sm text-[#ff6b6b]">${bot.name}</div>
-            <div class="font-mono text-xs text-[#ff6b6b] mt-0.5">${bot.pts > 0 ? '+' : ''}${bot.pts} pts</div>
+            <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">💀 Lowest</div>
+            <div class="fun text-sm" style="color:#ff4757">${bot?.name || '—'}</div>
+            <div class="font-mono text-xs mt-0.5" style="color:#ff4757">${bot ? (bot.pts > 0 ? '+' : '') + bot.pts + ' pts' : '—'}</div>
         </div>
         <div class="card p-3">
-            <div class="text-[8px] text-[#55557a] uppercase tracking-wide mb-1">📈 Best Value Δ</div>
-            <div class="fun text-sm text-[#ffd93d]">${topDelta.name}</div>
-            <div class="font-mono text-xs text-[#ffd93d] mt-0.5">+$${topDelta.delta}M</div>
+            <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">📈 Best Value Δ</div>
+            <div class="fun text-sm" style="color:#f4a100">${topDelta.name}</div>
+            <div class="font-mono text-xs mt-0.5" style="color:#f4a100">+$${topDelta.delta}M</div>
         </div>
         <div class="card p-3">
-            <div class="text-[8px] text-[#55557a] uppercase tracking-wide mb-1">Σ Field Pts</div>
-            <div class="fun text-sm text-[#4d96ff]">${totPts} pts</div>
-            <div class="text-[8px] text-[#55557a] mt-0.5">${isOverall ? 'season' : raceKey}</div>
+            <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">Σ Field Pts</div>
+            <div class="fun text-sm" style="color:#3a86ff">${totPts} pts</div>
+            <div class="text-[8px] mt-0.5" style="color:var(--muted)">${isOverall ? 'season' : raceKey}</div>
         </div>
     </div>`;
 }
@@ -682,8 +783,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderH2H();
     renderJuice();
     renderMarket();
-    renderLuck();
     renderRaws();
+
+    // Auto-sync on load — reads data.json if committed by GitHub Actions
+    syncF1Data();
 });
 </script>
 </body>
