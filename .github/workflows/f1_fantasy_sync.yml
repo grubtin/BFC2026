@@ -1,9 +1,22 @@
-name: F1 Fantasy Sync
+# F1 Fantasy Sync — DISABLED for GitHub Actions
+#
+# The F1 API (api.formula1.com) blocks all datacenter IPs (Azure/AWS/GitHub)
+# via Distil Networks CDN-level IP reputation blocking. No workaround exists.
+#
+# HOW TO UPDATE INSTEAD:
+#   1. Run `run_fantasy_sync.bat` (Windows) or `run_fantasy_sync.sh` (Mac/Linux)
+#      from your HOME computer after each race weekend
+#   2. The script fetches the data and pushes f1_fantasy.json + f1_teams.json
+#      to GitHub automatically
+#   3. Your GitHub Pages site will update within ~30 seconds
+#
+# This workflow is kept as a manual trigger only — it will always fail from
+# GitHub Actions but is here for documentation purposes.
+
+name: F1 Fantasy Sync (LOCAL ONLY - see run_fantasy_sync scripts)
 
 on:
-  schedule:
-    - cron: '0 4 * * *'   # daily at 4am UTC (after races typically finish)
-  workflow_dispatch:        # allow manual trigger
+  workflow_dispatch:   # manual trigger only — will fail, use local scripts instead
 
 permissions:
   contents: write
@@ -11,43 +24,10 @@ permissions:
 jobs:
   fantasy_sync:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
+      - name: ❌ This workflow cannot run from GitHub Actions
         run: |
-          pip install aiohttp playwright
-          playwright install chromium --with-deps
-
-      - name: Run Fantasy Sync
-        run: |
-          cd scripts
-          python f1_fantasy_sync.py
-          echo "--- Output files ---"
-          [ -f f1_fantasy.json ] && echo "f1_fantasy.json: $(wc -l < f1_fantasy.json) lines" || echo "f1_fantasy.json: NOT FOUND"
-          [ -f f1_teams.json   ] && echo "f1_teams.json:   $(wc -l < f1_teams.json) lines"   || echo "f1_teams.json: NOT FOUND"
-          mv f1_fantasy.json ../f1_fantasy.json 2>/dev/null || true
-          mv f1_teams.json   ../f1_teams.json   2>/dev/null || true
-        env:
-          F1_FANTASY_EMAIL:     ${{ secrets.F1_FANTASY_EMAIL }}
-          F1_FANTASY_PASSWORD:  ${{ secrets.F1_FANTASY_PASSWORD }}
-          F1_FANTASY_LEAGUE_ID: ${{ secrets.F1_FANTASY_LEAGUE_ID }}
-
-      - name: Commit updated data files
-        run: |
-          git config --global user.name  "F1-Bot"
-          git config --global user.email "f1bot@users.noreply.github.com"
-          git add f1_fantasy.json f1_teams.json
-          git diff --cached --quiet || git commit -m "chore: update f1 fantasy data [skip ci]"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "The F1 Fantasy API blocks all datacenter IPs (including GitHub Actions)."
+          echo "Run run_fantasy_sync.bat (Windows) or run_fantasy_sync.sh (Mac/Linux)"
+          echo "from your home computer instead."
+          exit 1

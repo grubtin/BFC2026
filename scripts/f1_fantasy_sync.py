@@ -27,7 +27,6 @@ import sys
 from datetime import datetime, timezone
 
 import aiohttp
-from playwright.async_api import async_playwright
 
 # ─────────────────────────────────────────────────────────────────
 BASE        = "https://fantasy-api.formula1.com/f1/2026"
@@ -53,92 +52,47 @@ PLAYER_MAP = {
 # ─────────────────────────────────────────────────────────────────
 # AUTH — uses Playwright browser to bypass bot-detection
 # ─────────────────────────────────────────────────────────────────
-async def authenticate_with_browser() -> str:
+async def authenticate(session: aiohttp.ClientSession) -> str:
     """
-    Uses Playwright's APIRequestContext (context.request.post) to authenticate.
+    Authenticate with the F1 Fantasy API.
 
-    WHY NOT page.evaluate() fetch:
-      fetch() inside a browser page is subject to CORS. api.formula1.com does
-      not allow cross-origin requests from account.formula1.com in a headless
-      context, so it throws a network error → status=0.
+    NOTE: This ONLY works from a residential/home IP address.
+    Datacenter IPs (GitHub Actions, AWS, Azure) are blocked by Distil Networks
+    at the CDN edge — no workaround exists for automated server-based calls.
 
-    WHY context.request.post WORKS:
-      Playwright's APIRequestContext makes requests at the network level through
-      the real Chromium process — same TLS fingerprint, IP, and browser headers
-      as a real user — but it is NOT subject to browser CORS restrictions.
-      This bypasses Distil Networks bot-detection on datacenter IPs.
+    Run this script locally and push the resulting JSON files to GitHub.
     """
-    print("  Launching browser for auth …")
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
-            ),
-            locale="en-US",
-            timezone_id="Australia/Sydney",
-            extra_http_headers={"accept-language": "en-US,en;q=0.9"},
-        )
-
-        # Visit F1 account page first to establish cookies + pass JS challenge
-        print("  Visiting F1 account page …")
-        page = await context.new_page()
-        try:
-            await page.goto(
-                "https://account.formula1.com/",
-                wait_until="domcontentloaded",
-                timeout=30_000,
-            )
-            await page.wait_for_timeout(2000)
-        except Exception as e:
-            print(f"  ⚠️  Page visit warning (continuing): {e}")
-
-        # Use APIRequestContext — network-level POST, not subject to CORS
-        print("  Posting auth via APIRequestContext …")
-        response = await context.request.post(
-            "https://api.formula1.com/v2/account/subscriber/authenticate/by-password",
-            headers={
-                "Content-Type":   "application/json",
-                "apikey":         "fCUCjWrKPu9ylJwRAv8BpGLEgiAuThx7",
-                "origin":         "https://account.formula1.com",
-                "referer":        "https://account.formula1.com/",
-                "authority":      "api.formula1.com",
-                "sec-fetch-site": "same-site",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-dest": "empty",
-            },
-            data=json.dumps({
-                "Login":               EMAIL,
-                "Password":            PASSWORD,
-                "DistributionChannel": "d861e38f-05ea-4063-8776-a7e2b6d885a4",
-            }),
-        )
-
-        status = response.status
-        body   = await response.text()
-        await browser.close()
-
-    print(f"  Auth response status: {status}")
-    print(f"  Auth response preview: {body[:200]}")
-
-    if status != 200:
-        raise RuntimeError(f"Auth failed {status}: {body[:500]}")
-
-    try:
-        data = json.loads(body)
-    except json.JSONDecodeError:
-        raise RuntimeError(f"Auth response not JSON: {body[:500]}")
-
-    token = (
-        data.get("data", {}).get("subscriptionToken")
-        or data.get("subscriptionToken")
-        or data.get("token")
-    )
+    payload = {
+        "Login":               EMAIL,
+        "Password":            PASSWORD,
+        "DistributionChannel": "d861e38f-05ea-4063-8776-a7e2b6d885a4",
+    }
+    headers = {
+        "Content-Type":   "application/json",
+        "apikey":         "fCUCjWrKPu9ylJwRAv8BpGLEgiAuThx7",
+        "origin":         "https://account.formula1.com",
+        "referer":        "https://account.formula1.com/",
+        "user-agent":     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "accept":         "application/json, text/javascript, */*; q=0.01",
+        "accept-language":"en-US,en;q=0.9",
+        "sec-fetch-site": "same-site",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "empty",
+    }
+    async with session.post(AUTH_URL, json=payload, headers=headers) as r:
+        if r.status != 200:
+            body = await r.text()
+            if "Pardon Our Interruption" in body or r.status == 403:
+                print()
+                print("  ❌ BLOCKED BY DISTIL NETWORKS (403)")
+                print("  This IP address is flagged as a datacenter.")
+                print("  → You must run this script from your home/residential connection.")
+                print("  → See README for local run instructions.")
+            raise RuntimeError(f"Auth failed {r.status}: {body[:300]}")
+        data = await r.json()
+    token = data.get("data", {}).get("subscriptionToken") or data.get("subscriptionToken")
     if not token:
-        raise RuntimeError(f"No token found in response: {data}")
-
+        raise RuntimeError(f"No token in auth response: {data}")
     print("  ✅ Authenticated.")
     return token
 
@@ -313,13 +267,15 @@ async def sync(session: aiohttp.ClientSession, token: str):
 async def main():
     if not EMAIL or not PASSWORD:
         print("❌ F1_FANTASY_EMAIL / F1_FANTASY_PASSWORD not set.")
+        print("   Set them as environment variables or edit this script directly.")
         sys.exit(1)
 
-    # Auth via real browser (bypasses bot-detection)
-    token = await authenticate_with_browser()
+    print("F1 Fantasy Sync — run from home/residential IP only")
+    print(f"  Email: {EMAIL[:4]}***")
+    print()
 
-    # All subsequent calls use fast async HTTP
     async with aiohttp.ClientSession() as session:
+        token = await authenticate(session)
         await sync(session, token)
 
 
