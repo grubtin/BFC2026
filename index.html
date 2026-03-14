@@ -864,50 +864,206 @@ function renderRaws() {}
 // SCHEDULE PAGE
 // ═══════════════════════════════════════════════════════════════════
 
-// Full session templates per race type (UTC offsets applied at render)
-// Sydney is UTC+11 (AEDT) in Mar-Apr, UTC+10 (AEST) May onward
-const SESSION_TEMPLATES = {
-    traditional: [
-        { key:'fp1',   label:'Free Practice 1', dayOffset:0, utcH:3,  utcM:30 },
-        { key:'fp2',   label:'Free Practice 2', dayOffset:0, utcH:7,  utcM:0  },
-        { key:'fp3',   label:'Free Practice 3', dayOffset:1, utcH:4,  utcM:30 },
-        { key:'quali', label:'Qualifying',       dayOffset:1, utcH:8,  utcM:0  },
-        { key:'race',  label:'Race',             dayOffset:2, utcH:7,  utcM:0  },
-    ],
-    sprint: [
-        { key:'fp1',   label:'Free Practice 1', dayOffset:0, utcH:3,  utcM:30 },
-        { key:'sq',    label:'Sprint Qualifying',dayOffset:0, utcH:7,  utcM:30 },
-        { key:'sprint',label:'Sprint Race',      dayOffset:1, utcH:4,  utcM:0  },
-        { key:'quali', label:'Qualifying',       dayOffset:1, utcH:8,  utcM:0  },
-        { key:'race',  label:'Race',             dayOffset:2, utcH:7,  utcM:0  },
-    ],
-};
+// Each race has explicit UTC session times — no generic templates.
+// Sessions: {key, label, y, mo (0-indexed), d, h, m} in UTC.
+// Sydney DST: AEDT (UTC+11) first Sun Oct → first Sun Apr
+//             AEST (UTC+10) first Sun Apr → first Sun Oct
+// 2026 transitions: AEDT ends Apr 5, AEDT starts Oct 4
 
 const F1_SCHEDULE = [
-    { round:1,  gp:'Australian Grand Prix',        location:'Melbourne',        circuit:'Albert Park Circuit',               type:'traditional', date:'Mar 08', full_dates:'Mar 06-08', year:2026, month:2,  day:6  },
-    { round:2,  gp:'Chinese Grand Prix',           location:'Shanghai',         circuit:'Shanghai International Circuit',    type:'sprint',       date:'Mar 15', full_dates:'Mar 13-15', year:2026, month:2,  day:13 },
-    { round:3,  gp:'Japanese Grand Prix',          location:'Suzuka',           circuit:'Suzuka Circuit',                    type:'traditional', date:'Mar 29', full_dates:'Mar 27-29', year:2026, month:2,  day:27 },
-    { round:4,  gp:'Bahrain Grand Prix',           location:'Sakhir',           circuit:'Bahrain International Circuit',     type:'traditional', date:'Apr 12', full_dates:'Apr 10-12', year:2026, month:3,  day:10 },
-    { round:5,  gp:'Saudi Arabian Grand Prix',     location:'Jeddah',           circuit:'Jeddah Corniche Circuit',           type:'traditional', date:'Apr 19', full_dates:'Apr 17-19', year:2026, month:3,  day:17 },
-    { round:6,  gp:'Miami Grand Prix',             location:'Miami',            circuit:'Miami International Autodrome',     type:'sprint',       date:'May 03', full_dates:'May 01-03', year:2026, month:4,  day:1  },
-    { round:7,  gp:'Canadian Grand Prix',          location:'Montreal',         circuit:'Circuit Gilles Villeneuve',         type:'sprint',       date:'May 24', full_dates:'May 22-24', year:2026, month:4,  day:22 },
-    { round:8,  gp:'Monaco Grand Prix',            location:'Monte Carlo',      circuit:'Circuit de Monaco',                 type:'traditional', date:'Jun 07', full_dates:'Jun 05-07', year:2026, month:5,  day:5  },
-    { round:9,  gp:'Barcelona-Catalunya GP',       location:'Barcelona',        circuit:'Circuit de Barcelona-Catalunya',    type:'traditional', date:'Jun 14', full_dates:'Jun 12-14', year:2026, month:5,  day:12 },
-    { round:10, gp:'Austrian Grand Prix',          location:'Spielberg',        circuit:'Red Bull Ring',                     type:'traditional', date:'Jun 28', full_dates:'Jun 26-28', year:2026, month:5,  day:26 },
-    { round:11, gp:'British Grand Prix',           location:'Silverstone',      circuit:'Silverstone Circuit',               type:'sprint',       date:'Jul 05', full_dates:'Jul 03-05', year:2026, month:6,  day:3  },
-    { round:12, gp:'Belgian Grand Prix',           location:'Spa-Francorchamps',circuit:'Circuit de Spa-Francorchamps',      type:'traditional', date:'Jul 19', full_dates:'Jul 17-19', year:2026, month:6,  day:17 },
-    { round:13, gp:'Hungarian Grand Prix',         location:'Budapest',         circuit:'Hungaroring',                       type:'traditional', date:'Jul 26', full_dates:'Jul 24-26', year:2026, month:6,  day:24 },
-    { round:14, gp:'Dutch Grand Prix',             location:'Zandvoort',        circuit:'Circuit Zandvoort',                 type:'sprint',       date:'Aug 23', full_dates:'Aug 21-23', year:2026, month:7,  day:21 },
-    { round:15, gp:'Italian Grand Prix',           location:'Monza',            circuit:'Autodromo Nazionale Monza',         type:'traditional', date:'Sep 06', full_dates:'Sep 04-06', year:2026, month:8,  day:4  },
-    { round:16, gp:'Spanish Grand Prix',           location:'Madrid',           circuit:'Madrid Street Circuit',             type:'traditional', date:'Sep 13', full_dates:'Sep 11-13', year:2026, month:8,  day:11 },
-    { round:17, gp:'Azerbaijan Grand Prix',        location:'Baku',             circuit:'Baku City Circuit',                 type:'traditional', date:'Sep 26', full_dates:'Sep 24-26', year:2026, month:8,  day:24 },
-    { round:18, gp:'Singapore Grand Prix',         location:'Marina Bay',       circuit:'Marina Bay Street Circuit',         type:'sprint',       date:'Oct 11', full_dates:'Oct 09-11', year:2026, month:9,  day:9  },
-    { round:19, gp:'United States Grand Prix',     location:'Austin',           circuit:'Circuit of the Americas',           type:'traditional', date:'Oct 25', full_dates:'Oct 23-25', year:2026, month:9,  day:23 },
-    { round:20, gp:'Mexico City Grand Prix',       location:'Mexico City',      circuit:'Autódromo Hermanos Rodríguez',      type:'traditional', date:'Nov 01', full_dates:'Oct 30-Nov 01', year:2026, month:9,  day:30 },
-    { round:21, gp:'São Paulo Grand Prix',         location:'São Paulo',        circuit:'Autódromo José Carlos Pace',        type:'traditional', date:'Nov 08', full_dates:'Nov 06-08', year:2026, month:10, day:6  },
-    { round:22, gp:'Las Vegas Grand Prix',         location:'Las Vegas',        circuit:'Las Vegas Strip Circuit',           type:'traditional', date:'Nov 21', full_dates:'Nov 19-21', year:2026, month:10, day:19 },
-    { round:23, gp:'Qatar Grand Prix',             location:'Lusail',           circuit:'Lusail International Circuit',      type:'sprint',       date:'Nov 29', full_dates:'Nov 27-29', year:2026, month:10, day:27 },
-    { round:24, gp:'Abu Dhabi Grand Prix',         location:'Yas Island',       circuit:'Yas Marina Circuit',                type:'traditional', date:'Dec 06', full_dates:'Dec 04-06', year:2026, month:11, day:4  },
+  { round:1,  gp:'Australian Grand Prix',      location:'Melbourne',         circuit:'Albert Park Circuit',             type:'traditional', date:'Mar 08', full_dates:'Mar 06-08',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:2, d:6,  h:1,  m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:2, d:6,  h:5,  m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:2, d:7,  h:1,  m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:2, d:7,  h:5,  m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:2, d:8,  h:4,  m:0 },
+    ]},
+  { round:2,  gp:'Chinese Grand Prix',         location:'Shanghai',          circuit:'Shanghai International Circuit',  type:'sprint',      date:'Mar 15', full_dates:'Mar 13-15',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:2, d:13, h:3,  m:30},
+      {key:'sq',    label:'Sprint Qualifying',  y:2026,mo:2, d:13, h:7,  m:30},
+      {key:'sprint',label:'Sprint Race',        y:2026,mo:2, d:14, h:4,  m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:2, d:14, h:8,  m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:2, d:15, h:7,  m:0 },
+    ]},
+  { round:3,  gp:'Japanese Grand Prix',        location:'Suzuka',            circuit:'Suzuka Circuit',                  type:'traditional', date:'Mar 29', full_dates:'Mar 27-29',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:2, d:27, h:2,  m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:2, d:27, h:6,  m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:2, d:28, h:2,  m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:2, d:28, h:6,  m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:2, d:29, h:5,  m:0 },
+    ]},
+  { round:4,  gp:'Bahrain Grand Prix',         location:'Sakhir',            circuit:'Bahrain International Circuit',   type:'traditional', date:'Apr 12', full_dates:'Apr 10-12',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:3, d:10, h:12, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:3, d:10, h:16, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:3, d:11, h:12, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:3, d:11, h:16, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:3, d:12, h:15, m:0 },
+    ]},
+  { round:5,  gp:'Saudi Arabian Grand Prix',   location:'Jeddah',            circuit:'Jeddah Corniche Circuit',         type:'traditional', date:'Apr 19', full_dates:'Apr 17-19',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:3, d:17, h:14, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:3, d:17, h:18, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:3, d:18, h:14, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:3, d:18, h:18, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:3, d:19, h:17, m:0 },
+    ]},
+  { round:6,  gp:'Miami Grand Prix',           location:'Miami',             circuit:'Miami International Autodrome',   type:'sprint',      date:'May 03', full_dates:'May 01-03',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:4, d:1,  h:16, m:30},
+      {key:'sq',    label:'Sprint Qualifying',  y:2026,mo:4, d:1,  h:20, m:30},
+      {key:'sprint',label:'Sprint Race',        y:2026,mo:4, d:2,  h:15, m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:4, d:2,  h:20, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:4, d:3,  h:19, m:30},
+    ]},
+  { round:7,  gp:'Canadian Grand Prix',        location:'Montreal',          circuit:'Circuit Gilles Villeneuve',       type:'sprint',      date:'May 24', full_dates:'May 22-24',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:4, d:22, h:17, m:30},
+      {key:'sq',    label:'Sprint Qualifying',  y:2026,mo:4, d:22, h:21, m:30},
+      {key:'sprint',label:'Sprint Race',        y:2026,mo:4, d:23, h:16, m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:4, d:23, h:20, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:4, d:24, h:18, m:0 },
+    ]},
+  { round:8,  gp:'Monaco Grand Prix',          location:'Monte Carlo',       circuit:'Circuit de Monaco',               type:'traditional', date:'Jun 07', full_dates:'Jun 05-07',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:5, d:5,  h:10, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:5, d:5,  h:14, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:5, d:6,  h:9,  m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:5, d:6,  h:13, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:5, d:7,  h:13, m:0 },
+    ]},
+  { round:9,  gp:'Barcelona-Catalunya GP',     location:'Barcelona',         circuit:'Circuit de Barcelona-Catalunya',  type:'traditional', date:'Jun 14', full_dates:'Jun 12-14',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:5, d:12, h:11, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:5, d:12, h:15, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:5, d:13, h:10, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:5, d:13, h:14, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:5, d:14, h:13, m:0 },
+    ]},
+  { round:10, gp:'Austrian Grand Prix',        location:'Spielberg',         circuit:'Red Bull Ring',                   type:'traditional', date:'Jun 28', full_dates:'Jun 26-28',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:5, d:26, h:11, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:5, d:26, h:15, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:5, d:27, h:10, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:5, d:27, h:14, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:5, d:28, h:13, m:0 },
+    ]},
+  { round:11, gp:'British Grand Prix',         location:'Silverstone',       circuit:'Silverstone Circuit',             type:'sprint',      date:'Jul 05', full_dates:'Jul 03-05',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:6, d:3,  h:11, m:30},
+      {key:'sq',    label:'Sprint Qualifying',  y:2026,mo:6, d:3,  h:15, m:30},
+      {key:'sprint',label:'Sprint Race',        y:2026,mo:6, d:4,  h:11, m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:6, d:4,  h:15, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:6, d:5,  h:14, m:0 },
+    ]},
+  { round:12, gp:'Belgian Grand Prix',         location:'Spa-Francorchamps', circuit:'Circuit de Spa-Francorchamps',    type:'traditional', date:'Jul 19', full_dates:'Jul 17-19',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:6, d:17, h:11, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:6, d:17, h:15, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:6, d:18, h:10, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:6, d:18, h:14, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:6, d:19, h:13, m:0 },
+    ]},
+  { round:13, gp:'Hungarian Grand Prix',       location:'Budapest',          circuit:'Hungaroring',                     type:'traditional', date:'Jul 26', full_dates:'Jul 24-26',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:6, d:24, h:11, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:6, d:24, h:15, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:6, d:25, h:10, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:6, d:25, h:14, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:6, d:26, h:13, m:0 },
+    ]},
+  { round:14, gp:'Dutch Grand Prix',           location:'Zandvoort',         circuit:'Circuit Zandvoort',               type:'sprint',      date:'Aug 23', full_dates:'Aug 21-23',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:7, d:21, h:11, m:30},
+      {key:'sq',    label:'Sprint Qualifying',  y:2026,mo:7, d:21, h:15, m:30},
+      {key:'sprint',label:'Sprint Race',        y:2026,mo:7, d:22, h:11, m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:7, d:22, h:15, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:7, d:23, h:13, m:0 },
+    ]},
+  { round:15, gp:'Italian Grand Prix',         location:'Monza',             circuit:'Autodromo Nazionale Monza',       type:'traditional', date:'Sep 06', full_dates:'Sep 04-06',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:8, d:4,  h:11, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:8, d:4,  h:15, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:8, d:5,  h:10, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:8, d:5,  h:14, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:8, d:6,  h:13, m:0 },
+    ]},
+  { round:16, gp:'Spanish Grand Prix',         location:'Madrid',            circuit:'Madrid Street Circuit',           type:'traditional', date:'Sep 13', full_dates:'Sep 11-13',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:8, d:11, h:11, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:8, d:11, h:15, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:8, d:12, h:10, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:8, d:12, h:14, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:8, d:13, h:13, m:0 },
+    ]},
+  { round:17, gp:'Azerbaijan Grand Prix',      location:'Baku',              circuit:'Baku City Circuit',               type:'traditional', date:'Sep 26', full_dates:'Sep 24-26',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:8, d:24, h:9,  m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:8, d:24, h:13, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:8, d:25, h:9,  m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:8, d:25, h:13, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:8, d:26, h:11, m:0 },
+    ]},
+  { round:18, gp:'Singapore Grand Prix',       location:'Marina Bay',        circuit:'Marina Bay Street Circuit',       type:'sprint',      date:'Oct 11', full_dates:'Oct 09-11',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:9, d:9,  h:9,  m:30},
+      {key:'sq',    label:'Sprint Qualifying',  y:2026,mo:9, d:9,  h:13, m:30},
+      {key:'sprint',label:'Sprint Race',        y:2026,mo:9, d:10, h:9,  m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:9, d:10, h:13, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:9, d:11, h:12, m:0 },
+    ]},
+  { round:19, gp:'United States Grand Prix',   location:'Austin',            circuit:'Circuit of the Americas',         type:'traditional', date:'Oct 25', full_dates:'Oct 23-25',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:9, d:23, h:18, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:9, d:23, h:22, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:9, d:24, h:18, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:9, d:24, h:22, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:9, d:25, h:20, m:0 },
+    ]},
+  { round:20, gp:'Mexico City Grand Prix',     location:'Mexico City',       circuit:'Autódromo Hermanos Rodríguez',    type:'traditional', date:'Nov 01', full_dates:'Oct 30-Nov 01',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:9, d:30, h:19, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:9, d:30, h:23, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:9, d:31, h:19, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:9, d:31, h:23, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:10,d:1,  h:20, m:0 },
+    ]},
+  { round:21, gp:'São Paulo Grand Prix',       location:'São Paulo',         circuit:'Autódromo José Carlos Pace',      type:'traditional', date:'Nov 08', full_dates:'Nov 06-08',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:10,d:6,  h:14, m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:10,d:6,  h:18, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:10,d:7,  h:14, m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:10,d:7,  h:18, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:10,d:8,  h:17, m:0 },
+    ]},
+  { round:22, gp:'Las Vegas Grand Prix',       location:'Las Vegas',         circuit:'Las Vegas Strip Circuit',         type:'traditional', date:'Nov 21', full_dates:'Nov 19-21',
+    sessions:[
+      // Las Vegas runs Thu-Sat nights local (PST = UTC-8)
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:10,d:20, h:2,  m:30},  // Thu 18:30 PST
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:10,d:20, h:6,  m:30},  // Thu 22:30 PST
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:10,d:21, h:2,  m:0 },  // Fri 18:00 PST
+      {key:'quali', label:'Qualifying',         y:2026,mo:10,d:21, h:6,  m:0 },  // Fri 22:00 PST
+      {key:'race',  label:'Race',               y:2026,mo:10,d:22, h:6,  m:0 },  // Sat 22:00 PST
+    ]},
+  { round:23, gp:'Qatar Grand Prix',           location:'Lusail',            circuit:'Lusail International Circuit',    type:'sprint',      date:'Nov 29', full_dates:'Nov 27-29',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:10,d:27, h:13, m:30},
+      {key:'sq',    label:'Sprint Qualifying',  y:2026,mo:10,d:27, h:17, m:30},
+      {key:'sprint',label:'Sprint Race',        y:2026,mo:10,d:28, h:13, m:0 },
+      {key:'quali', label:'Qualifying',         y:2026,mo:10,d:28, h:17, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:10,d:29, h:15, m:0 },
+    ]},
+  { round:24, gp:'Abu Dhabi Grand Prix',       location:'Yas Island',        circuit:'Yas Marina Circuit',              type:'traditional', date:'Dec 06', full_dates:'Dec 04-06',
+    sessions:[
+      {key:'fp1',   label:'Free Practice 1',   y:2026,mo:11,d:4,  h:9,  m:30},
+      {key:'fp2',   label:'Free Practice 2',   y:2026,mo:11,d:4,  h:13, m:0 },
+      {key:'fp3',   label:'Free Practice 3',   y:2026,mo:11,d:5,  h:9,  m:30},
+      {key:'quali', label:'Qualifying',         y:2026,mo:11,d:5,  h:13, m:0 },
+      {key:'race',  label:'Race',               y:2026,mo:11,d:6,  h:13, m:0 },
+    ]},
 ];
 
 const GP_FLAGS = {
@@ -921,11 +1077,19 @@ const GP_FLAGS = {
     'Las Vegas Grand Prix':'🇺🇸','Qatar Grand Prix':'🇶🇦','Abu Dhabi Grand Prix':'🇦🇪',
 };
 
-// Sydney offset: AEDT (UTC+11) Oct–Apr, AEST (UTC+10) Apr–Sep
-function sydneyOffsetHours(date) {
-    const m = date.getUTCMonth(); // 0=Jan
-    // AEDT: last Sun Oct → first Sun Apr  (approx months 9-3)
-    return (m <= 3 || m >= 9) ? 11 : 10;
+// Sydney timezone: AEDT (UTC+11) first Sun Oct → first Sun Apr
+//                  AEST (UTC+10) first Sun Apr → first Sun Oct
+// Computes the correct offset for any UTC date
+function sydneyOffsetHours(utcDate) {
+    const y = utcDate.getUTCFullYear();
+    // First Sunday of April (AEDT ends — clocks back to AEST)
+    const apr1    = new Date(Date.UTC(y, 3, 1));
+    const aprSun  = new Date(Date.UTC(y, 3, 1 + (7 - apr1.getUTCDay()) % 7, 2, 0, 0)); // 02:00 UTC ≈ 13:00 AEDT transition
+    // First Sunday of October (AEST ends — clocks forward to AEDT)
+    const oct1    = new Date(Date.UTC(y, 9, 1));
+    const octSun  = new Date(Date.UTC(y, 9, 1 + (7 - oct1.getUTCDay()) % 7, 16, 0, 0)); // 16:00 UTC ≈ 02:00 AEDT next day
+    if (utcDate >= aprSun && utcDate < octSun) return 10; // AEST
+    return 11; // AEDT
 }
 
 function utcToSydney(utcDate) {
@@ -937,12 +1101,10 @@ function nowSydney() {
     return utcToSydney(new Date());
 }
 
-// Build all sessions for a round as { label, utcDate, sydDate }
+// Build sessions for a round from its hardcoded UTC session data
 function buildSessions(race) {
-    const tpl = SESSION_TEMPLATES[race.type] || SESSION_TEMPLATES.traditional;
-    // race.month is 0-indexed (Mar=2), race.day is start of weekend (Friday)
-    return tpl.map(s => {
-        const utcDate = new Date(Date.UTC(race.year, race.month, race.day + s.dayOffset, s.utcH, s.utcM, 0));
+    return race.sessions.map(s => {
+        const utcDate = new Date(Date.UTC(s.y, s.mo, s.d, s.h, s.m, 0));
         return {
             key:     s.key,
             label:   s.label,
@@ -952,7 +1114,7 @@ function buildSessions(race) {
     });
 }
 
-// Format as "Sat 7 Mar, 3:30 PM"
+// Format sydDate as "Sat 7 Mar, 3:30 PM"
 function fmtSyd(d) {
     const days  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const months= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
