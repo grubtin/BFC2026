@@ -190,9 +190,16 @@ async def identify_and_scrape(table) -> tuple[str | None, list[dict]]:
 
     for row in all_rows:
         cells = await row.locator("td, th").all()
-        texts = [(await c.inner_text()).strip() for c in cells]
-        # Flatten any newlines inside cells
-        texts = [re.sub(r'\s+', ' ', t).strip() for t in texts]
+        # Use JavaScript textContent instead of inner_text() — textContent captures
+        # text from ALL descendant nodes including React-rendered spans that
+        # inner_text() sometimes returns empty for.
+        texts = []
+        for c in cells:
+            try:
+                val = await c.evaluate("el => el.textContent")
+            except Exception:
+                val = await c.inner_text()
+            texts.append(re.sub(r'\s+', ' ', (val or "")).strip())
         if not texts:
             continue
 
@@ -334,8 +341,14 @@ async def run_scraper():
                 print(f"\n  === Table {ti} ({len(rows)} rows) ===")
                 for i, row in enumerate(rows[:6]):
                     cells = await row.locator("td, th").all()
-                    txts  = [(await c.inner_text()).strip() for c in cells]
-                    print(f"    row {i}: {txts}")
+                    txts = []
+                    for c in cells:
+                        try:
+                            v = await c.evaluate("el => el.textContent")
+                        except Exception:
+                            v = await c.inner_text()
+                        txts.append(re.sub(r'\s+', ' ', (v or "")).strip())
+                    print(f"    row {i} ({len(txts)} cells): {txts}")
 
                 ttype, entries = await identify_and_scrape(table)
                 print(f"  → type={ttype}, entries={len(entries)}")
