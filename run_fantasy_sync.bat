@@ -2,9 +2,9 @@
 REM Run this from your home PC after each race weekend
 REM It fetches F1 Fantasy data and pushes to GitHub automatically
 
-set F1_FANTASY_EMAIL=your_email@example.com
-set F1_FANTASY_PASSWORD=your_password
-set F1_FANTASY_LEAGUE_ID=your_league_id
+set F1_FANTASY_EMAIL=tinofjuice@gmail.com
+set F1_FANTASY_PASSWORD=F1!juice26
+set F1_FANTASY_LEAGUE_ID=5008603
 
 echo Running F1 Fantasy Sync from local machine...
 cd /d "%~dp0"

@@ -6,18 +6,17 @@ Pulls data from the official F1 Fantasy API and writes two JSON files:
   f1_fantasy.json  — driver / constructor prices & points (overall + per GW)
   f1_teams.json    — Baby Formula Championship league team picks per round
 
-Secrets expected as environment variables (set in GitHub Actions):
+Secrets expected as environment variables (set in bat file):
   F1_FANTASY_EMAIL     — your login email
   F1_FANTASY_PASSWORD  — your login password
   F1_FANTASY_LEAGUE_ID — your private league ID (numeric string)
 
 WHY PLAYWRIGHT FOR AUTH:
   The F1 API auth endpoint (api.formula1.com) is protected by Distil Networks
-  bot-detection. Plain HTTP requests from datacenter IPs (GitHub Actions = Azure)
-  get a 403 "Pardon Our Interruption" CAPTCHA page regardless of headers.
-  Playwright runs a real Chromium browser which passes the JS challenge and
-  obtains a valid session token. All subsequent API calls use that token via
-  aiohttp (fast async HTTP) — only auth needs the browser.
+  bot-detection. It checks TLS fingerprints, JS execution, and IP reputation.
+  Playwright runs a real Chromium browser which passes all checks and obtains
+  a valid session token. All subsequent API calls use that token via aiohttp.
+  This ONLY works from a residential/home IP — not VPNs or datacenters.
 """
 
 import asyncio
@@ -27,14 +26,15 @@ import sys
 from datetime import datetime, timezone
 
 import aiohttp
+from playwright.async_api import async_playwright
 
 # ─────────────────────────────────────────────────────────────────
-BASE        = "https://fantasy-api.formula1.com/f1/2026"
-AUTH_URL    = "https://api.formula1.com/v2/account/subscriber/authenticate/by-password"
+BASE      = "https://fantasy-api.formula1.com/f1/2026"
+AUTH_URL  = "https://api.formula1.com/v2/account/subscriber/authenticate/by-password"
 
-EMAIL       = os.environ.get("F1_FANTASY_EMAIL", "")
-PASSWORD    = os.environ.get("F1_FANTASY_PASSWORD", "")
-LEAGUE_ID   = os.environ.get("F1_FANTASY_LEAGUE_ID", "")
+EMAIL     = os.environ.get("F1_FANTASY_EMAIL", "")
+PASSWORD  = os.environ.get("F1_FANTASY_PASSWORD", "")
+LEAGUE_ID = os.environ.get("F1_FANTASY_LEAGUE_ID", "")
 
 TEAM_TAG_MAP = {
     1:'MER', 2:'FER', 3:'RED', 4:'MCL', 5:'AMR',
@@ -50,50 +50,91 @@ PLAYER_MAP = {
 }
 
 # ─────────────────────────────────────────────────────────────────
-# AUTH — uses Playwright browser to bypass bot-detection
+# AUTH — uses real Chromium browser via Playwright
 # ─────────────────────────────────────────────────────────────────
-async def authenticate(session: aiohttp.ClientSession) -> str:
+async def authenticate(_session) -> str:
     """
-    Authenticate with the F1 Fantasy API.
+    Launch a real Chromium browser to post credentials to the F1 auth endpoint.
+    This bypasses Distil Networks bot-detection (TLS fingerprint + JS challenge).
 
-    NOTE: This ONLY works from a residential/home IP address.
-    Datacenter IPs (GitHub Actions, AWS, Azure) are blocked by Distil Networks
-    at the CDN edge — no workaround exists for automated server-based calls.
-
-    Run this script locally and push the resulting JSON files to GitHub.
+    MUST be run from a home/residential IP. VPNs and datacenter IPs will still
+    be blocked at the CDN edge regardless of browser type.
     """
-    payload = {
-        "Login":               EMAIL,
-        "Password":            PASSWORD,
-        "DistributionChannel": "d861e38f-05ea-4063-8776-a7e2b6d885a4",
-    }
-    headers = {
-        "Content-Type":   "application/json",
-        "apikey":         "fCUCjWrKPu9ylJwRAv8BpGLEgiAuThx7",
-        "origin":         "https://account.formula1.com",
-        "referer":        "https://account.formula1.com/",
-        "user-agent":     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "accept":         "application/json, text/javascript, */*; q=0.01",
-        "accept-language":"en-US,en;q=0.9",
-        "sec-fetch-site": "same-site",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-dest": "empty",
-    }
-    async with session.post(AUTH_URL, json=payload, headers=headers) as r:
-        if r.status != 200:
-            body = await r.text()
-            if "Pardon Our Interruption" in body or r.status == 403:
-                print()
-                print("  ❌ BLOCKED BY DISTIL NETWORKS (403)")
-                print("  This IP address is flagged as a datacenter.")
-                print("  → You must run this script from your home/residential connection.")
-                print("  → See README for local run instructions.")
-            raise RuntimeError(f"Auth failed {r.status}: {body[:300]}")
-        data = await r.json()
+    print("  Launching Chromium browser for auth...")
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0.0.0 Safari/537.36"
+            ),
+            extra_http_headers={
+                "Accept-Language": "en-US,en;q=0.9",
+            },
+        )
+        page = await context.new_page()
+
+        # Visit F1 account page first so cookies/JS are initialized
+        print("  Visiting F1 account page to initialise session...")
+        try:
+            await page.goto(
+                "https://account.formula1.com/",
+                wait_until="domcontentloaded",
+                timeout=30000,
+            )
+        except Exception:
+            pass  # page may redirect — that's fine, we just need the cookies
+
+        # Small delay to let JS challenges complete
+        await asyncio.sleep(2)
+
+        # POST credentials via Playwright's fetch (uses browser's network stack)
+        print("  Posting credentials...")
+        response = await page.request.post(
+            AUTH_URL,
+            data=json.dumps({
+                "Login":               EMAIL,
+                "Password":            PASSWORD,
+                "DistributionChannel": "d861e38f-05ea-4063-8776-a7e2b6d885a4",
+            }),
+            headers={
+                "Content-Type":    "application/json",
+                "apikey":          "fCUCjWrKPu9ylJwRAv8BpGLEgiAuThx7",
+                "origin":          "https://account.formula1.com",
+                "referer":         "https://account.formula1.com/",
+                "accept":          "application/json, text/javascript, */*; q=0.01",
+                "accept-language": "en-US,en;q=0.9",
+                "sec-fetch-site":  "same-site",
+                "sec-fetch-mode":  "cors",
+                "sec-fetch-dest":  "empty",
+            },
+        )
+
+        status = response.status
+        body   = await response.text()
+        await browser.close()
+
+    if status != 200:
+        if "Pardon Our Interruption" in body or status == 403:
+            print()
+            print("  ❌ BLOCKED BY DISTIL NETWORKS (403)")
+            print("  → Make sure you are on HOME internet with NO VPN active.")
+            print("  → Disable any proxy software and try again.")
+            print("  → If on a work/office network, switch to your home Wi-Fi.")
+        raise RuntimeError(f"Auth failed {status}: {body[:300]}")
+
+    try:
+        data = json.loads(body)
+    except Exception:
+        raise RuntimeError(f"Auth response not JSON: {body[:300]}")
+
     token = data.get("data", {}).get("subscriptionToken") or data.get("subscriptionToken")
     if not token:
         raise RuntimeError(f"No token in auth response: {data}")
-    print("  ✅ Authenticated.")
+
+    print("  ✅ Authenticated successfully.")
     return token
 
 
