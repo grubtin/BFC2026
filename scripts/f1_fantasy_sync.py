@@ -162,13 +162,15 @@ def round_pts(cumul: float | None, prev: float | None) -> float | None:
 # Main sync
 # ─────────────────────────────────────────────────────────────────────────────
 
-async def sync():
+async def sync(force: bool = False):
     guid, raw_cookies = load_session()
     print(f"  Session: GUID {guid[:8]}…")
+    if force:
+        print("  ⚠️  --force: re-fetching all rounds (ignoring cache)")
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     existing = load_existing()
-    cached_confirmed: dict[int, dict] = {
+    cached_confirmed: dict[int, dict] = {} if force else {
         r["round"]: r
         for r in existing.get("rounds", [])
         if r.get("confirmed") and any(t.get("picks") for t in r.get("teams", []))
@@ -294,6 +296,13 @@ async def sync():
         to_fetch: set[int] = {m for m in completed if m not in cached_confirmed}
         if next_round:
             to_fetch.add(next_round)
+        # Always re-fetch the most recently completed round so final scores replace
+        # any provisional data that was cached mid-weekend
+        if completed and not force:
+            most_recent_confirmed = max(completed)
+            to_fetch.add(most_recent_confirmed)
+            if most_recent_confirmed in cached_confirmed:
+                del cached_confirmed[most_recent_confirmed]
 
         print(f"  Fetching picks for rounds: {sorted(to_fetch) or 'none (all cached)'}")
 
@@ -330,6 +339,15 @@ async def sync():
             }
             cumul_this: dict[str, float] = {}
 
+            # ── Source cumulative points for this round ───────────────────
+            # For the LATEST completed round: use cur_points from the overall
+            # leaderboard (already in league_players) — this is always accurate.
+            # For older rounds: we rely on cached data (handled above), so we
+            # never need to fetch historical per-round leaderboard data.
+            # ovpoints from getteam is unreliable and is NOT used.
+            is_latest_completed = confirmed and (mdid == max(completed, default=0))
+            overall_pts: dict[str, float] = {p["id"]: p["cur_points"] for p in league_players}
+
             for player in league_players:
                 pid    = player["id"]
                 p_guid = player.get("guid", "")
@@ -348,7 +366,16 @@ async def sync():
                 team   = teams[0] if teams else {}
                 picks_raw = team.get("playerid", [])
 
-                cumul   = float(team.get("ovpoints") or 0) if confirmed else None
+                # For the latest confirmed round: overall cur_points IS the cumulative.
+                # For provisional / future rounds: cumulative is not yet known.
+                if is_latest_completed:
+                    cumul = overall_pts.get(pid) or float(team.get("ovpoints") or 0) or None
+                elif confirmed:
+                    # Older confirmed round — should have been served from cache above.
+                    # Fallback: use ovpoints (may be stale but better than nothing).
+                    cumul = float(team.get("ovpoints") or 0) or None
+                else:
+                    cumul = None
                 cumul_this[pid] = cumul or 0
                 rpts    = round_pts(cumul, prev_cumul.get(pid))
 
@@ -419,11 +446,31 @@ async def sync():
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="F1 Fantasy Sync")
+    parser.add_argument("--force", action="store_true",
+                        help="Re-fetch all rounds, ignoring cached confirmed data")
+    args = parser.parse_args()
+
     print("F1 Fantasy Sync")
-    print("═" * 40)
-    asyncio.run(sync())
-    print()
-    print("Deploy:  git add f1_teams.json && git commit -m 'data: sync' && git push")
+    print("=" * 40)
+
+    # Windows: use SelectorEventLoop to avoid ProactorEventLoop cleanup errors
+    # that cause a non-zero exit code even on successful runs.
+    import platform
+    if platform.system() == "Windows":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    try:
+        asyncio.run(sync(force=args.force))
+        print()
+        print("SYNC COMPLETE")
+        sys.exit(0)
+    except SystemExit:
+        raise
+    except Exception as e:
+        print(f"\n❌ Unexpected error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -23,37 +23,51 @@ if errorlevel 1 (
     pip install httpx
 )
 
-python scripts/f1_fantasy_sync.py
+REM Pass --force flag if called as: run_fantasy_sync.bat --force
+set FORCE_FLAG=
+if /i "%1"=="--force" set FORCE_FLAG=--force
 
-if errorlevel 1 (
-    echo.
-    echo SYNC FAILED - see error above.
-    echo.
-    echo If you see a 401 error, your cookies have expired.
-    echo.
-    echo How to refresh cookies:
-    echo   1. Open Chrome - fantasy.formula1.com
-    echo   2. F12 - Network tab - filter: getusergamedaysv1
-    echo   3. Reload the page
-    echo   4. Right-click request - Copy - Copy as cURL (bash)
-    echo   5. Extract the -b '...' value
-    echo   6. Paste into scripts\f1_session.json as raw_cookies
-    echo.
-    pause
-    exit /b 1
-)
+python scripts/f1_fantasy_sync.py %FORCE_FLAG%
+if errorlevel 1 goto :sync_failed
 
 echo.
 echo Pushing to GitHub...
 git add f1_teams.json
 git commit -m "data: sync f1 fantasy [skip ci]"
 git push
-
 if errorlevel 1 (
-    echo WARNING: Git push failed - data file updated locally.
+    echo.
+    echo ============================================
+    echo  WARNING: Git push failed.
+    echo  Data file was updated locally but NOT pushed.
+    echo  Run manually: git push
+    echo ============================================
+    echo.
 ) else (
-    echo SUCCESS: f1_teams.json synced and pushed.
+    echo.
+    echo ============================================
+    echo  SUCCESS: Synced and pushed to GitHub.
+    echo ============================================
+    echo.
 )
+pause
+exit /b 0
 
+:sync_failed
+echo.
+echo ============================================
+echo  SYNC FAILED - see error above.
+echo ============================================
+echo.
+echo If you see a 401 error, your cookies have expired.
+echo.
+echo How to refresh cookies:
+echo   1. Open Chrome - fantasy.formula1.com
+echo   2. F12 - Network tab - filter: getusergamedaysv1
+echo   3. Reload the page
+echo   4. Right-click request - Copy - Copy as cURL (bash)
+echo   5. Extract the -b '...' value
+echo   6. Paste into scripts\f1_session.json as raw_cookies
 echo.
 pause
+exit /b 1
