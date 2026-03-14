@@ -1,9 +1,9 @@
-name: Budget Data Scraper - F1 Fantasy Tools
+name: Daily Budget Data Scraper - F1 Fantasy Tools
 
 on:
   schedule:
-    - cron: '0 */6 * * *'   # every 6 hours
-  workflow_dispatch:          # allow manual trigger
+    - cron: '0 0 * * *'    # daily at midnight UTC
+  workflow_dispatch:         # allow manual trigger
 
 jobs:
   scrape_job:
@@ -24,7 +24,10 @@ jobs:
           playwright install chromium --with-deps
 
       - name: Run Scraper
-        run: python budget_scraper.py
+        run: |
+          cd scripts
+          python budget_scraper.py
+          mv f1_budget_data.json ../f1_budget_data.json
 
       - name: Push updated data
         run: |
