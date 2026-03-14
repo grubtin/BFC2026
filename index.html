@@ -1,1336 +1,524 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🏎️ Baby Formula Championship</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --r1:#ff4757;--r2:#ff6b35;--r3:#f7c59f;--r4:#2ec4b6;--r5:#3a86ff;--r6:#c77dff;
-            --gold:#f4a100;--silver:#9a9aaa;--bronze:#cd7f32;
-            --bg:#f0eff4;--card:#ffffff;--card2:#f5f4fa;--border:#e2e0ee;
-            --text:#1a1a2e;--subtext:#6b6b8a;--muted:#a0a0bb;
-        }
-        *{box-sizing:border-box;}
-        body{font-family:'Share Tech Mono',monospace;background:var(--bg);color:var(--text);margin:0;}
-        .fun{font-family:'Boogaloo',cursive;}
-        .rb-text{background:linear-gradient(90deg,var(--r1),var(--r2),#f4a100,var(--r4),var(--r5),var(--r6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-        .rb-bar{height:3px;background:linear-gradient(90deg,var(--r1),var(--r2),#f4a100,var(--r4),var(--r5),var(--r6));}
-        .rb-border{border:2px solid transparent;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(135deg,var(--r1),#f4a100,var(--r4),var(--r5),var(--r6)) border-box;}
-        .page{display:none;animation:fadeSlide .25s ease;}
-        .page.active{display:block;}
-        @keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-        .nav-btn{cursor:pointer;padding:6px 4px;border-radius:12px;text-align:center;transition:background .15s;}
-        .nav-btn.active{background:#e8e6f5;}
-        .nav-btn .ni{font-size:20px;line-height:1;}
-        .nav-btn .nl{font-size:8px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;}
-        .nav-btn.active .nl{color:var(--subtext);}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-        .card2{background:var(--card2);border:1px solid var(--border);border-radius:12px;}
-        .prow{border-bottom:1px solid var(--border);transition:background .12s;opacity:0;animation:rowIn .35s ease forwards;}
-        .prow:last-child{border-bottom:none;}
-        .prow:active{background:var(--card2);}
-        @keyframes rowIn{to{opacity:1}}
-        select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:10px;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;width:100%;cursor:pointer;-webkit-appearance:none;box-shadow:0 1px 3px rgba(0,0,0,.05);}
-        .chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:8px;font-weight:bold;letter-spacing:.07em;text-transform:uppercase;}
-        .jcard{background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;border-left:3px solid transparent;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.05);}
-        ::-webkit-scrollbar{display:none;}
-        #sync-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:100;padding:6px 16px;font-size:10px;text-align:center;letter-spacing:.06em;}
-        #sync-banner.show{display:block;}
-        #sync-banner.loading{background:#3a86ff22;color:#3a86ff;border-bottom:1px solid #3a86ff44;}
-        #sync-banner.success{background:#2ec4b622;color:#2ec4b6;border-bottom:1px solid #2ec4b644;}
-        #sync-banner.error{background:#ff475722;color:#ff4757;border-bottom:1px solid #ff475744;}
-        .skeleton{background:linear-gradient(90deg,#e8e6f5 25%,#f5f4fa 50%,#e8e6f5 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;}
-        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-        /* Team card expand */
-        .team-card-detail{display:none;border-top:1px solid var(--border);padding:10px 14px;}
-        .team-card.open .team-card-detail{display:block;}
-        .team-card.open .team-card-chevron{transform:rotate(180deg);}
-        .team-card-chevron{transition:transform .2s;font-size:10px;color:var(--muted);}
-    </style>
-</head>
-<body>
-<div id="sync-banner"></div>
-<div class="max-w-[448px] mx-auto min-h-screen pb-24">
-
-    <!-- HEADER -->
-    <header class="sticky top-0 z-50 bg-[#f0eff4]/96 backdrop-blur border-b border-[#e2e0ee]">
-        <div class="rb-bar"></div>
-        <div class="flex justify-between items-center px-4 py-3">
-            <div>
-                <h1 class="fun text-2xl rb-text leading-none">Baby Formula Championship</h1>
-                <p class="text-[9px] text-[#9090b8] uppercase tracking-widest mt-0.5" id="header-subtitle">2026 Season · Loading…</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="syncAll()" id="sync-btn"
-                    style="background:#f5f4fa;border:1px solid #e2e0ee;border-radius:10px;padding:6px 10px;cursor:pointer;font-size:10px;color:#6b6b8a;font-family:'Share Tech Mono',monospace;transition:all .15s;"
-                    onmouseover="this.style.background='#e8e6f5'" onmouseout="this.style.background='#f5f4fa'">
-                    🔄 Sync
-                </button>
-                <span class="text-3xl">🏎️</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- HOME PAGE -->
-    <div id="page-home" class="page active px-4 pt-5">
-        <!-- Overall Standings -->
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="fun text-xl" style="color:var(--text)">Standings</h2>
-            <div style="position:relative;width:190px;">
-                <select id="standings-round-select" onchange="renderStandings()" style="padding:5px 28px 5px 10px;font-size:10px;border-radius:10px;">
-                    <option value="overall">📊 Overall</option>
-                </select>
-                <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:9px;color:var(--muted)">▼</span>
-            </div>
-        </div>
-
-        <!-- Standings table — expandable team cards -->
-        <div class="card overflow-hidden mb-4" id="standings-table">
-            <div class="skeleton" style="height:56px;border-radius:0;margin-bottom:1px;opacity:.5"></div>
-            <div class="skeleton" style="height:56px;border-radius:0;margin-bottom:1px;opacity:.4"></div>
-            <div class="skeleton" style="height:56px;border-radius:0;opacity:.3"></div>
-        </div>
-
-        <!-- Quick stats -->
-        <div class="grid grid-cols-3 gap-2 mb-4" id="home-stats">
-            <div class="card p-3 text-center"><div class="skeleton" style="height:48px;border-radius:10px"></div></div>
-            <div class="card p-3 text-center"><div class="skeleton" style="height:48px;border-radius:10px"></div></div>
-            <div class="card p-3 text-center"><div class="skeleton" style="height:48px;border-radius:10px"></div></div>
-        </div>
-
-        <!-- Latest round team standings (weekly) -->
-        <div id="home-weekly-section" style="display:none">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="fun text-base" style="color:var(--text)" id="home-weekly-title">Latest Round</h3>
-            </div>
-            <div class="card overflow-hidden mb-4" id="home-weekly-table"></div>
-        </div>
-
-        <div class="card p-4" id="home-recap">
-            <h3 class="fun text-base mb-3" style="color:var(--text)">🇦🇺 Australian GP Recap</h3>
-            <div class="space-y-2 text-[11px]" style="color:var(--subtext)">
-                <div class="flex gap-2"><span>🥇</span><span><span style="color:#2ec4b6;font-weight:bold">Russell wins it</span> for Mercedes — anyone with George (2x) absolutely feasted</span></div>
-                <div class="flex gap-2"><span>🥈</span><span><span style="color:#3a86ff;font-weight:bold">Mercedes 1-2</span> — Antonelli P2 on debut season. The silver era is actually back</span></div>
-                <div class="flex gap-2"><span>💥</span><span><span style="color:#ff4757;font-weight:bold">Piastri DNS</span> — crashed on sighting lap before race even started. Cosmically cursed</span></div>
-                <div class="flex gap-2"><span>📉</span><span><span style="color:#ff4757;font-weight:bold">Hadjar -8 pts</span> — DNF + penalty combo. Negative eight. NEGATIVE EIGHT.</span></div>
-                <div class="flex gap-2"><span>🚀</span><span><span style="color:#f4a100;font-weight:bold">Verstappen P6 from P20</span> — came from last after quali crash. 14 overtakes. Unreal</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- H2H PAGE -->
-    <div id="page-h2h" class="page px-4 pt-5">
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="fun text-xl" style="color:var(--text)">H2H Pulse ⚡</h2>
-            <span class="chip" id="h2h-chip" style="background:rgba(58,134,255,.12);color:#3a86ff">—</span>
-        </div>
-        <!-- Player selectors -->
-        <div class="grid grid-cols-[1fr_20px_1fr] items-center gap-2 mb-3">
-            <select id="h2h-left"  onchange="renderH2H()"></select>
-            <div class="text-center text-xs" style="color:var(--muted)">vs</div>
-            <select id="h2h-right" onchange="renderH2H()"></select>
-        </div>
-        <!-- Round toggle -->
-        <div style="position:relative;margin-bottom:16px;">
-            <select id="h2h-round-select" onchange="renderH2H()" style="padding:9px 28px 9px 10px;">
-                <option value="overall">📊 Overall Season</option>
-            </select>
-            <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:9px;color:var(--muted)">▼</span>
-        </div>
-        <div id="h2h-content"></div>
-    </div>
-
-    <!-- SCHEDULE PAGE -->
-    <div id="page-schedule" class="page px-4 pt-5">
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="fun text-xl" style="color:var(--text)">Schedule 📅</h2>
-            <span class="chip" style="background:rgba(58,134,255,.12);color:#3a86ff">2026 Season</span>
-        </div>
-        <div class="card p-4 mb-4" id="sched-countdown-card">
-            <div class="text-[8px] uppercase tracking-widest mb-1" style="color:var(--muted)">Next Session · Sydney Time</div>
-            <div class="fun text-base mb-0.5" style="color:var(--text)" id="sched-countdown-event">Loading…</div>
-            <div class="font-mono text-2xl font-bold rb-text" id="sched-countdown-timer">--:--:--</div>
-            <div class="text-[9px] mt-1" style="color:var(--subtext)" id="sched-countdown-when"></div>
-        </div>
-        <div style="position:relative;margin-bottom:12px;">
-            <select id="sched-round-select" onchange="renderScheduleRound()" style="padding:9px 28px 9px 10px;"></select>
-            <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:9px;color:var(--muted)">▼</span>
-        </div>
-        <div class="card overflow-hidden" id="sched-session-table"></div>
-    </div>
-
-    <!-- DATA PAGE -->
-    <div id="page-data" class="page px-4 pt-5">
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="fun text-xl" style="color:var(--text)">Data 📊</h2>
-            <span class="chip" style="background:rgba(46,196,182,.12);color:#2ec4b6" id="data-freshness-chip">—</span>
-        </div>
-        <div style="position:relative;margin-bottom:12px;">
-            <select id="data-stat-select" onchange="onDataStatChange()" style="padding:9px 28px 9px 10px;">
-                <option value="budget">📉 Budget Stats</option>
-                <option value="fantasy">🏆 Fantasy Prices & Points</option>
-                <option value="teams">👥 League Teams</option>
-            </select>
-            <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:9px;color:var(--muted)">▼</span>
-        </div>
-
-        <!-- Budget Stats panel -->
-        <div id="data-budget-panel">
-            <div class="card2 flex items-center gap-2 px-3 py-2 mb-3" style="font-size:9px;color:var(--subtext);">
-                <span>🔗 Source:</span>
-                <a href="https://f1fantasytools.com/budget-builder" target="_blank" rel="noopener" style="color:#3a86ff;text-decoration:none;">f1fantasytools.com/budget-builder</a>
-                <span id="data-sim-label" style="margin-left:auto;color:var(--muted);font-size:8px;white-space:nowrap;flex-shrink:0;"></span>
-            </div>
-            <div class="flex rounded-xl p-1 gap-1 mb-3" style="background:#f5f4fa;border:1px solid #e2e0ee;display:inline-flex;">
-                <button id="data-tab-drivers" onclick="setDataTab('drivers')" class="data-tab-btn px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all" style="background:#ffffff;color:var(--text)">Drivers</button>
-                <button id="data-tab-constructors" onclick="setDataTab('constructors')" class="data-tab-btn px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all" style="color:var(--muted)">Constructors</button>
-            </div>
-            <p class="text-[8px] mb-2 px-1 uppercase tracking-widest" style="color:var(--muted)">Tap column header to sort ↕</p>
-            <div class="card overflow-hidden mb-3" id="data-budget-table-wrap">
-                <div id="data-budget-table">
-                    <div class="skeleton" style="height:40px;border-radius:0;margin-bottom:1px;opacity:.5"></div>
-                    <div class="skeleton" style="height:36px;border-radius:0;margin-bottom:1px;opacity:.4"></div>
-                    <div class="skeleton" style="height:36px;border-radius:0;opacity:.3"></div>
-                </div>
-            </div>
-            <div id="data-budget-error" style="display:none;" class="card2 p-4 text-center mb-3">
-                <div style="font-size:24px;margin-bottom:6px;">⚠️</div>
-                <div class="text-[11px] font-bold mb-1" style="color:var(--text)">Data not available</div>
-                <div class="text-[9px]" style="color:var(--subtext)">Run the scraper to generate <code style="background:#e8e6f5;padding:1px 4px;border-radius:4px;">f1_budget_data.json</code>.</div>
-            </div>
-        </div>
-
-        <!-- Fantasy Prices & Points panel -->
-        <div id="data-fantasy-panel" style="display:none;">
-            <div class="card2 flex items-center gap-2 px-3 py-2 mb-3" style="font-size:9px;color:var(--subtext);">
-                <span>🔗 fantasy.formula1.com</span>
-                <span id="fantasy-updated-chip" style="margin-left:auto;color:var(--muted);font-size:8px;"></span>
-            </div>
-            <!-- Overall / Round toggle -->
-            <div style="position:relative;margin-bottom:10px;">
-                <select id="fantasy-round-select" onchange="renderFantasyTable()" style="padding:9px 28px 9px 10px;"></select>
-                <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:9px;color:var(--muted)">▼</span>
-            </div>
-            <div class="flex rounded-xl p-1 gap-1 mb-3" style="background:#f5f4fa;border:1px solid #e2e0ee;display:inline-flex;">
-                <button id="fantasy-tab-drivers" onclick="setFantasyTab('drivers')" class="px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all" style="background:#ffffff;color:var(--text)">Drivers</button>
-                <button id="fantasy-tab-constructors" onclick="setFantasyTab('constructors')" class="px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition-all" style="color:var(--muted)">Teams</button>
-            </div>
-            <p class="text-[8px] mb-2 px-1 uppercase tracking-widest" style="color:var(--muted)">Tap column header to sort ↕</p>
-            <div class="card overflow-hidden mb-3"><div id="fantasy-table"></div></div>
-            <div id="fantasy-error" style="display:none;" class="card2 p-4 text-center mb-3">
-                <div style="font-size:22px;margin-bottom:6px;">🔐</div>
-                <div class="text-[11px] font-bold mb-1" style="color:var(--text)">Fantasy data not synced</div>
-                <div class="text-[9px]" style="color:var(--subtext)">Run <code style="background:#e8e6f5;padding:1px 4px;border-radius:4px;">run_fantasy_sync.bat</code> to pull data.</div>
-            </div>
-        </div>
-
-        <!-- League Teams panel -->
-        <div id="data-teams-panel" style="display:none;">
-            <div class="card2 flex items-center gap-2 px-3 py-2 mb-3" style="font-size:9px;color:var(--subtext);">
-                <span>🏁 Baby Formula Championship · Team Picks</span>
-                <span id="teams-updated-chip" style="margin-left:auto;color:var(--muted);font-size:8px;"></span>
-            </div>
-            <!-- Overall / Round toggle -->
-            <div style="position:relative;margin-bottom:10px;">
-                <select id="teams-round-select" onchange="renderTeamsPanel()" style="padding:9px 28px 9px 10px;"></select>
-                <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:9px;color:var(--muted)">▼</span>
-            </div>
-            <!-- Player selector (shown only in per-round view) -->
-            <div id="teams-player-wrap" style="position:relative;margin-bottom:12px;display:none;">
-                <select id="teams-player-select" onchange="renderTeamsPanel()" style="padding:9px 28px 9px 10px;"></select>
-                <span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:9px;color:var(--muted)">▼</span>
-            </div>
-            <div id="teams-summary" class="grid grid-cols-3 gap-2 mb-3"></div>
-            <div class="card overflow-hidden mb-3"><div id="teams-picks-table"></div></div>
-            <div id="teams-error" style="display:none;" class="card2 p-4 text-center mb-3">
-                <div style="font-size:22px;margin-bottom:6px;">🔐</div>
-                <div class="text-[11px] font-bold mb-1" style="color:var(--text)">Team data not synced</div>
-                <div class="text-[9px]" style="color:var(--subtext)">Run <code style="background:#e8e6f5;padding:1px 4px;border-radius:4px;">run_fantasy_sync.bat</code> to pull league data.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BOTTOM NAV -->
-    <nav class="fixed bottom-0 left-0 right-0 flex justify-center z-50">
-        <div class="w-full max-w-[448px] backdrop-blur border-t" style="background:rgba(240,239,244,.96);border-color:#e2e0ee">
-            <div class="rb-bar"></div>
-            <div class="grid grid-cols-4 gap-1 px-2 py-2">
-                <div class="nav-btn active" onclick="navigate('home')"     id="nav-home"><div class="ni">🏠</div><div class="nl">Home</div></div>
-                <div class="nav-btn"        onclick="navigate('h2h')"      id="nav-h2h"><div class="ni">⚡</div><div class="nl">H2H</div></div>
-                <div class="nav-btn"        onclick="navigate('schedule')" id="nav-schedule"><div class="ni">📅</div><div class="nl">Schedule</div></div>
-                <div class="nav-btn"        onclick="navigate('data')"     id="nav-data"><div class="ni">📊</div><div class="nl">Data</div></div>
-            </div>
-        </div>
-    </nav>
-</div>
-
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// PLAYER CONFIG — static metadata (colors, emojis, owner names)
+// PLAYER CONFIG — static fallback metadata
+// (overridden at runtime by f1_teams.json players[] display fields)
 // ═══════════════════════════════════════════════════════════════════
 const PLAYER_CONFIG = {
-    kevcedes: { id:'kevcedes', name:'Kevcedes',     owner:'Kevin Liang',    emoji:'🗿', color:'#f4a100' },
-    grahhh:   { id:'grahhh',   name:'GRAHHH racing',owner:'Vivian Nguyen',  emoji:'🐥', color:'#ff4757' },
-    leclaren: { id:'leclaren', name:'LeClaren F1',  owner:'Selina Le Khac', emoji:'👽', color:'#3a86ff' },
-    juice:    { id:'juice',    name:'RACING JUICE', owner:'Justin Tran',    emoji:'👑', color:'#2ec4b6' },
-    thumbi:   { id:'thumbi',  name:'Thumbi',        owner:'Thomas George',  emoji:'🍄', color:'#c77dff' },
+    kevcedes: { id:"kevcedes", name:"Kevcedes",     owner:"Kevin Liang",    emoji:"🗿", color:"#f4a100" },
+    grahhh:   { id:"grahhh",   name:"GRAHHH racing",owner:"Vivian Nguyen",  emoji:"🐥", color:"#ff4757" },
+    leclaren: { id:"leclaren", name:"LeClaren F1",  owner:"Selina Le Khac", emoji:"👽", color:"#3a86ff" },
+    juice:    { id:"juice",    name:"RACING JUICE", owner:"Justin Tran",    emoji:"👑", color:"#2ec4b6" },
+    thumbi:   { id:"thumbi",  name:"Thumbi",        owner:"Thomas George",  emoji:"🍄", color:"#c77dff" },
 };
+let PLAYERS = {};
+function getPlayer(key) {
+    return PLAYERS[key] || PLAYER_CONFIG[key] || { id:key, name:key, owner:"", emoji:"👤", color:"#aaa" };
+}
 
-// Maps f1_teams.json player IDs → PLAYER_CONFIG keys
-const PLAYER_ID_MAP = {
-    '232016281': 'kevcedes',
-    '191134213': 'grahhh',
-    '178336081': 'juice',
-    '178339760': 'leclaren',
-    '178798446': 'thumbi',
-};
-
-const TEAM_COLORS = {
-    'Mercedes':'#00d2be','Ferrari':'#e8002d','Red Bull Racing':'#3671c6',
-    'McLaren':'#ff8000','Aston Martin':'#358c75','Alpine':'#0093cc',
-    'Williams':'#005aff','Haas F1 Team':'#888888','Audi':'#52e252',
-    'Racing Bulls':'#6692ff','Cadillac':'#cc0000',
-};
 const TEAM_TAG_COLORS = {
-    'MER':'#00d2be','FER':'#e8002d','RBR':'#3671c6','MCL':'#ff8000',
-    'AST':'#358c75','ALP':'#0093cc','WIL':'#005aff','HAA':'#888888',
-    'AUD':'#52e252','RBS':'#6692ff','CAD':'#cc0000',
-    'RUS':'#00d2be','ANT':'#00d2be','LEC':'#e8002d','HAM':'#e8002d',
-    'VER':'#3671c6','HAD':'#3671c6','NOR':'#ff8000','PIA':'#ff8000',
-    'ALO':'#358c75','STR':'#358c75','GAS':'#0093cc','COL':'#0093cc',
-    'SAI':'#005aff','ALB':'#005aff','BEA':'#888888','OCO':'#888888',
-    'HUL':'#52e252','BOR':'#52e252','LAW':'#6692ff','LIN':'#6692ff',
-    'BOT':'#cc0000','PER':'#cc0000',
+    "MER":"#00d2be","FER":"#e8002d","RBR":"#3671c6","MCL":"#ff8000",
+    "AST":"#358c75","ALP":"#0093cc","WIL":"#005aff","HAA":"#888888",
+    "AUD":"#52e252","RBS":"#6692ff","CAD":"#cc0000",
+    "RUS":"#00d2be","ANT":"#00d2be","LEC":"#e8002d","HAM":"#e8002d",
+    "VER":"#3671c6","HAD":"#3671c6","NOR":"#ff8000","PIA":"#ff8000",
+    "ALO":"#358c75","STR":"#358c75","GAS":"#0093cc","COL":"#0093cc",
+    "SAI":"#005aff","ALB":"#005aff","BEA":"#888888","OCO":"#888888",
+    "HUL":"#52e252","BOR":"#52e252","LAW":"#6692ff","LIN":"#6692ff",
+    "BOT":"#cc0000","PER":"#cc0000",
 };
-const MEDAL_COLOR = ['#f4a100','#9a9aaa','#cd7f32'];
-const MEDAL = ['🥇','🥈','🥉'];
+const MEDAL_COLOR = ["#f4a100","#9a9aaa","#cd7f32"];
+const MEDAL = ["🥇","🥈","🥉"];
 
-// ═══════════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════════
-let DB        = null;   // history.json
-let ROUNDS    = [];     // from history.json
-let PLAYERS   = {};     // merged player config
-let F1_TEAMS  = null;   // f1_teams.json
-let F1_FANTASY= null;   // f1_fantasy.json
-let F1_DATA   = null;   // f1_budget_data.json
+// STATE — single source: f1_teams.json
+let F1_TEAMS = null;
+let F1_DATA  = null;
 
-// ═══════════════════════════════════════════════════════════════════
-// BANNER HELPERS
-// ═══════════════════════════════════════════════════════════════════
+// HELPERS
 function showBanner(type, msg) {
-    const banner = document.getElementById('sync-banner');
-    banner.className = `show ${type}`;
-    banner.textContent = msg;
-    if (type !== 'loading') setTimeout(() => banner.classList.remove('show'), 3500);
+    const b = document.getElementById("sync-banner");
+    b.className = `show ${type}`;
+    b.textContent = msg;
+    if (type !== "loading") setTimeout(() => b.classList.remove("show"), 3500);
 }
-function hideBanner() { document.getElementById('sync-banner').classList.remove('show'); }
-
-// ═══════════════════════════════════════════════════════════════════
-// SYNC ALL
-// ═══════════════════════════════════════════════════════════════════
-async function syncAll() {
-    const btn = document.getElementById('sync-btn');
-    btn.textContent = '⏳ Loading…';
-    btn.disabled = true;
-    showBanner('loading', '🔄 Syncing all data…');
-    try {
-        await Promise.all([syncHistory(), syncF1Teams(), syncF1Fantasy()]);
-        showBanner('success', `✅ All data synced · ${new Date().toLocaleTimeString()}`);
-    } catch(e) {
-        showBanner('error', '⚠️ Some data failed to load');
-    } finally {
-        btn.textContent = '🔄 Sync';
-        btn.disabled = false;
-    }
-}
-
-async function syncHistory() {
-    try {
-        const res = await fetch('./history.json', { cache:'no-cache' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        DB = await res.json();
-    } catch(e) { DB = null; }
-    applyHistory(DB);
-}
-
-async function syncF1Teams() {
-    try {
-        const res = await fetch('./f1_teams.json', { cache:'no-cache' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        F1_TEAMS = await res.json();
-        if (!Object.keys(PLAYERS).length) PLAYERS = { ...PLAYER_CONFIG };
-        populateTeamsDropdowns();
-        renderTeamsPanel();
-        renderHomeWeekly(); // rebuilds dropdown + standings from f1_teams
-        document.getElementById('teams-error').style.display = 'none';
-        refreshFantasyRoundsIfNeeded();
-    } catch(e) {
-        console.warn('f1_teams.json not found:', e);
-    }
-}
-
-async function syncF1Fantasy() {
-    try {
-        const res = await fetch('./f1_fantasy.json', { cache:'no-cache' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        F1_FANTASY = await res.json();
-        populateFantasyRounds();
-        renderFantasyTable();
-        document.getElementById('fantasy-error').style.display = 'none';
-    } catch(e) {
-        console.warn('f1_fantasy.json not found:', e);
-    }
-}
-
-// Re-populate fantasy rounds after teams load (for provisional round detection)
-function refreshFantasyRoundsIfNeeded() {
-    if (F1_FANTASY) {
-        populateFantasyRounds();
-        renderFantasyTable();
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// HISTORY.JSON → STANDINGS + H2H
-// ═══════════════════════════════════════════════════════════════════
-function applyHistory(db) {
-    PLAYERS = { ...PLAYER_CONFIG };
-    if (db?.players) {
-        Object.entries(db.players).forEach(([k, v]) => {
-            if (PLAYERS[k]) PLAYERS[k] = { ...PLAYERS[k], ...v };
-        });
-    }
-    ROUNDS = db?.rounds ? [...db.rounds].sort((a,b) => a.round - b.round) : [];
-    if (!ROUNDS.length) ROUNDS = [SEED_ROUND];
-
-    populateRoundDropdowns();
-
-    // Update subtitle — prefer f1_teams data for current round label
-    const teamsRounds = getTeamsRelevantRounds();
-    if (teamsRounds.length) {
-        const lr = teamsRounds[teamsRounds.length - 1];
-        const schedR = F1_SCHEDULE.find(s => s.round === lr.round);
-        const gpName = schedR ? schedR.gp : (lr.gp || `Round ${lr.round}`);
-        const flag = GP_FLAGS[gpName] || '🏁';
-        const provTag = lr.confirmed ? '' : ' · 🔄';
-        document.getElementById('header-subtitle').textContent =
-            `2026 Season · R${String(lr.round).padStart(2,'0')} · ${gpName} ${flag}${provTag}`;
-    } else {
-        const latest = ROUNDS[ROUNDS.length - 1];
-        document.getElementById('header-subtitle').textContent =
-            `2026 Season · ${latest.key||'R0?'} · ${latest.gp||''} ${latest.flag||''}`;
-    }
-
-    renderStandings();
-    renderH2H();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ROUND DROPDOWNS
-// ═══════════════════════════════════════════════════════════════════
-
-// Returns rounds from f1_teams that have picks (confirmed or live-provisional)
-function getTeamsRelevantRounds() {
+function getActiveRounds() {
     if (!F1_TEAMS) return [];
     return (F1_TEAMS.rounds || [])
         .filter(r => r.confirmed || r.teams?.some(t => t.picks?.length > 0))
-        .sort((a, b) => a.round - b.round);
+        .sort((a,b) => a.round - b.round);
+}
+function getGpName(roundNum) {
+    const s = F1_SCHEDULE.find(r => r.round === roundNum);
+    return s ? s.gp : ((F1_TEAMS?.rounds||[]).find(r => r.round === roundNum)?.gp || `Round ${roundNum}`);
 }
 
-function populateHomeRoundDropdown() {
-    const sSelect = document.getElementById('standings-round-select');
-    sSelect.innerHTML = '<option value="overall">📊 Overall</option>';
-    const relevantRounds = getTeamsRelevantRounds();
-    if (relevantRounds.length) {
-        [...relevantRounds].reverse().forEach(r => {
-            const schedRound = F1_SCHEDULE.find(s => s.round === r.round);
-            const gpName = schedRound ? schedRound.gp : (r.gp || `Round ${r.round}`);
-            const flag = GP_FLAGS[gpName] || '🏁';
-            const provTag = r.confirmed ? '' : ' 🔄';
-            const o = document.createElement('option');
-            o.value = 'r' + r.round;
-            o.textContent = `${flag} R${String(r.round).padStart(2,'0')} · ${gpName}${provTag}`;
-            sSelect.appendChild(o);
-        });
-        sSelect.value = 'r' + relevantRounds[relevantRounds.length - 1].round;
-    } else {
-        // Fallback to history ROUNDS
-        [...ROUNDS].reverse().forEach(r => {
-            const o = document.createElement('option');
-            o.value = r.round;
-            o.textContent = r.label || `R${String(r.round).padStart(2,'0')} · ${r.gp}`;
-            sSelect.appendChild(o);
-        });
-        if (ROUNDS.length) sSelect.value = ROUNDS[ROUNDS.length - 1].round;
+// SYNC
+async function syncAll() {
+    const btn = document.getElementById("sync-btn");
+    btn.textContent = "⏳ Loading…"; btn.disabled = true;
+    showBanner("loading", "🔄 Syncing data…");
+    try {
+        await loadF1Teams();
+        showBanner("success", `✅ Synced · ${new Date().toLocaleTimeString()}`);
+    } catch(e) {
+        showBanner("error", "⚠️ Sync failed — check console");
+        console.error("Sync error:", e);
+    } finally { btn.textContent = "🔄 Sync"; btn.disabled = false; }
+}
+
+async function loadF1Teams() {
+    const res = await fetch("./f1_teams.json", { cache:"no-cache" });
+    if (!res.ok) throw new Error(`f1_teams.json HTTP ${res.status}`);
+    F1_TEAMS = await res.json();
+
+    // Build PLAYERS from f1_teams.players[] merged with static PLAYER_CONFIG
+    PLAYERS = {};
+    for (const pl of (F1_TEAMS.players || [])) {
+        const key  = pl.player_key || pl.id;
+        const base = PLAYER_CONFIG[key] || {};
+        PLAYERS[key] = {
+            id:    key,
+            name:  pl.name  || base.name  || key,
+            owner: pl.owner || base.owner || "",
+            emoji: pl.emoji || base.emoji || "👤",
+            color: pl.color || base.color || "#aaa",
+        };
     }
-}
+    for (const [k,v] of Object.entries(PLAYER_CONFIG)) { if (!PLAYERS[k]) PLAYERS[k]={...v}; }
 
-function populateRoundDropdowns() {
-    populateHomeRoundDropdown();
-
-    // H2H players
-    ['h2h-left','h2h-right'].forEach((id, i) => {
-        const sel = document.getElementById(id);
-        sel.innerHTML = Object.values(PLAYERS).map((p, idx) =>
-            `<option value="${p.id}" ${i===1&&idx===1?'selected':''}>${p.emoji} ${p.name}</option>`
-        ).join('');
-    });
-
-    // H2H round
-    const hSel = document.getElementById('h2h-round-select');
-    hSel.innerHTML = '<option value="overall">📊 Overall Season</option>';
-    [...ROUNDS].reverse().forEach(r => {
-        const o = document.createElement('option');
-        o.value = r.round;
-        o.textContent = r.label || `R${String(r.round).padStart(2,'0')} · ${r.gp}`;
-        hSel.appendChild(o);
-    });
-    if (ROUNDS.length) hSel.value = ROUNDS[ROUNDS.length - 1].round;
-}
-
-// ─── Helper: compute overall standings from f1_teams.json ───
-function computeOverallAtRound(maxRound) {
-    // Used by H2H — keep history-based fallback
-    const totals = {};
-    ROUNDS.filter(r => r.round <= maxRound).forEach(r => {
-        r.standings.forEach(s => {
-            if (!totals[s.player_key]) totals[s.player_key] = 0;
-            totals[s.player_key] += s.points;
-        });
-    });
-    return Object.entries(totals).map(([k,v]) => ({ player_key:k, points:v })).sort((a,b) => b.points - a.points);
-}
-
-// ─── Get standings array from f1_teams.json for a given dropdown value ───
-// roundVal is 'overall', 'r1', 'r2', etc.  (or legacy numeric from history)
-function getStandingsFromTeams(roundVal) {
-    if (!Object.keys(PLAYERS).length) PLAYERS = { ...PLAYER_CONFIG };
-
-    if (roundVal === 'overall') {
-        // Use cur_points from F1_TEAMS.players
-        const arr = (F1_TEAMS?.players || []).map(pl => {
-            const key = PLAYER_ID_MAP[pl.id] || pl.id;
-            return { player_key: key, points: pl.cur_points || 0, team_value: 0 };
-        }).sort((a,b) => b.points - a.points);
-        return arr.map((s,i,a) => ({
-            ...s, pos:i+1,
-            gapAbove: i>0 ? s.points - a[i-1].points : null,
-            gapP1:    s.points - a[0].points,
-        }));
+    // Update header
+    const active = getActiveRounds();
+    if (active.length) {
+        const lr  = active[active.length-1];
+        const gp  = getGpName(lr.round);
+        const flg = GP_FLAGS[gp] || "🏁";
+        document.getElementById("header-subtitle").textContent =
+            `2026 Season · R${String(lr.round).padStart(2,"0")} · ${gp} ${flg}${lr.confirmed?"":" · 🔄"}`;
     }
 
-    // Round view: parse 'r1' → 1
-    const roundNum = parseInt(String(roundVal).replace(/^r/i,''));
-    const roundData = (F1_TEAMS?.rounds || []).find(r => r.round === roundNum);
-    if (!roundData) return [];
-
-    const arr = (roundData.teams || [])
-        .filter(t => t.picks?.length > 0)
-        .map(t => {
-            const key = PLAYER_ID_MAP[t.player_id] || t.player_id;
-            const playerMeta = (F1_TEAMS.players||[]).find(p => p.id === t.player_id);
-            const pts = t.total_points ?? playerMeta?.cur_points ?? 0;
-            return { player_key: key, points: pts, team_value: t.team_value || 0, _teamData: t };
-        }).sort((a,b) => b.points - a.points);
-    return arr.map((s,i,a) => ({
-        ...s, pos:i+1,
-        gapAbove: i>0 ? s.points - a[i-1].points : null,
-        gapP1:    s.points - a[0].points,
-    }));
+    buildHomeDropdown(); renderStandings();
+    buildH2HDropdowns(); renderH2H();
+    populateTeamsDropdowns(); renderTeamsPanel();
+    populateFantasyRounds(); renderF1PlayersPanel();
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// RENDER — HOME STANDINGS + WEEKLY (unified — driven by single dropdown)
-// ═══════════════════════════════════════════════════════════════════
+// HOME STANDINGS + WEEKLY
+function buildHomeDropdown() {
+    const sel = document.getElementById("standings-round-select");
+    sel.innerHTML = `<option value="overall">📊 Overall</option>`;
+    const active = getActiveRounds();
+    [...active].reverse().forEach(r => {
+        const gp = getGpName(r.round), flag = GP_FLAGS[gp]||"🏁";
+        const o = document.createElement("option");
+        o.value = "r"+r.round;
+        o.textContent = `${flag} R${String(r.round).padStart(2,"0")} · ${gp}${r.confirmed?"":" 🔄"}`;
+        sel.appendChild(o);
+    });
+    if (active.length) sel.value = "r"+active[active.length-1].round;
+}
+
 function renderStandings() {
-    if (!Object.keys(PLAYERS).length) PLAYERS = { ...PLAYER_CONFIG };
-    const roundVal  = document.getElementById('standings-round-select').value;
-    const isOverall = roundVal === 'overall';
-
-    // Determine if this is a round view from f1_teams or legacy history
-    const useTeams = F1_TEAMS && (isOverall || String(roundVal).startsWith('r'));
+    if (!F1_TEAMS) return;
+    const val = document.getElementById("standings-round-select").value;
+    const isOverall = val === "overall";
     let standings = [];
 
-    if (useTeams) {
-        standings = getStandingsFromTeams(roundVal);
+    if (isOverall) {
+        standings = [...(F1_TEAMS.players||[])]
+            .map(pl => ({ player_key: pl.player_key||pl.id, points: pl.cur_points||0 }))
+            .sort((a,b)=>b.points-a.points)
+            .map((s,i,a)=>({...s,pos:i+1,gapAbove:i>0?s.points-a[i-1].points:null,gapP1:s.points-a[0].points}));
     } else {
-        // Legacy fallback from history.json ROUNDS
-        const rNum = parseInt(roundVal);
-        const round = ROUNDS.find(r => r.round === rNum);
-        if (!round) return;
-        standings = round.standings.map((s,i,a) => ({
-            ...s, pos:i+1,
-            gapAbove: i>0 ? s.points - a[i-1].points : null,
-            gapP1:    s.points - a[0].points,
+        const rNum = parseInt(val.replace(/^r/i,""));
+        const rd   = (F1_TEAMS.rounds||[]).find(r=>r.round===rNum);
+        if (!rd) return;
+        const src  = rd.standings?.length ? rd.standings : (rd.teams||[]).filter(t=>t.picks?.length).map(t=>({
+            player_key:t.player_key||t.player_id, round_points:t.round_points, cumulative_points:t.cumulative_points
         }));
+        standings = src.map(s=>{
+            const pts = rd.confirmed ? (s.round_points??0) : (s.cumulative_points??0);
+            return { player_key:s.player_key, points:pts };
+        }).sort((a,b)=>b.points-a.points)
+          .map((s,i,a)=>({...s,pos:i+1,gapAbove:i>0?s.points-a[i-1].points:null,gapP1:s.points-a[0].points}));
     }
     if (!standings.length) return;
 
-    // Determine round number for picks lookup
-    const roundNum = isOverall ? null : parseInt(String(roundVal).replace(/^r/i,''));
-    const roundData = roundNum ? (F1_TEAMS?.rounds||[]).find(r => r.round === roundNum) : null;
-    const isProvisional = roundData ? !roundData.confirmed : false;
+    const rNum      = isOverall ? null : parseInt(val.replace(/^r/i,""));
+    const roundData = rNum ? (F1_TEAMS.rounds||[]).find(r=>r.round===rNum) : null;
+    const isProvis  = roundData ? !roundData.confirmed : false;
+    const gpName    = rNum ? getGpName(rNum) : "";
+    const roundFlag = gpName ? (GP_FLAGS[gpName]||"🏁") : "";
 
-    // Get GP name for weekly section title
-    const schedRound = roundNum ? F1_SCHEDULE.find(s => s.round === roundNum) : null;
-    const gpName = schedRound ? schedRound.gp : (roundData?.gp || (roundNum ? `Round ${roundNum}` : ''));
-    const roundFlag = gpName ? (GP_FLAGS[gpName] || '🏁') : '';
+    document.getElementById("standings-table").innerHTML = standings.map((s,i) => {
+        const p  = getPlayer(s.player_key);
+        const mc = i<3 ? MEDAL_COLOR[i] : p.color;
+        const pts = s.points??0;
+        const teamEntry = !isOverall&&roundData ? roundData.teams?.find(t=>(t.player_key||t.player_id)===s.player_key) : null;
+        const hasPicks  = teamEntry?.picks?.length>0;
 
-    const el = document.getElementById('standings-table');
-    el.innerHTML = standings.map((s, i) => {
-        const p  = PLAYERS[s.player_key] || {};
-        const mc = i < 3 ? MEDAL_COLOR[i] : (p.color || '#aaa');
-        const pts = s.points ?? 0;
-
-        // Get picks for this player in this round
-        const playerId = Object.entries(PLAYER_ID_MAP).find(([,v]) => v === s.player_key)?.[0];
-        const teamData = (!isOverall && roundData && playerId)
-            ? roundData.teams?.find(t => t.player_id === playerId) : null;
-        const hasPicks = teamData?.picks?.length > 0;
-
-        let picksHtml = '';
+        let picksHtml = "";
         if (hasPicks) {
-            const driverPicks = teamData.picks.filter(pk => pk.type === 'driver');
-            const constrPicks = teamData.picks.filter(pk => pk.type === 'constructor');
-            const pickRow = (items) => items.map(pk => {
-                const tc = TEAM_TAG_COLORS[pk.team_tag] || '#9090b8';
-                return `<span style="background:${tc}22;color:${tc};font-size:8px;font-weight:bold;padding:1px 5px;border-radius:5px;margin:1px;display:inline-block;">${pk.is_star?'⭐':''}${pk.short_name}</span>`;
-            }).join('');
-            picksHtml = `
-            <div class="team-card-detail">
+            const chip = pk => {
+                const tc=TEAM_TAG_COLORS[pk.team_tag]||"#9090b8";
+                return `<span style="background:${tc}22;color:${tc};font-size:8px;font-weight:bold;padding:1px 5px;border-radius:5px;margin:1px;display:inline-block;">${pk.is_star?"⭐":""}${pk.short_name}</span>`;
+            };
+            const drs=teamEntry.picks.filter(pk=>pk.type==="driver");
+            const cns=teamEntry.picks.filter(pk=>pk.type==="constructor");
+            picksHtml=`<div class="team-card-detail">
                 <div class="text-[8px] uppercase tracking-widest mb-1.5" style="color:var(--muted)">Drivers</div>
-                <div class="mb-2">${pickRow(driverPicks)}</div>
+                <div class="mb-2">${drs.map(chip).join("")}</div>
                 <div class="text-[8px] uppercase tracking-widest mb-1.5" style="color:var(--muted)">Constructors</div>
-                <div class="mb-1">${pickRow(constrPicks)}</div>
-                ${teamData.team_value ? `<div class="text-[8px] mt-2" style="color:var(--muted)">Team value: <span style="color:var(--subtext)">$${teamData.team_value}M</span></div>` : ''}
+                <div class="mb-1">${cns.map(chip).join("")}</div>
+                ${teamEntry.team_value?`<div class="text-[8px] mt-2" style="color:var(--muted)">Team value: <span style="color:var(--subtext)">$${teamEntry.team_value}M</span></div>`:""}
             </div>`;
         }
-
-        const clickable = hasPicks ? `onclick="toggleTeamCard(this)" style="cursor:pointer;"` : '';
-        const ptsColor = isProvisional ? '#f4a100' : mc;
-
-        return `
-        <div class="team-card prow" style="animation-delay:${i*0.05}s">
-            <div class="px-4 py-3 flex items-center gap-3" ${clickable}>
+        const ptsColor = isProvis ? "#f4a100" : mc;
+        return `<div class="team-card prow" style="animation-delay:${i*0.05}s">
+            <div class="px-4 py-3 flex items-center gap-3" ${hasPicks?"onclick=\"toggleTeamCard(this)\" style=\"cursor:pointer;\"":""}>
                 <div class="w-7 text-center flex-shrink-0">
-                    ${i < 3
-                        ? `<span class="text-xl leading-none">${MEDAL[i]}</span>`
-                        : `<span class="fun text-base" style="color:${p.color}">${s.pos}</span>`}
+                    ${i<3?`<span class="text-xl leading-none">${MEDAL[i]}</span>`:`<span class="fun text-base" style="color:${p.color}">${s.pos}</span>`}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="fun text-[15px] leading-tight truncate" style="color:${p.color||'#aaa'}">${p.emoji||''} ${p.name||s.player_key}</div>
-                    <div class="text-[9px] truncate" style="color:var(--subtext)">${p.owner||''}</div>
+                    <div class="fun text-[15px] leading-tight truncate" style="color:${p.color}">${p.emoji} ${p.name}</div>
+                    <div class="text-[9px] truncate" style="color:var(--subtext)">${p.owner}</div>
                 </div>
                 <div class="text-right flex-shrink-0">
-                    <div class="fun text-base leading-none" style="color:${ptsColor}">${pts}${isProvisional?'<span style="font-size:8px;margin-left:2px;opacity:.7">~</span>':''}</div>
-                    ${i === 0
-                        ? `<div class="text-[9px] font-bold mt-0.5" style="color:var(--gold)">LEADER</div>`
-                        : `<div class="text-[9px] mt-0.5 font-mono">
-                               <span style="color:#ff6b35">${s.gapAbove??''}</span>
-                               <span style="color:#d0cee8"> | </span>
-                               <span style="color:#ff4757">${s.gapP1}</span>
-                           </div>`}
+                    <div class="fun text-base leading-none" style="color:${ptsColor}">${pts}${isProvis?"<span style=\"font-size:8px;margin-left:2px;opacity:.6\">~</span>":""}</div>
+                    ${i===0?`<div class="text-[9px] font-bold mt-0.5" style="color:var(--gold)">LEADER</div>`
+                           :`<div class="text-[9px] mt-0.5 font-mono"><span style="color:#ff6b35">${s.gapAbove??""}</span><span style="color:#d0cee8"> | </span><span style="color:#ff4757">${s.gapP1}</span></div>`}
                 </div>
-                ${hasPicks ? `<div class="team-card-chevron">▼</div>` : '<div class="w-4"></div>'}
-            </div>
-            ${picksHtml}
-        </div>`;
-    }).join('');
+                ${hasPicks?`<div class="team-card-chevron">▼</div>`:"<div class=\"w-4\"></div>"}
+            </div>${picksHtml}</div>`;
+    }).join("");
 
-    // Quick stats
-    const topS   = standings[0];
-    const topP   = PLAYERS[topS?.player_key] || {};
-    const sorted = standings.slice().sort((a,b) => b.points - a.points);
-    const bestS  = sorted[0], worstS = sorted[sorted.length-1];
-    const bestP  = PLAYERS[bestS?.player_key] || {};
-    const worstP = PLAYERS[worstS?.player_key] || {};
-    document.getElementById('home-stats').innerHTML = `
-        <div class="card p-3 text-center">
-            <div class="text-xl">🏆</div>
+    const top=standings[0], worst=standings[standings.length-1];
+    document.getElementById("home-stats").innerHTML=`
+        <div class="card p-3 text-center"><div class="text-xl">🏆</div>
             <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Leader</div>
-            <div class="fun text-sm mt-0.5" style="color:var(--gold)">${topP.name||'—'}</div>
-            <div class="text-[9px] mt-0.5" style="color:var(--muted)">${topS?.points??'—'} pts</div>
-        </div>
-        <div class="card p-3 text-center">
-            <div class="text-xl">🔥</div>
-            <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Best ${isOverall?'Total':'Race'}</div>
-            <div class="fun text-sm mt-0.5" style="color:#ff4757">${bestP.name||'—'}</div>
-            <div class="text-[9px] mt-0.5" style="color:var(--muted)">${bestS?.points??'—'} pts</div>
-        </div>
-        <div class="card p-3 text-center">
-            <div class="text-xl">💀</div>
-            <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Worst ${isOverall?'Total':'Race'}</div>
-            <div class="fun text-sm mt-0.5" style="color:#c77dff">${worstP.name||'—'}</div>
-            <div class="text-[9px] mt-0.5" style="color:var(--muted)">${worstS?.points??'—'} pts</div>
-        </div>`;
+            <div class="fun text-sm mt-0.5" style="color:var(--gold)">${getPlayer(top.player_key).name}</div>
+            <div class="text-[9px] mt-0.5" style="color:var(--muted)">${top.points} pts</div></div>
+        <div class="card p-3 text-center"><div class="text-xl">🔥</div>
+            <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Best ${isOverall?"Total":"Race"}</div>
+            <div class="fun text-sm mt-0.5" style="color:#ff4757">${getPlayer(top.player_key).name}</div>
+            <div class="text-[9px] mt-0.5" style="color:var(--muted)">${top.points} pts</div></div>
+        <div class="card p-3 text-center"><div class="text-xl">💀</div>
+            <div class="text-[8px] mt-1 uppercase" style="color:var(--muted)">Worst ${isOverall?"Total":"Race"}</div>
+            <div class="fun text-sm mt-0.5" style="color:#c77dff">${getPlayer(worst.player_key).name}</div>
+            <div class="text-[9px] mt-0.5" style="color:var(--muted)">${worst.points} pts</div></div>`;
 
-    // Update weekly section to match the selected round
-    renderHomeWeeklyForRound(roundNum, roundData, gpName, roundFlag, isProvisional);
+    renderHomeWeeklySection(rNum, roundData, gpName, roundFlag, isProvis);
 }
 
-function toggleTeamCard(header) {
-    const card = header.closest('.team-card');
-    card.classList.toggle('open');
-}
+function toggleTeamCard(header) { header.closest(".team-card").classList.toggle("open"); }
 
-// ═══════════════════════════════════════════════════════════════════
-// RENDER — HOME WEEKLY — driven by renderStandings dropdown
-// ═══════════════════════════════════════════════════════════════════
-function renderHomeWeekly() {
-    // Called after f1_teams loads — just trigger a full re-render
-    populateHomeRoundDropdown();
-    renderStandings();
-}
+function renderHomeWeeklySection(rNum, roundData, gpName, roundFlag, isProvis) {
+    const section=document.getElementById("home-weekly-section");
+    const title=document.getElementById("home-weekly-title");
+    const table=document.getElementById("home-weekly-table");
+    if (!rNum||!roundData) { section.style.display="none"; return; }
 
-function renderHomeWeeklyForRound(roundNum, roundData, gpName, roundFlag, isProvisional) {
-    const section = document.getElementById('home-weekly-section');
-    const title   = document.getElementById('home-weekly-title');
-    const table   = document.getElementById('home-weekly-table');
+    const prov=isProvis?" <span style=\"font-size:9px;background:rgba(244,161,0,.15);color:#f4a100;padding:1px 5px;border-radius:4px;vertical-align:middle;\">PROVISIONAL</span>":"";
+    section.style.display="";
+    title.innerHTML=`${roundFlag} ${gpName} — Team Points${prov}`;
 
-    if (!roundNum || !roundData) {
-        // Overall view — hide the weekly picks table
-        section.style.display = 'none';
+    const teams=(roundData.teams||[]).filter(t=>t.picks?.length).map(t=>({
+        ...t, _pts: roundData.confirmed?(t.round_points??0):(t.cumulative_points??0)
+    })).sort((a,b)=>(b._pts??-9999)-(a._pts??-9999));
+
+    if (!teams.length) {
+        table.innerHTML=`<div class="p-4 text-center text-[10px]" style="color:var(--muted)">${isProvis?"Provisional picks loaded.":"No picks data."}</div>`;
         return;
     }
-
-    const provLabel = isProvisional
-        ? ' <span style="font-size:9px;background:rgba(244,161,0,.15);color:#f4a100;padding:1px 5px;border-radius:4px;vertical-align:middle;">PROVISIONAL</span>'
-        : '';
-    section.style.display = '';
-    title.innerHTML = `${roundFlag} ${gpName} — Team Points${provLabel}`;
-
-    const allTeams = (roundData.teams || []).filter(t => t.picks?.length > 0);
-    const teamsWithPts = allTeams.map(t => {
-        const playerMeta = (F1_TEAMS.players||[]).find(p => p.id === t.player_id);
-        return { ...t, _displayPts: t.total_points ?? playerMeta?.cur_points ?? null };
-    }).sort((a,b) => (b._displayPts??-9999) - (a._displayPts??-9999));
-
-    if (!teamsWithPts.length) {
-        table.innerHTML = `<div class="p-4 text-center text-[10px]" style="color:var(--muted)">${isProvisional ? 'Provisional picks loaded — points incoming.' : 'No picks data for this round.'}</div>`;
-        return;
-    }
-
-    const provBannerHtml = isProvisional
-        ? `<div style="background:rgba(244,161,0,.08);border-bottom:1px solid rgba(244,161,0,.2);padding:7px 14px;font-size:9px;color:#f4a100;">⚠️ Live race week — points are provisional and updating</div>`
-        : '';
-
-    table.innerHTML = provBannerHtml + teamsWithPts.map((t, i) => {
-        const pid = PLAYER_ID_MAP[t.player_id] || t.player_id;
-        const p   = PLAYERS[pid] || { name: t.player_id, color:'#aaa', emoji:'👤' };
-        const mc  = i < 3 ? MEDAL_COLOR[i] : (p.color || '#aaa');
-        const pts = t._displayPts ?? '—';
-        const ptsColor = isProvisional ? '#f4a100' : mc;
-
-        const drivers = (t.picks||[]).filter(pk => pk.type==='driver').map(pk => {
-            const tc = TEAM_TAG_COLORS[pk.team_tag] || '#9090b8';
-            return `<span style="background:${tc}22;color:${tc};font-size:8px;font-weight:bold;padding:1px 5px;border-radius:4px;">${pk.is_star?'⭐':''}${pk.short_name}</span>`;
-        }).join(' ');
-        const constrs = (t.picks||[]).filter(pk => pk.type==='constructor').map(pk => {
-            const tc = TEAM_TAG_COLORS[pk.team_tag] || '#9090b8';
-            return `<span style="background:${tc}22;color:${tc};font-size:8px;font-weight:bold;padding:1px 5px;border-radius:4px;">${pk.short_name}</span>`;
-        }).join(' ');
-
-        return `
-        <div class="prow px-4 py-3" style="border-left:3px solid ${mc};animation-delay:${i*0.05}s">
+    const banner=isProvis?`<div style="background:rgba(244,161,0,.08);border-bottom:1px solid rgba(244,161,0,.2);padding:7px 14px;font-size:9px;color:#f4a100;">⚠️ Live race week — points updating</div>`:"";
+    table.innerHTML=banner+teams.map((t,i)=>{
+        const p=getPlayer(t.player_key||t.player_id);
+        const mc=i<3?MEDAL_COLOR[i]:p.color;
+        const pts=t._pts??"—";
+        const chips=type=>(t.picks||[]).filter(pk=>pk.type===type).map(pk=>{
+            const tc=TEAM_TAG_COLORS[pk.team_tag]||"#9090b8";
+            return `<span style="background:${tc}22;color:${tc};font-size:8px;font-weight:bold;padding:1px 5px;border-radius:4px;">${pk.is_star?"⭐":""}${pk.short_name}</span>`;
+        }).join(" ");
+        return `<div class="prow px-4 py-3" style="border-left:3px solid ${mc};animation-delay:${i*0.05}s">
             <div class="flex items-center gap-3 mb-1.5">
-                <div class="w-6 text-center flex-shrink-0">
-                    ${i < 3 ? `<span class="text-lg">${MEDAL[i]}</span>` : `<span class="fun text-sm" style="color:${p.color}">${i+1}</span>`}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="fun text-[14px] leading-tight" style="color:${p.color}">${p.emoji} ${p.name}</div>
-                </div>
-                <div class="fun text-lg" style="color:${ptsColor}">${pts}${isProvisional&&pts!=='—'?'<span style="font-size:9px;opacity:.6">~</span>':''}</div>
+                <div class="w-6 text-center flex-shrink-0">${i<3?`<span class="text-lg">${MEDAL[i]}</span>`:`<span class="fun text-sm" style="color:${p.color}">${i+1}</span>`}</div>
+                <div class="flex-1 min-w-0"><div class="fun text-[14px] leading-tight" style="color:${p.color}">${p.emoji} ${p.name}</div></div>
+                <div class="fun text-lg" style="color:${isProvis?"#f4a100":mc}">${pts}${isProvis&&pts!=="—"?"<span style=\"font-size:9px;opacity:.6\">~</span>":""}</div>
             </div>
-            <div class="ml-9 flex flex-wrap gap-0.5">
-                ${drivers} ${constrs}
-            </div>
+            <div class="ml-9 flex flex-wrap gap-0.5">${chips("driver")} ${chips("constructor")}</div>
         </div>`;
-    }).join('');
+    }).join("");
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// RENDER — H2H
-// ═══════════════════════════════════════════════════════════════════
+// H2H
+function buildH2HDropdowns() {
+    ["h2h-left","h2h-right"].forEach((id,i)=>{
+        const sel=document.getElementById(id);
+        sel.innerHTML=Object.values(PLAYERS).map((p,idx)=>
+            `<option value="${p.id}" ${i===1&&idx===1?"selected":""}>${p.emoji} ${p.name}</option>`
+        ).join("");
+    });
+    const hSel=document.getElementById("h2h-round-select");
+    hSel.innerHTML=`<option value="overall">📊 Overall Season</option>`;
+    const active=getActiveRounds();
+    [...active].reverse().forEach(r=>{
+        const gp=getGpName(r.round);
+        const o=document.createElement("option");
+        o.value=r.round;
+        o.textContent=`${GP_FLAGS[gp]||"🏁"} R${String(r.round).padStart(2,"0")} · ${gp}${r.confirmed?"":" 🔄"}`;
+        hSel.appendChild(o);
+    });
+    if (active.length) hSel.value=active[active.length-1].round;
+}
+
 function renderH2H() {
-    const lk       = document.getElementById('h2h-left').value;
-    const rk       = document.getElementById('h2h-right').value;
-    const roundVal = document.getElementById('h2h-round-select').value;
-    const isOverall = roundVal === 'overall';
-    const L = PLAYERS[lk], R = PLAYERS[rk];
-    const el = document.getElementById('h2h-content');
-    if (!L || !R) return;
+    if (!F1_TEAMS) return;
+    const lk=document.getElementById("h2h-left").value;
+    const rk=document.getElementById("h2h-right").value;
+    const rv=document.getElementById("h2h-round-select").value;
+    const isOverall=rv==="overall";
+    const L=getPlayer(lk), R=getPlayer(rk);
+    const el=document.getElementById("h2h-content");
+    if (!L||!R) return;
 
-    // Points for selected view
-    const getPts = (key) => {
-        if (isOverall) return ROUNDS.reduce((sum, r) => { const s = r.standings.find(x => x.player_key === key); return sum + (s?.points||0); }, 0);
-        const round = ROUNDS.find(r => r.round === parseInt(roundVal));
-        return round?.standings.find(s => s.player_key === key)?.race_points ?? 0;
+    const getPoints=(key,roundVal)=>{
+        if (roundVal==="overall") {
+            const pl=(F1_TEAMS.players||[]).find(p=>(p.player_key||p.id)===key);
+            return pl?.cur_points??0;
+        }
+        const rNum=parseInt(roundVal);
+        const rd=(F1_TEAMS.rounds||[]).find(r=>r.round===rNum);
+        if (!rd) return 0;
+        const s=rd.standings?.find(s=>s.player_key===key);
+        if (s) return rd.confirmed?(s.round_points??0):(s.cumulative_points??0);
+        const t=rd.teams?.find(t=>(t.player_key||t.player_id)===key);
+        return rd.confirmed?(t?.round_points??0):(t?.cumulative_points??0);
     };
-    const getOverallPts = (key) => ROUNDS.reduce((sum, r) => { const s = r.standings.find(x => x.player_key === key); return sum + (s?.points||0); }, 0);
-    const getLatestValue = (key) => {
-        const latest = ROUNDS[ROUNDS.length-1];
-        return latest?.standings.find(x => x.player_key === key)?.team_value ?? 0;
+
+    const active=getActiveRounds();
+    const Lpts=getPoints(lk,rv), Rpts=getPoints(rk,rv);
+    let lWins=0,rWins=0;
+    active.filter(r=>r.confirmed).forEach(r=>{
+        const lp=getPoints(lk,r.round),rp=getPoints(rk,r.round);
+        if(lp>rp) lWins++; else if(rp>lp) rWins++;
+    });
+    const ties=active.filter(r=>r.confirmed).length-lWins-rWins;
+    const gap=Math.abs(Lpts-Rpts), tied=Lpts===Rpts, ahead=Lpts>=Rpts?L:R;
+
+    const getLoverall=key=>{const pl=(F1_TEAMS.players||[]).find(p=>(p.player_key||p.id)===key);return pl?.cur_points??0;};
+    const getPos=key=>{
+        const s=[...(F1_TEAMS.players||[])].sort((a,b)=>(b.cur_points||0)-(a.cur_points||0));
+        return s.findIndex(p=>(p.player_key||p.id)===key)+1;
     };
-    const getPos = (key) => {
-        const overall = computeOverallAtRound(ROUNDS[ROUNDS.length-1]?.round ?? 1);
-        return overall.findIndex(x => x.player_key === key) + 1;
-    };
+    const roundLabel=isOverall?"Overall":getGpName(parseInt(rv));
+    document.getElementById("h2h-chip").textContent=roundLabel;
 
-    // Win record: how many rounds each won
-    const lWins = ROUNDS.filter(r => {
-        const ls = r.standings.find(x=>x.player_key===lk)?.race_points??0;
-        const rs = r.standings.find(x=>x.player_key===rk)?.race_points??0;
-        return ls > rs;
-    }).length;
-    const rWins = ROUNDS.filter(r => {
-        const ls = r.standings.find(x=>x.player_key===lk)?.race_points??0;
-        const rs = r.standings.find(x=>x.player_key===rk)?.race_points??0;
-        return rs > ls;
-    }).length;
-    const ties = ROUNDS.length - lWins - rWins;
-
-    const Lpts = getPts(lk), Rpts = getPts(rk);
-    const gap  = Math.abs(Lpts - Rpts);
-    const tied = Lpts === Rpts;
-    const ahead = Lpts >= Rpts ? L : R;
-
-    // Selected round label
-    const roundLabel = isOverall ? 'Overall' : (ROUNDS.find(r => r.round === parseInt(roundVal))?.label || `Round ${roundVal}`);
-    document.getElementById('h2h-chip').textContent = roundLabel;
-
-    const row = (label, lv, rv, fmtL, fmtR) => {
-        const lWin = lv > rv, rWin = rv > lv;
-        return `
-        <div class="flex items-center gap-2 py-2.5 border-b last:border-0" style="border-color:var(--border)">
-            <div class="flex-1 text-right font-mono text-xs ${lWin?'font-bold':''}" style="${lWin?`color:${L.color}`:'color:var(--muted)'}">
-                ${fmtL ? fmtL(lv) : lv}
-            </div>
+    const row=(label,lv,rv2,fL,fR)=>{
+        const lW=lv>rv2,rW=rv2>lv;
+        return `<div class="flex items-center gap-2 py-2.5 border-b last:border-0" style="border-color:var(--border)">
+            <div class="flex-1 text-right font-mono text-xs ${lW?"font-bold":""}" style="${lW?`color:${L.color}`:"color:var(--muted)"}">${fL?fL(lv):lv}</div>
             <div class="w-28 text-center text-[8px] uppercase tracking-widest flex-shrink-0" style="color:var(--muted)">${label}</div>
-            <div class="flex-1 text-left font-mono text-xs ${rWin?'font-bold':''}" style="${rWin?`color:${R.color}`:'color:var(--muted)'}">
-                ${fmtR ? fmtR(rv) : rv}
-            </div>
+            <div class="flex-1 text-left font-mono text-xs ${rW?"font-bold":""}" style="${rW?`color:${R.color}`:"color:var(--muted)"}">${fR?fR(rv2):rv2}</div>
         </div>`;
     };
 
-    const posL = getPos(lk), posR = getPos(rk);
-
-    el.innerHTML = `
+    const posL=getPos(lk),posR=getPos(rk);
+    el.innerHTML=`
     <div class="grid grid-cols-2 gap-3 mb-4">
-        <div class="card p-3" style="border-left:3px solid ${L.color}">
-            <div class="fun text-[15px] leading-tight" style="color:${L.color}">${L.emoji} ${L.name}</div>
-            <div class="text-[9px] mt-0.5" style="color:var(--subtext)">${L.owner}</div>
-        </div>
-        <div class="card p-3" style="border-left:3px solid ${R.color}">
-            <div class="fun text-[15px] leading-tight" style="color:${R.color}">${R.emoji} ${R.name}</div>
-            <div class="text-[9px] mt-0.5" style="color:var(--subtext)">${R.owner}</div>
-        </div>
+        <div class="card p-3" style="border-left:3px solid ${L.color}"><div class="fun text-[15px] leading-tight" style="color:${L.color}">${L.emoji} ${L.name}</div><div class="text-[9px] mt-0.5" style="color:var(--subtext)">${L.owner}</div></div>
+        <div class="card p-3" style="border-left:3px solid ${R.color}"><div class="fun text-[15px] leading-tight" style="color:${R.color}">${R.emoji} ${R.name}</div><div class="text-[9px] mt-0.5" style="color:var(--subtext)">${R.owner}</div></div>
     </div>
     <div class="card px-4 py-1 mb-4">
-        ${row('Position',      -posL,              -posR,              v=>`P${Math.abs(v)}`, v=>`P${Math.abs(v)}`)}
-        ${row(isOverall ? 'Total Pts' : 'Round Pts', Lpts, Rpts)}
-        ${isOverall ? row('Overall', getOverallPts(lk), getOverallPts(rk)) : ''}
-        ${row('Team Value',    getLatestValue(lk), getLatestValue(rk), v=>`$${v}M`, v=>`$${v}M`)}
-        ${row('Round Wins',    lWins,              rWins)}
-        ${row('Ties',          ties,               ties,               v=>`${v}`, v=>`${v}`)}
+        ${row("Position",-posL,-posR,v=>`P${Math.abs(v)}`,v=>`P${Math.abs(v)}`)}
+        ${row(isOverall?"Total Pts":"Round Pts",Lpts,Rpts)}
+        ${isOverall?row("Overall",getLoverall(lk),getLoverall(rk)):""}
+        ${row("Round Wins",lWins,rWins)}
+        ${row("Ties",ties,ties)}
     </div>
     <div class="card p-4 text-center rb-border">
-        <div class="text-[9px] uppercase tracking-widest mb-1" style="color:var(--subtext)">${isOverall ? 'Overall Gap' : 'Round Gap'}</div>
-        <div class="fun text-4xl leading-none" style="color:${tied ? '#f4a100' : ahead.color}">
-            ${tied ? 'TIED' : gap + ' pts'}
-        </div>
-        <div class="text-[10px] mt-2" style="color:var(--subtext)">
-            ${tied ? 'Dead level — both on ' + Lpts + ' pts'
-                   : ahead.name + ' leads by ' + gap + ' points'}
-        </div>
+        <div class="text-[9px] uppercase tracking-widest mb-1" style="color:var(--subtext)">${isOverall?"Overall Gap":"Round Gap"}</div>
+        <div class="fun text-4xl leading-none" style="color:${tied?"#f4a100":ahead.color}">${tied?"TIED":gap+" pts"}</div>
+        <div class="text-[10px] mt-2" style="color:var(--subtext)">${tied?"Dead level — both on "+Lpts+" pts":ahead.name+" leads by "+gap+" points"}</div>
     </div>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// FANTASY PRICES & POINTS (f1_fantasy.json) — overall or per-round
-// ═══════════════════════════════════════════════════════════════════
-let fantasyMode = 'drivers';
-let fantasySort = { col:'total_points', dir:-1 };
+// DATA PAGE — F1 Players (replaces f1_fantasy.json)
+let fantasyMode="drivers";
+let fantasySort={ col:"total_points", dir:-1 };
 
 function setFantasyTab(mode) {
-    fantasyMode = mode;
-    ['drivers','constructors'].forEach(t => {
-        const btn = document.getElementById(`fantasy-tab-${t}`);
-        if (!btn) return;
-        if (t === mode) { btn.style.background='#ffffff'; btn.style.color='var(--text)'; }
-        else            { btn.style.background='';        btn.style.color='var(--muted)'; }
+    fantasyMode=mode;
+    ["drivers","constructors"].forEach(t=>{
+        const btn=document.getElementById(`fantasy-tab-${t}`);
+        if(!btn) return;
+        btn.style.background=t===mode?"#ffffff":""; btn.style.color=t===mode?"var(--text)":"var(--muted)";
     });
-    renderFantasyTable();
+    renderF1PlayersPanel();
 }
-
 function sortFantasyCol(col) {
-    if (fantasySort.col === col) fantasySort.dir *= -1;
-    else { fantasySort.col = col; fantasySort.dir = -1; }
-    renderFantasyTable();
+    fantasySort={ col, dir: fantasySort.col===col?-fantasySort.dir:-1 };
+    renderF1PlayersPanel();
 }
-
 function populateFantasyRounds() {
-    if (!F1_FANTASY) return;
-    const sel = document.getElementById('fantasy-round-select');
+    if (!F1_TEAMS) return;
+    const sel=document.getElementById("fantasy-round-select");
     if (!sel) return;
-    const gws = F1_FANTASY.gameweeks || [];
-
-    // Build synthetic rounds from overall points_this_gw if no gameweeks exist
-    // R1 = Australian GP (confirmed), R2 = Chinese GP (provisional if in f1_teams unconfirmed)
-    const syntheticOptions = [];
-    if (!gws.length) {
-        // R1: synthesize from overall data's points_this_gw
-        syntheticOptions.push({ value:'synth_r1', label:'🇦🇺 R01 · Australian Grand Prix' });
-        // R2: check if f1_teams has unconfirmed round 2 data
-        if (F1_TEAMS) {
-            const r2 = (F1_TEAMS.rounds||[]).find(r=>r.round===2 && !r.confirmed && r.teams?.some(t=>t.picks?.length>0));
-            if (r2) {
-                syntheticOptions.push({ value:'synth_r2', label:'🇨🇳 R02 · Chinese Grand Prix [PROVISIONAL]' });
-            }
-        }
-    }
-
-    sel.innerHTML = `<option value="overall">📊 Overall (Season)</option>` +
-        [...syntheticOptions].reverse().map(o => `<option value="${o.value}">${o.label}</option>`).join('') +
-        [...gws].reverse().map(gw =>
-            `<option value="${gw.round}">${GP_FLAGS[gw.gp]||'🏁'} R${String(gw.round).padStart(2,'0')} · ${gw.gp||''}${gw.confirmed===false?' [PROVISIONAL]':''}</option>`
-        ).join('');
+    const active=getActiveRounds();
+    sel.innerHTML=`<option value="overall">📊 Overall (Season)</option>`+
+        [...active].reverse().map(r=>{
+            const gp=getGpName(r.round),flag=GP_FLAGS[gp]||"🏁";
+            return `<option value="r${r.round}">${flag} R${String(r.round).padStart(2,"0")} · ${gp}${r.confirmed?"":" [PROVISIONAL]"}</option>`;
+        }).join("");
 }
+function renderF1PlayersPanel() {
+    if (!F1_TEAMS) return;
+    const gwVal=document.getElementById("fantasy-round-select")?.value||"overall";
+    let drivers=[],constructors=[],isProvis=false,roundLabel="";
 
-function renderFantasyTable() {
-    if (!F1_FANTASY) return;
-    const gwVal = document.getElementById('fantasy-round-select')?.value || 'overall';
-    let drivers = [], constructors = [], isProvisional = false, roundLabel = '';
-
-    if (gwVal === 'overall') {
-        drivers      = F1_FANTASY.overall?.drivers      || [];
-        constructors = F1_FANTASY.overall?.constructors || [];
-        document.getElementById('fantasy-updated-chip').textContent = F1_FANTASY.last_updated?.split(' ')[0] || '';
-        roundLabel = 'Overall (Season)';
-    } else if (gwVal === 'synth_r1') {
-        // Synthesize R1 data: use points_this_gw from overall as the round points
-        drivers = (F1_FANTASY.overall?.drivers||[]).map(d => ({...d, points_this_gw: d.points_this_gw ?? 0}));
-        constructors = (F1_FANTASY.overall?.constructors||[]).map(d => ({...d, points_this_gw: d.points_this_gw ?? 0}));
-        document.getElementById('fantasy-updated-chip').textContent = 'R01 · Australian GP ✅';
-        roundLabel = 'R01 · Australian Grand Prix';
-        fantasySort = { col:'points_this_gw', dir:-1 };
-    } else if (gwVal === 'synth_r2') {
-        // R2 provisional: use overall data (prices may reflect R2 changes), mark as provisional
-        drivers = (F1_FANTASY.overall?.drivers||[]).map(d => ({...d, points_this_gw: null}));
-        constructors = (F1_FANTASY.overall?.constructors||[]).map(d => ({...d, points_this_gw: null}));
-        document.getElementById('fantasy-updated-chip').textContent = 'R02 · China 🔄 PROVISIONAL';
-        roundLabel = 'R02 · Chinese Grand Prix [PROVISIONAL]';
-        isProvisional = true;
-        fantasySort = { col:'price', dir:-1 };
+    if (gwVal==="overall") {
+        drivers=F1_TEAMS.f1_players?.drivers||[];
+        constructors=F1_TEAMS.f1_players?.constructors||[];
+        document.getElementById("fantasy-updated-chip").textContent=F1_TEAMS.last_updated?.split(" ")[0]||"";
+        roundLabel="Overall (Season)";
     } else {
-        const gw = (F1_FANTASY.gameweeks||[]).find(g => String(g.round)===String(gwVal));
-        drivers      = gw?.drivers      || [];
-        constructors = gw?.constructors || [];
-        isProvisional = gw?.confirmed === false;
-        document.getElementById('fantasy-updated-chip').textContent = gw?.date || '';
-        roundLabel = gw?.gp || '';
+        const rNum=parseInt(gwVal.replace(/^r/i,""));
+        const rd=(F1_TEAMS.rounds||[]).find(r=>r.round===rNum);
+        isProvis=rd?!rd.confirmed:false;
+        roundLabel=getGpName(rNum);
+        document.getElementById("fantasy-updated-chip").textContent=`R${String(rNum).padStart(2,"0")} · ${roundLabel}${isProvis?" 🔄":""}`;
+        drivers=(F1_TEAMS.f1_players?.drivers||[]).map(d=>({...d}));
+        constructors=(F1_TEAMS.f1_players?.constructors||[]).map(d=>({...d}));
     }
 
-    const raw    = fantasyMode === 'drivers' ? drivers : constructors;
-    const sorted = [...raw].sort((a,b) => {
-        const av = a[fantasySort.col] ?? -Infinity;
-        const bv = b[fantasySort.col] ?? -Infinity;
-        return fantasySort.dir * (bv - av);
+    const raw=fantasyMode==="drivers"?drivers:constructors;
+    const sorted=[...raw].sort((a,b)=>{
+        const av=a[fantasySort.col]??-Infinity, bv=b[fantasySort.col]??-Infinity;
+        return fantasySort.dir*(bv-av);
     });
+    const isRoundView=gwVal!=="overall";
+    const ptsField=isRoundView?"points_this_gw":"total_points";
 
-    const isRoundView = gwVal !== 'overall';
-    const ptsField = isRoundView ? 'points_this_gw' : 'total_points';
-
-    const th = (col, label, extra='') => {
-        const active = fantasySort.col === col;
-        const arrow  = active ? (fantasySort.dir === -1 ? '↓' : '↑') : '↕';
-        return `<th class="p-2 text-center cursor-pointer select-none text-[8px] uppercase tracking-wider font-normal whitespace-nowrap ${extra}"
-                    style="color:${active?'#3a86ff':'var(--muted)'}" onclick="sortFantasyCol('${col}')">
-                    ${label}<span style="opacity:.7;margin-left:2px">${arrow}</span></th>`;
+    const th=(col,label,extra="")=>{
+        const active=fantasySort.col===col;
+        const arrow=active?(fantasySort.dir===-1?"↓":"↑"):"↕";
+        return `<th class="p-2 text-center cursor-pointer select-none text-[8px] uppercase tracking-wider font-normal whitespace-nowrap ${extra}" style="color:${active?"#3a86ff":"var(--muted)"}" onclick="sortFantasyCol(\"${col}\")">${label}<span style="opacity:.7;margin-left:2px">${arrow}</span></th>`;
     };
-
-    const rows = sorted.map((d, i) => {
-        const tag    = d.short_name || d.name || '—';
-        const tc     = TEAM_TAG_COLORS[d.team_tag || tag] || '#9090b8';
-        const pts    = isProvisional ? '—' : (d[ptsField] ?? '—');
-        const price  = d.price != null ? `$${d.price}M` : '—';
-        const ptsNum = typeof pts === 'number' ? pts : 0;
-        const rankCol = i===0?'#f4a100':i===1?'#9a9aaa':i===2?'#cd7f32':'var(--muted)';
-        return `<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)"
-                    onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background=''">
+    const rows=sorted.map((d,i)=>{
+        const tag=d.short_name||"—";
+        const tc=TEAM_TAG_COLORS[d.team_tag||tag]||"#9090b8";
+        const pts=isProvis?"—":(d[ptsField]??"—");
+        const ptsNum=typeof pts==="number"?pts:0;
+        const rankCol=i===0?"#f4a100":i===1?"#9a9aaa":i===2?"#cd7f32":"var(--muted)";
+        return `<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)" onmouseover="this.style.background=\"var(--card2)\"" onmouseout="this.style.background=\"\"">
             <td class="p-2 text-center font-mono text-[9px] font-bold w-6" style="color:${rankCol}">${i+1}</td>
-            <td class="p-3">
-                <div class="flex items-center gap-2">
-                    <span style="background:${tc}22;color:${tc};font-size:9px;font-weight:bold;padding:2px 6px;border-radius:6px;">${tag}</span>
-                    <span class="text-[10px]" style="color:var(--text)">${d.full_name || d.name || ''}</span>
-                </div>
-                ${fantasyMode==='drivers'&&d.team ? `<div class="text-[8px] mt-0.5 ml-9" style="color:${tc}">${d.team}</div>` : ''}
-            </td>
-            <td class="p-2 text-center font-mono text-[10px]" style="color:var(--subtext)">${price}</td>
-            <td class="p-2 text-center font-mono text-[11px] font-bold" style="color:${ptsNum>0?'#2ec4b6':ptsNum<0?'#ff4757':'var(--subtext)'}">${pts}</td>
+            <td class="p-3"><div class="flex items-center gap-2"><span style="background:${tc}22;color:${tc};font-size:9px;font-weight:bold;padding:2px 6px;border-radius:6px;">${tag}</span><span class="text-[10px]" style="color:var(--text)">${d.full_name||""}</span></div>${fantasyMode==="drivers"&&d.team?`<div class="text-[8px] mt-0.5 ml-9" style="color:${tc}">${d.team}</div>`:""}</td>
+            <td class="p-2 text-center font-mono text-[10px]" style="color:var(--subtext)">$${d.price}M</td>
+            <td class="p-2 text-center font-mono text-[11px] font-bold" style="color:${ptsNum>0?"#2ec4b6":ptsNum<0?"#ff4757":"var(--subtext)"}">${pts}</td>
         </tr>`;
-    }).join('');
-
-    const ptsColLabel = isRoundView ? 'Rnd Pts' : 'Pts';
-    const label = fantasyMode === 'drivers' ? 'Driver' : 'Constructor';
-    const provBanner = isProvisional ? `<div style="background:rgba(244,161,0,.1);border:1px solid rgba(244,161,0,.3);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:9px;color:#f4a100;display:flex;align-items:center;gap:6px;">⚠️ <strong>${roundLabel}</strong> — Data is PROVISIONAL. Points not yet confirmed.</div>` : '';
-    document.getElementById('fantasy-table').innerHTML = (rows.length ? `
-    ${provBanner}
-    <div style="overflow-x:auto">
-    <table class="w-full" style="min-width:280px">
-        <thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)">
-            <th class="p-2 text-center text-[8px] font-normal w-6" style="color:var(--muted)">#</th>
-            ${th('name', label, 'text-left pl-3')}
-            ${th('price', 'Price')}
-            ${th(ptsField, ptsColLabel)}
-        </tr></thead>
-        <tbody>${rows}</tbody>
-    </table></div>` : `<div class="p-6 text-center text-[10px]" style="color:var(--muted)">No data for this selection</div>`);
+    }).join("");
+    const provBanner=isProvis?`<div style="background:rgba(244,161,0,.1);border:1px solid rgba(244,161,0,.3);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:9px;color:#f4a100;">⚠️ <strong>${roundLabel}</strong> — PROVISIONAL</div>`:"";
+    const label=fantasyMode==="drivers"?"Driver":"Constructor";
+    document.getElementById("fantasy-table").innerHTML=rows.length?`${provBanner}<div style="overflow-x:auto"><table class="w-full" style="min-width:280px"><thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)"><th class="p-2 text-center text-[8px] font-normal w-6" style="color:var(--muted)">#</th>${th("full_name",label,"text-left pl-3")}${th("price","Price")}${th(ptsField,isRoundView?"Rnd Pts":"Pts")}</tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="p-6 text-center text-[10px]" style="color:var(--muted)">No data — run sync to populate.</div>`;
 }
+function renderFantasyTable() { renderF1PlayersPanel(); }
+function refreshFantasyRoundsIfNeeded() { if(F1_TEAMS){populateFantasyRounds();renderF1PlayersPanel();} }
 
-// ═══════════════════════════════════════════════════════════════════
-// LEAGUE TEAMS (f1_teams.json) — overall summary or per-round picks
-// ═══════════════════════════════════════════════════════════════════
+// DATA PAGE — League Teams
 function populateTeamsDropdowns() {
     if (!F1_TEAMS) return;
+    const rSel=document.getElementById("teams-round-select");
+    const active=getActiveRounds();
+    rSel.innerHTML=`<option value="overall">📊 Overall Standings</option>`+
+        [...active].reverse().map(r=>{
+            const gp=getGpName(r.round),flag=GP_FLAGS[gp]||"🏁";
+            return `<option value="${r.round}">${r.confirmed?"✅":"🔄"} R${String(r.round).padStart(2,"0")} · ${flag} ${gp}${r.confirmed?"":" [PROVISIONAL]"}</option>`;
+        }).join("");
+    if (active.length) rSel.value=active[active.length-1].round;
 
-    // Round dropdown — overall + rounds with picks (confirmed or provisional with picks)
-    const rSel = document.getElementById('teams-round-select');
-    const rounds = (F1_TEAMS.rounds||[]).filter(r => r.teams?.some(t => t.picks?.length > 0));
-    rSel.innerHTML = `<option value="overall">📊 Overall Standings</option>` +
-        [...rounds].reverse().map(r => {
-            // Use F1_SCHEDULE for proper GP name
-            const schedRound = F1_SCHEDULE.find(s => s.round === r.round);
-            const gpName = schedRound ? schedRound.gp : (r.gp || `Round ${r.round}`);
-            const flag   = GP_FLAGS[gpName] || '🏁';
-            const status = r.confirmed ? '✅' : '🔄';
-            const provTag = r.confirmed ? '' : ' [PROVISIONAL]';
-            return `<option value="${r.round}">${status} R${String(r.round).padStart(2,'0')} · ${flag} ${gpName}${provTag}</option>`;
-        }).join('');
-    if (rounds.length) rSel.value = rounds[rounds.length-1].round;
-
-    // Player dropdown
-    const pSel = document.getElementById('teams-player-select');
-    pSel.innerHTML = (F1_TEAMS.players||[]).map(p => {
-        const pid = PLAYER_ID_MAP[p.id] || p.id;
-        const pc  = PLAYERS[pid] || { name:p.name, emoji:'👤' };
-        return `<option value="${p.id}">${pc.emoji} ${pc.name||p.name}</option>`;
-    }).join('');
+    const pSel=document.getElementById("teams-player-select");
+    pSel.innerHTML=(F1_TEAMS.players||[]).map(p=>{
+        const pl=getPlayer(p.player_key||p.id);
+        return `<option value="${p.player_key||p.id}">${pl.emoji} ${pl.name}</option>`;
+    }).join("");
 }
-
 function renderTeamsPanel() {
     if (!F1_TEAMS) return;
-    const roundVal = document.getElementById('teams-round-select')?.value;
-    const isOverall = roundVal === 'overall';
-
-    // Show/hide player select
-    document.getElementById('teams-player-wrap').style.display = isOverall ? 'none' : '';
-
-    if (isOverall) {
-        renderTeamsOverall();
-    } else {
-        renderTeamsRound(parseInt(roundVal));
-    }
+    const val=document.getElementById("teams-round-select")?.value;
+    document.getElementById("teams-player-wrap").style.display=val==="overall"?"none":"";
+    val==="overall"?renderTeamsOverall():renderTeamsRound(parseInt(val));
 }
-
 function renderTeamsOverall() {
-    // Show all players ranked by cur_points from f1_teams.json
-    const players = [...(F1_TEAMS.players||[])].sort((a,b) => (b.cur_points||0) - (a.cur_points||0));
-
-    document.getElementById('teams-updated-chip').textContent = F1_TEAMS.last_updated?.split(' ')[0] || '';
-    document.getElementById('teams-summary').innerHTML = '';
-
-    if (!players.length) {
-        document.getElementById('teams-picks-table').innerHTML = '<div class="p-4 text-center text-[10px]" style="color:var(--muted)">No players found.</div>';
-        return;
-    }
-
-    document.getElementById('teams-picks-table').innerHTML = `
+    const players=[...(F1_TEAMS.players||[])].sort((a,b)=>(b.cur_points||0)-(a.cur_points||0));
+    document.getElementById("teams-updated-chip").textContent=F1_TEAMS.last_updated?.split(" ")[0]||"";
+    document.getElementById("teams-summary").innerHTML="";
+    document.getElementById("teams-picks-table").innerHTML=`
     <div style="padding:10px 14px 8px;border-bottom:1px solid var(--border)">
         <span class="text-[8px] uppercase tracking-widest" style="color:var(--muted)">Overall League Standings</span>
     </div>
-    <table class="w-full">
-        <thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)">
-            <th class="p-3 text-left text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Team</th>
-            <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Rank</th>
-            <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Points</th>
-        </tr></thead>
-        <tbody>
-        ${players.map((pl, i) => {
-            const pid = PLAYER_ID_MAP[pl.id] || pl.id;
-            const p   = PLAYERS[pid] || { name:pl.name, color:'#aaa', emoji:'👤' };
-            const mc  = i < 3 ? MEDAL_COLOR[i] : (p.color || '#aaa');
-            return `<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)"
-                        onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background=''">
-                <td class="p-3">
-                    <div class="fun text-[14px]" style="color:${p.color}">${p.emoji} ${p.name}</div>
-                    <div class="text-[9px]" style="color:var(--muted)">Rank #${pl.cur_rank||i+1}</div>
-                </td>
-                <td class="p-2 text-center">
-                    ${i<3 ? `<span class="text-lg">${MEDAL[i]}</span>` : `<span class="fun text-sm" style="color:${mc}">${i+1}</span>`}
-                </td>
-                <td class="p-2 text-center font-mono text-lg font-bold" style="color:${mc}">${pl.cur_points||0}</td>
-            </tr>`;
-        }).join('')}
-        </tbody>
-    </table>`;
+    <table class="w-full"><thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)">
+        <th class="p-3 text-left text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Team</th>
+        <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Rank</th>
+        <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Points</th>
+    </tr></thead><tbody>
+    ${players.map((pl,i)=>{
+        const p=getPlayer(pl.player_key||pl.id), mc=i<3?MEDAL_COLOR[i]:p.color;
+        return `<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)" onmouseover="this.style.background=\"var(--card2)\"" onmouseout="this.style.background=\"\"">
+            <td class="p-3"><div class="fun text-[14px]" style="color:${p.color}">${p.emoji} ${p.name}</div><div class="text-[9px]" style="color:var(--muted)">Rank #${pl.cur_rank||i+1}</div></td>
+            <td class="p-2 text-center">${i<3?`<span class="text-lg">${MEDAL[i]}</span>`:`<span class="fun text-sm" style="color:${mc}">${i+1}</span>`}</td>
+            <td class="p-2 text-center font-mono text-lg font-bold" style="color:${mc}">${pl.cur_points||0}</td>
+        </tr>`;
+    }).join("")}</tbody></table>`;
 }
-
 function renderTeamsRound(roundNum) {
-    const roundData = (F1_TEAMS.rounds||[]).find(r => r.round === roundNum);
-    if (!roundData) return;
+    const rd=(F1_TEAMS.rounds||[]).find(r=>r.round===roundNum);
+    if (!rd) return;
+    const playerKey=document.getElementById("teams-player-select")?.value;
+    if (!playerKey) return;
+    const te=(rd.teams||[]).find(t=>(t.player_key||t.player_id)===playerKey);
+    const isProvis=!rd.confirmed;
+    const gpName=getGpName(roundNum);
+    document.getElementById("teams-updated-chip").textContent=isProvis?"Provisional 🔄":"Confirmed ✅";
 
-    const playerId = document.getElementById('teams-player-select')?.value;
-    if (!playerId) return;
-
-    const playerData = (roundData.teams||[]).find(t => t.player_id === playerId);
-    const isProvisional = !roundData.confirmed;
-    document.getElementById('teams-updated-chip').textContent = isProvisional ? 'Provisional 🔄' : 'Confirmed ✅';
-
-    // Get proper GP name from schedule
-    const schedRound = F1_SCHEDULE.find(s => s.round === roundNum);
-    const gpName = schedRound ? schedRound.gp : (roundData.gp || `Round ${roundNum}`);
-
-    if (!playerData || !playerData.picks?.length) {
-        document.getElementById('teams-summary').innerHTML = '';
-        document.getElementById('teams-picks-table').innerHTML = `<div class="p-4 text-center text-[10px]" style="color:var(--muted)">No team data for this round.</div>`;
+    if (!te?.picks?.length) {
+        document.getElementById("teams-summary").innerHTML="";
+        document.getElementById("teams-picks-table").innerHTML=`<div class="p-4 text-center text-[10px]" style="color:var(--muted)">No team data for this round.</div>`;
         return;
     }
-
-    const totalPts = playerData.total_points ?? '—';
-    const budget   = playerData.budget_remaining != null ? `$${playerData.budget_remaining}M` : '—';
-    const teamVal  = playerData.team_value != null ? `$${playerData.team_value}M` : '—';
-
-    const provBanner = isProvisional ? `
-        <div style="background:rgba(244,161,0,.1);border:1px solid rgba(244,161,0,.3);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:9px;color:#f4a100;display:flex;align-items:center;gap:6px;">
-            ⚠️ <strong>R${String(roundNum).padStart(2,'0')} · ${gpName}</strong> — PROVISIONAL data. Points not yet confirmed.
-        </div>` : '';
-
-    document.getElementById('teams-summary').innerHTML = `
-        ${provBanner}
-        <div class="card p-3 text-center">
-            <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">Total Pts</div>
-            <div class="fun text-lg" style="color:#2ec4b6">${totalPts}</div>
-        </div>
-        <div class="card p-3 text-center">
-            <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">Team Value</div>
-            <div class="fun text-sm" style="color:#3a86ff">${teamVal}</div>
-        </div>
-        <div class="card p-3 text-center">
-            <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">In Bank</div>
-            <div class="fun text-sm" style="color:#f4a100">${budget}</div>
-        </div>`;
-
-    const picks = playerData.picks || [];
-    const rows  = picks.map(p => {
-        const tc     = TEAM_TAG_COLORS[p.team_tag] || '#9090b8';
-        const pts    = p.points ?? '—';
-        const price  = p.price != null ? `$${p.price}M` : '—';
-        const ptsNum = typeof pts === 'number' ? pts : 0;
-        return `<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)"
-                    onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background=''">
-            <td class="p-3">
-                <div class="flex items-center gap-2">
-                    ${p.is_star ? '<span style="font-size:10px">⭐</span>' : '<span style="width:14px;display:inline-block"></span>'}
-                    <span style="background:${tc}22;color:${tc};font-size:9px;font-weight:bold;padding:2px 6px;border-radius:6px;">${p.short_name||p.name}</span>
-                    <span class="text-[9px]" style="color:var(--subtext)">${p.type==='constructor'?'🏗️':'🧑‍✈️'}</span>
-                </div>
-                ${p.team ? `<div class="text-[8px] mt-0.5 ml-9" style="color:${tc}">${p.team}</div>` : ''}
-            </td>
-            <td class="p-2 text-center font-mono text-[10px]" style="color:var(--subtext)">${price}</td>
-            <td class="p-2 text-center font-mono text-[11px] font-bold" style="color:${ptsNum>0?'#2ec4b6':ptsNum<0?'#ff4757':'var(--subtext)'}">${pts}</td>
+    const rPts=rd.confirmed?(te.round_points??"—"):"—";
+    const cPts=te.cumulative_points??"—";
+    const budget=te.budget_remaining!=null?`$${te.budget_remaining}M`:"—";
+    const teamVal=te.team_value!=null?`$${te.team_value}M`:"—";
+    const provBanner=isProvis?`<div style="background:rgba(244,161,0,.1);border:1px solid rgba(244,161,0,.3);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:9px;color:#f4a100;display:flex;align-items:center;gap:6px;">⚠️ <strong>R${String(roundNum).padStart(2,"0")} · ${gpName}</strong> — PROVISIONAL</div>`:"";
+    document.getElementById("teams-summary").innerHTML=`${provBanner}
+        <div class="card p-3 text-center"><div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">${rd.confirmed?"Round Pts":"Cumul Pts"}</div><div class="fun text-lg" style="color:#2ec4b6">${rd.confirmed?rPts:cPts}</div></div>
+        <div class="card p-3 text-center"><div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">Team Value</div><div class="fun text-sm" style="color:#3a86ff">${teamVal}</div></div>
+        <div class="card p-3 text-center"><div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">In Bank</div><div class="fun text-sm" style="color:#f4a100">${budget}</div></div>`;
+    const rows=(te.picks||[]).map(pk=>{
+        const tc=TEAM_TAG_COLORS[pk.team_tag]||"#9090b8";
+        const pts=pk.round_points??"—";
+        const ptsNum=typeof pts==="number"?pts:0;
+        return `<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)" onmouseover="this.style.background=\"var(--card2)\"" onmouseout="this.style.background=\"\"">
+            <td class="p-3"><div class="flex items-center gap-2">${pk.is_star?"<span style=\"font-size:10px\">⭐</span>":"<span style=\"width:14px;display:inline-block\"></span>"}<span style="background:${tc}22;color:${tc};font-size:9px;font-weight:bold;padding:2px 6px;border-radius:6px;">${pk.short_name}</span><span class="text-[9px]" style="color:var(--subtext)">${pk.type==="constructor"?"🏗️":"🧑‍✈️"}</span></div>${pk.team?`<div class="text-[8px] mt-0.5 ml-9" style="color:${tc}">${pk.team}</div>`:""}</td>
+            <td class="p-2 text-center font-mono text-[10px]" style="color:var(--subtext)">$${pk.price}M</td>
+            <td class="p-2 text-center font-mono text-[11px] font-bold" style="color:${ptsNum>0?"#2ec4b6":ptsNum<0?"#ff4757":"var(--subtext)"}">${pts}</td>
         </tr>`;
-    }).join('');
-
-    document.getElementById('teams-picks-table').innerHTML = `
-    <div style="padding:10px 14px 8px;border-bottom:1px solid var(--border)">
-        <span class="text-[8px] uppercase tracking-widest" style="color:var(--muted)">Picks · ${isProvisional ? `R${String(roundNum).padStart(2,'0')} ${gpName} · <span style="color:#f4a100">PROVISIONAL</span>` : 'Final Points'}</span>
-    </div>
-    <table class="w-full">
-        <thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)">
-            <th class="p-3 text-left text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Pick</th>
-            <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Price</th>
-            <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Pts</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-    </table>`;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// DATA PAGE — Budget Stats
-// ═══════════════════════════════════════════════════════════════════
-let dataMode = 'drivers';
-let dataSort = { col:'price', dir:-1 };
-
-function setDataTab(mode) {
-    dataMode = mode;
-    ['drivers','constructors'].forEach(t => {
-        const btn = document.getElementById(`data-tab-${t}`);
-        if (t === mode) { btn.style.background='#ffffff'; btn.style.color='var(--text)'; }
-        else            { btn.style.background='';        btn.style.color='var(--muted)'; }
-    });
-    renderBudgetTable();
-}
-
-function sortDataCol(col) {
-    if (dataSort.col === col) dataSort.dir *= -1;
-    else { dataSort.col = col; dataSort.dir = -1; }
-    renderBudgetTable();
+    }).join("");
+    document.getElementById("teams-picks-table").innerHTML=`
+    <div style="padding:10px 14px 8px;border-bottom:1px solid var(--border)"><span class="text-[8px] uppercase tracking-widest" style="color:var(--muted)">Picks · ${isProvis?`<span style="color:#f4a100">PROVISIONAL</span>`:"Final Points"}</span></div>
+    <table class="w-full"><thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)">
+        <th class="p-3 text-left text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Pick</th>
+        <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Price</th>
+        <th class="p-2 text-center text-[8px] uppercase tracking-wider font-normal" style="color:var(--muted)">Pts</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function onDataStatChange() {
-    const v = document.getElementById('data-stat-select').value;
-    document.getElementById('data-budget-panel').style.display  = v==='budget'  ? '' : 'none';
-    document.getElementById('data-fantasy-panel').style.display = v==='fantasy' ? '' : 'none';
-    document.getElementById('data-teams-panel').style.display   = v==='teams'   ? '' : 'none';
-    if (v==='fantasy' && !F1_FANTASY) syncF1Fantasy();
-    if (v==='teams'   && !F1_TEAMS)   syncF1Teams();
+    const v=document.getElementById("data-stat-select").value;
+    document.getElementById("data-budget-panel").style.display  = v==="budget" ?"":"none";
+    document.getElementById("data-fantasy-panel").style.display = v==="fantasy"?"":"none";
+    document.getElementById("data-teams-panel").style.display   = v==="teams"  ?"":"none";
+    if (v==="fantasy"){populateFantasyRounds();renderF1PlayersPanel();}
+    if (v==="teams"&&F1_TEAMS) renderTeamsPanel();
+    if (v==="budget"&&!F1_DATA) loadF1Data();
 }
-
-async function loadF1Data() {
-    try {
-        const res = await fetch('./f1_budget_data.json', { cache:'no-cache' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        F1_DATA = await res.json();
-        renderBudgetTable();
-    } catch(e) {
-        document.getElementById('data-budget-table').style.display = 'none';
-        document.getElementById('data-budget-error').style.display = '';
-        document.getElementById('data-freshness-chip').textContent = 'No data';
-    }
-}
-
-function parseNum(v) {
-    if (v==null) return -Infinity;
-    const n = parseFloat(String(v).replace(/[^0-9.\-]/g,''));
-    return isNaN(n) ? -Infinity : n;
-}
-
-function renderBudgetTable() {
-    if (!F1_DATA) return;
-    const chip = document.getElementById('data-freshness-chip');
-    chip.textContent = F1_DATA.last_updated ? F1_DATA.last_updated.split(' ')[0] : 'Loaded';
-    const simEl = document.getElementById('data-sim-label');
-    if (simEl) simEl.textContent = F1_DATA.simulation_label || '';
-
-    const raw = dataMode === 'drivers' ? (F1_DATA.drivers||[]) : (F1_DATA.constructors||[]);
-    if (!raw.length) {
-        document.getElementById('data-budget-error').style.display = '';
-        document.getElementById('data-budget-table').style.display = 'none';
-        return;
-    }
-
-    function doSort(arr) {
-        return [...arr].sort((a,b) => {
-            if (dataSort.col==='name') return dataSort.dir*String(a.name||'').localeCompare(String(b.name||''));
-            if (dataSort.col==='price') return dataSort.dir*((parseFloat(a.price)||0)-(parseFloat(b.price)||0));
-            if (dataSort.col.match(/^R\d+$/)) {
-                const av=parseFloat((a.race_pts||{})[dataSort.col]||'')||-Infinity;
-                const bv=parseFloat((b.race_pts||{})[dataSort.col]||'')||-Infinity;
-                return dataSort.dir*(av-bv);
-            }
-            const av=parseFloat(String(((a.req_pts||{})[dataSort.col])||'').replace(/[^\d.\-]/g,''));
-            const bv=parseFloat(String(((b.req_pts||{})[dataSort.col])||'').replace(/[^\d.\-]/g,''));
-            return dataSort.dir*((isNaN(av)?Infinity:av)-(isNaN(bv)?Infinity:bv));
-        });
-    }
-
-    const fmtPts = (val) => {
-        if (!val||val==='-'||val==='—') return '<span style="color:var(--muted)">—</span>';
-        const n=parseFloat(val);
-        const c=n>0?'#2ec4b6':n<0?'#ff4757':'var(--subtext)';
-        return `<span style="font-size:10px;color:${c}">${val}</span>`;
-    };
-    const fmtReq = (val, isNeg) => {
-        if (!val||val==='-'||val==='—') return '<span style="color:var(--muted)">—</span>';
-        const s=String(val).trim();
-        const n=parseFloat(s.replace(/[^\d.\-]/g,''));
-        let bg='transparent',fg='#cccccc';
-        if (isNeg) {
-            if (n<=-20){bg='#7b0000';fg='#ff9999';}
-            else if(n<=-10){bg='#5a2000';fg='#ffbb88';}
-            else if(n<=0){bg='#1a5a1a';fg='#aaffaa';}
-            else if(n<=15){bg='#2a6a2a';fg='#88ff88';}
-            else{bg='#3a3a00';fg='#ffff88';}
-        } else {
-            if(n<=0){bg='#1a5a1a';fg='#aaffaa';}
-            else if(n<=10){bg='#1a5a1a';fg='#aaffaa';}
-            else if(n<=25){bg='#4a4a00';fg='#ffff88';}
-            else if(n<=45){bg='#5a2a00';fg='#ffcc88';}
-            else{bg='#7b0000';fg='#ffaaaa';}
-        }
-        return `<div style="text-align:center;background:${bg};border-radius:3px;padding:2px 5px;font-size:10px;font-weight:bold;color:${fg}">${s}</div>`;
-    };
-
-    const TAG_COLORS = {
-        'MER':'#00d2be','FER':'#e8002d','RED':'#3671c6','MCL':'#ff8000',
-        'AMR':'#358c75','ALP':'#0093cc','WIL':'#005aff','HAA':'#888888',
-        'AUD':'#52e252','VRB':'#6692ff','CAD':'#cc0000','AST':'#358c75',
-        ...TEAM_TAG_COLORS,
-    };
-
-    function buildTierTable(tierEntries) {
-        if (!tierEntries.length) return '';
-        const sample=tierEntries[0];
-        const tierLabel=sample.tier_label||'';
-        const isA=sample.tier==='A';
-        const accent=isA?'#f4a100':'#3a86ff';
-        const nameLabel=dataMode==='drivers'?'DR':'CR';
-        const raceCols=Object.keys(sample.race_pts||{}).sort((a,b)=>parseInt(a.slice(1))-parseInt(b.slice(1)));
-        const pcLabels=sample.price_changes||Object.keys(sample.req_pts||{});
-        const ac=(col)=>dataSort.col===col?'#3a86ff':'var(--muted)';
-        const nRace=raceCols.length,nDrop=pcLabels.filter(p=>p.startsWith('-')).length,nRise=pcLabels.filter(p=>p.startsWith('+')).length;
-
-        let hdr1=`<tr style="background:var(--card2);border-top:2px solid ${accent}88"><td colspan="2" style="padding:5px 8px;font-size:8px;font-weight:bold;color:${accent};text-transform:uppercase;letter-spacing:.06em">${tierLabel}</td>`;
-        if(nRace>0) hdr1+=`<th colspan="${nRace}" class="p-1 text-center text-[8px]" style="color:var(--muted)">Pts</th>`;
-        if(nDrop>0) hdr1+=`<th colspan="${nDrop}" class="p-1 text-center text-[8px] font-bold" style="background:rgba(120,10,10,.5);color:#ff8888;border-radius:3px 3px 0 0">${pcLabels.filter(p=>p.startsWith('-')).join(' &nbsp; ')}</th>`;
-        if(nRise>0) hdr1+=`<th colspan="${nRise}" class="p-1 text-center text-[8px] font-bold" style="background:rgba(10,120,50,.5);color:#aaffcc;border-radius:3px 3px 0 0">${pcLabels.filter(p=>p.startsWith('+')).join(' &nbsp; ')}</th>`;
-        hdr1+='</tr>';
-
-        let hdr2=`<tr style="background:var(--card2);border-bottom:2px solid var(--border)"><th class="p-2 pl-3 text-left text-[8px] font-normal cursor-pointer select-none" style="color:${ac('name')}" onclick="sortDataCol('name')">${nameLabel} ↕</th><th class="p-2 text-center text-[8px] font-normal cursor-pointer select-none" style="color:${ac('price')}" onclick="sortDataCol('price')">$ ↕</th>`;
-        raceCols.forEach(rk=>{hdr2+=`<th class="p-1 text-center text-[8px] font-normal cursor-pointer select-none" style="color:${ac(rk)}" onclick="sortDataCol('${rk}')">${rk} ↕</th>`;});
-        pcLabels.forEach(pk=>{const isNeg=pk.startsWith('-');const pcol=isNeg?'#ff9999':'#aaffcc';hdr2+=`<th class="p-1 text-center text-[8px] font-normal cursor-pointer select-none" style="color:${dataSort.col===pk?'#3a86ff':pcol}" onclick="sortDataCol('${pk.replace(/'/g,"\\'")}')">Pts ↕</th>`;});
-        hdr2+='</tr>';
-
-        const sorted=doSort(tierEntries);
-        const dataRows=sorted.map(d=>{
-            const tag=d.name||'—';
-            const tc=TAG_COLORS[tag]||'#9090b8';
-            let row=`<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)" onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background=''"><td class="p-2 pl-3 whitespace-nowrap"><span style="background:${tc}33;color:${tc};font-size:9px;font-weight:bold;padding:2px 7px;border-radius:5px">${tag}</span></td><td class="p-2 text-center font-mono text-[10px] whitespace-nowrap" style="color:var(--subtext)">${d.price||'—'}</td>`;
-            raceCols.forEach(rk=>{row+=`<td class="p-1 text-center">${fmtPts((d.race_pts||{})[rk])}</td>`;});
-            pcLabels.forEach(pk=>{const isNeg=pk.startsWith('-');row+=`<td class="p-1 text-center">${fmtReq((d.req_pts||{})[pk],isNeg)}</td>`;});
-            row+='</tr>';
-            return row;
-        }).join('');
-
-        return `<table class="w-full mb-4" style="min-width:380px;border-collapse:collapse;border:1px solid var(--border);border-radius:10px;overflow:hidden"><thead>${hdr1}${hdr2}</thead><tbody>${dataRows}</tbody></table>`;
-    }
-
-    const tierA=raw.filter(d=>d.tier==='A'||(d.tier==null&&parseFloat(d.price)>=18.5));
-    const tierB=raw.filter(d=>d.tier==='B'||(d.tier==null&&parseFloat(d.price)<18.5));
-    document.getElementById('data-budget-table').innerHTML=`<div style="overflow-x:auto">${buildTierTable(tierA)}${buildTierTable(tierB)}</div>`;
-    document.getElementById('data-budget-error').style.display='none';
-    document.getElementById('data-budget-table').style.display='';
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// SEED DATA (fallback if history.json not loaded)
-// ═══════════════════════════════════════════════════════════════════
-const SEED_ROUND = {
-    round:1,key:'R01',label:'R01 · Australian GP 🇦🇺',flag:'🇦🇺',gp:'Australian GP',date:'2026-03-16',
-    standings:[
-        {player_key:'kevcedes',player_name:'Kevcedes',    owner:'Kevin Liang',    points:340,race_points:340,team_value:99.9},
-        {player_key:'grahhh',  player_name:'GRAHHH racing',owner:'Vivian Nguyen',  points:340,race_points:340,team_value:99.9},
-        {player_key:'juice',   player_name:'RACING JUICE',owner:'Justin Tran',    points:340,race_points:340,team_value:99.9},
-        {player_key:'leclaren',player_name:'LeClaren F1', owner:'Selina Le Khac', points:340,race_points:340,team_value:99.9},
-        {player_key:'thumbi',  player_name:'Thumbi',      owner:'Thomas George',  points:195,race_points:195,team_value:99.9},
-    ],
-    drivers:[],constructors:[],
-};
-
 
 // ═══════════════════════════════════════════════════════════════════
 // SCHEDULE
