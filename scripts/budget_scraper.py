@@ -5,86 +5,96 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 
 # ─────────────────────────────────────────────────────────────────
-# Budget Builder column layout (after removing any hidden/grouped
-# header rows, each data row has these cells in order):
+# Budget Builder actual DOM column layout (10 cells per data row):
 #
-#  0  : Tag (e.g. RUS, ANT, MER, FER …)
-#  1  : $ price
-#  2  : Pts (actual points)
-#  3  : xPts (expected points)
-#  4  : Odds text for -0.3  e.g. "10% (5)"
-#  5  : Odds text for -0.1  e.g. "1% (-5)"
-#  6  : Odds text for +0.1  e.g. "2% (11)"
-#  7  : Odds text for +0.3  e.g. "87% (26)"
-#  8  : R2 price-change     e.g. "+0.23"
+#  0  : Tag          e.g. "RUS"
+#  1  : Price        e.g. "27.7"
+#  2  : Pts          season rolling total (may be "-" mid-week)
+#  3  : Pts R1       points from most recent completed race
+#  4  : xPts         expected points
+#  5  : -0.3 Odds    e.g. "10% (≤-6)"
+#  6  : -0.1 Odds    e.g. "1% (-5)"
+#  7  : +0.1 Odds    e.g. "2% (11)"
+#  8  : +0.3 Odds    e.g. "87% (28)"
+#  9  : R2 xΔ$       e.g. "+0.23"
 #
-# The page has two tables: drivers (index 0), constructors (index 1).
-# Tier rows contain a single <td colspan=...> with text "Tier A" or
-# "Tier B" — we track the current tier across rows.
+# Tables:  index 0 = Drivers,  index 1 = Constructors
+# Tier rows: single <td colspan=N> with text like "Tier A (>=18.5M)"
 # ─────────────────────────────────────────────────────────────────
 
+
 def parse_pct(raw: str) -> int | None:
-    """Extract leading integer percentage from a string like '87% (26)'."""
+    """Extract leading integer percentage from a string like '87% (≤28)'."""
+    if not raw:
+        return None
     m = re.match(r"(\d+)%", raw.strip())
     return int(m.group(1)) if m else None
 
 
+def clean_val(raw: str) -> str:
+    """Strip stray currency symbols and whitespace."""
+    return raw.replace("$", "").strip()
+
+
 async def scrape_table(table, table_index: int) -> list[dict]:
     """
-    Scrape one <table> element.  Returns a list of entry dicts.
-    table_index 0 → drivers, 1 → constructors.
+    Scrape one <table> element.
+    Returns list of entry dicts, each with a 'tier' key ('A' or 'B').
     """
     entries = []
-    current_tier = None
+    current_tier       = None
+    current_tier_label = None   # full label e.g. "Tier A (>=18.5M)"
 
     rows = await table.locator("tbody tr").all()
     for row in rows:
         cells = await row.locator("td").all()
-        texts = []
-        for cell in cells:
-            texts.append((await cell.inner_text()).strip())
+        texts = [(await cell.inner_text()).strip() for cell in cells]
 
-        # ── Tier header row (single wide cell like "Tier A (>=18.5M)") ──
+        # ── Tier header row: single cell spanning all columns ──
         if len(texts) == 1:
             m = re.search(r"Tier\s+([AB])", texts[0], re.IGNORECASE)
             if m:
-                current_tier = m.group(1).upper()
+                current_tier       = m.group(1).upper()
+                current_tier_label = texts[0].strip()
             continue
 
-        # ── Need at least 9 columns for a data row ──
-        if len(texts) < 9:
+        # ── Need at least 10 columns for a data row ──
+        if len(texts) < 10:
             continue
 
-        tag      = texts[0]
-        price    = texts[1]
-        pts      = texts[2]
-        xpts     = texts[3]
-        odds_m03 = texts[4]   # "-0.3" odds column
-        odds_m01 = texts[5]   # "-0.1" odds column
-        odds_p01 = texts[6]   # "+0.1" odds column
-        odds_p03 = texts[7]   # "+0.3" odds column
-        r2_change = texts[8]  # R2 Δ$ e.g. "+0.23" or "-0.30"
+        tag       = texts[0]
+        price     = clean_val(texts[1])
+        pts       = texts[2]      # season rolling total (or "-")
+        pts_r1    = texts[3]      # most recent race pts
+        xpts      = texts[4]      # expected pts
+        odds_m03  = texts[5]      # -0.3 odds  "10% (≤-6)"
+        odds_m01  = texts[6]      # -0.1 odds
+        odds_p01  = texts[7]      # +0.1 odds
+        odds_p03  = texts[8]      # +0.3 odds
+        r2_change = texts[9]      # R2 xΔ$  "+0.23"
 
-        # Skip blank / header-looking rows
-        if not tag or tag in ("-", "DR", "CR"):
+        # Skip blank or column-header placeholder rows
+        if not tag or tag in ("-", "DR", "CR", "Pts", "xPts", "$"):
             continue
 
         entry = {
-            "name":      tag,
-            "tier":      current_tier,
-            "price":     price,
-            "pts":       pts,
-            "xpts":      xpts,
-            "odds_m03":  odds_m03,
-            "odds_m01":  odds_m01,
-            "odds_p01":  odds_p01,
-            "odds_p03":  odds_p03,
-            # Pre-compute bare % ints for easy frontend sorting
+            "name":         tag,
+            "tier":         current_tier,
+            "tier_label":   current_tier_label,
+            "price":        price,
+            "pts":          pts,
+            "pts_r1":       pts_r1,
+            "xpts":         xpts,
+            "odds_m03":     odds_m03,
+            "odds_m01":     odds_m01,
+            "odds_p01":     odds_p01,
+            "odds_p03":     odds_p03,
+            # Pre-computed % ints for easy frontend sorting
             "odds_m03_pct": parse_pct(odds_m03),
             "odds_m01_pct": parse_pct(odds_m01),
             "odds_p01_pct": parse_pct(odds_p01),
             "odds_p03_pct": parse_pct(odds_p03),
-            "r2_change": r2_change,
+            "r2_change":    r2_change,
         }
         entries.append(entry)
 
@@ -113,31 +123,45 @@ async def run_scraper():
             )
             await page.wait_for_selector("table", timeout=30_000)
 
-            # ── Grab simulation label (e.g. "China, Post-SQ v2") ──
+            # ── Grab simulation label e.g. "China, Post-SQ v2." ──
             try:
-                sim_el = page.locator("select >> nth=0")
-                sim_label = (await sim_el.input_value()).strip()
+                sim_label = await page.evaluate(
+                    "() => { const s = document.querySelector('select'); "
+                    "return s ? s.options[s.selectedIndex].text.trim() : ''; }"
+                )
                 if not sim_label:
-                    sim_label = await sim_el.inner_text()
-                data_output["simulation_label"] = sim_label.strip()
-            except Exception:
-                pass
+                    sim_el    = page.locator("select").first
+                    sim_label = (await sim_el.input_value()).strip()
+                data_output["simulation_label"] = sim_label
+            except Exception as e:
+                print(f"  ⚠️  Could not read simulation label: {e}")
 
-            # ── Scrape tables ──
+            # ── Scrape Drivers (table 0) and Constructors (table 1) ──
             tables = await page.locator("table").all()
             if len(tables) < 2:
-                raise RuntimeError(f"Expected ≥2 tables, found {len(tables)}")
+                raise RuntimeError(
+                    f"Expected ≥2 tables on page, found {len(tables)}"
+                )
 
             data_output["drivers"]      = await scrape_table(tables[0], 0)
             data_output["constructors"] = await scrape_table(tables[1], 1)
 
-            print(
-                f"  Drivers:      {len(data_output['drivers'])} rows\n"
-                f"  Constructors: {len(data_output['constructors'])} rows"
-            )
+            d_count = len(data_output["drivers"])
+            c_count = len(data_output["constructors"])
+            print(f"  ✅  Drivers: {d_count} rows   Constructors: {c_count} rows")
+
+            # If we got nothing, print debug rows to diagnose column layout changes
+            if d_count == 0:
+                print("  ⚠️  No driver rows — printing first 4 rows for diagnosis:")
+                rows = await tables[0].locator("tbody tr").all()
+                for i, row in enumerate(rows[:4]):
+                    cells = await row.locator("td").all()
+                    texts = [(await c.inner_text()).strip() for c in cells]
+                    print(f"     Row {i} ({len(texts)} cols): {texts}")
 
         except Exception as e:
             print(f"Scraper error: {e}")
+            import traceback; traceback.print_exc()
         finally:
             await browser.close()
 
