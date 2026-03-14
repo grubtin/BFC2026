@@ -1,9 +1,12 @@
-name: F1 Fantasy Sync - F1 Fantasy (Official)
+name: F1 Fantasy Sync
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # Every day at midnight UTC (10:00 AM AEST / 11:00 AM AEDT)
-  workflow_dispatch:         # manual trigger from Actions tab
+    - cron: '0 4 * * *'   # daily at 4am UTC (after races typically finish)
+  workflow_dispatch:        # allow manual trigger
+
+permissions:
+  contents: write
 
 jobs:
   fantasy_sync:
@@ -12,26 +15,39 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install aiohttp
+        run: |
+          pip install aiohttp playwright
+          playwright install chromium --with-deps
 
       - name: Run Fantasy Sync
+        run: |
+          cd scripts
+          python f1_fantasy_sync.py
+          echo "--- Output files ---"
+          [ -f f1_fantasy.json ] && echo "f1_fantasy.json: $(wc -l < f1_fantasy.json) lines" || echo "f1_fantasy.json: NOT FOUND"
+          [ -f f1_teams.json   ] && echo "f1_teams.json:   $(wc -l < f1_teams.json) lines"   || echo "f1_teams.json: NOT FOUND"
+          mv f1_fantasy.json ../f1_fantasy.json 2>/dev/null || true
+          mv f1_teams.json   ../f1_teams.json   2>/dev/null || true
         env:
           F1_FANTASY_EMAIL:     ${{ secrets.F1_FANTASY_EMAIL }}
           F1_FANTASY_PASSWORD:  ${{ secrets.F1_FANTASY_PASSWORD }}
           F1_FANTASY_LEAGUE_ID: ${{ secrets.F1_FANTASY_LEAGUE_ID }}
-        run: python scripts/f1_fantasy_sync.py
 
       - name: Commit updated data files
         run: |
           git config --global user.name  "F1-Bot"
-          git config --global user.email "bot@f1app.com"
+          git config --global user.email "f1bot@users.noreply.github.com"
           git add f1_fantasy.json f1_teams.json
-          git commit -m "Auto-sync: F1 Fantasy data $(date -u '+%Y-%m-%d %H:%M UTC')" || exit 0
+          git diff --cached --quiet || git commit -m "chore: update f1 fantasy data [skip ci]"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
