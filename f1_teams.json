@@ -410,36 +410,36 @@
         {
           "player_id": "232016281",
           "player_key": "kevcedes",
-          "round_points": 375.0,
-          "cumulative_points": 375.0,
+          "round_points": 240.0,
+          "cumulative_points": 240.0,
           "team_value": 99.9
         },
         {
           "player_id": "191134213",
           "player_key": "grahhh",
-          "round_points": 359.0,
-          "cumulative_points": 359.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "178336081",
-          "player_key": "juice",
-          "round_points": 340.0,
-          "cumulative_points": 340.0,
+          "round_points": 230.0,
+          "cumulative_points": 230.0,
           "team_value": 99.9
         },
         {
           "player_id": "178339760",
           "player_key": "leclaren",
-          "round_points": 333.0,
-          "cumulative_points": 333.0,
+          "round_points": 222.0,
+          "cumulative_points": 222.0,
+          "team_value": 99.9
+        },
+        {
+          "player_id": "178336081",
+          "player_key": "juice",
+          "round_points": 195.0,
+          "cumulative_points": 195.0,
           "team_value": 99.9
         },
         {
           "player_id": "178798446",
           "player_key": "thumbi",
-          "round_points": 302.0,
-          "cumulative_points": 302.0,
+          "round_points": 195.0,
+          "cumulative_points": 195.0,
           "team_value": 99.9
         }
       ],
@@ -447,8 +447,8 @@
         {
           "player_id": "232016281",
           "player_key": "kevcedes",
-          "round_points": 375.0,
-          "cumulative_points": 375.0,
+          "round_points": 240.0,
+          "cumulative_points": 240.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -534,8 +534,8 @@
         {
           "player_id": "191134213",
           "player_key": "grahhh",
-          "round_points": 359.0,
-          "cumulative_points": 359.0,
+          "round_points": 230.0,
+          "cumulative_points": 230.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -621,8 +621,8 @@
         {
           "player_id": "178336081",
           "player_key": "juice",
-          "round_points": 340.0,
-          "cumulative_points": 340.0,
+          "round_points": 195.0,
+          "cumulative_points": 195.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -708,8 +708,8 @@
         {
           "player_id": "178339760",
           "player_key": "leclaren",
-          "round_points": 333.0,
-          "cumulative_points": 333.0,
+          "round_points": 222.0,
+          "cumulative_points": 222.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -795,8 +795,8 @@
         {
           "player_id": "178798446",
           "player_key": "thumbi",
-          "round_points": 302.0,
-          "cumulative_points": 302.0,
+          "round_points": 195.0,
+          "cumulative_points": 195.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -885,41 +885,41 @@
       "round": 2,
       "gp": "Chinese Grand Prix",
       "date": "03/14/2026",
-      "confirmed": false,
+      "confirmed": true,
       "standings": [
+        {
+          "player_id": "178336081",
+          "player_key": "juice",
+          "round_points": 145.0,
+          "cumulative_points": 340.0,
+          "team_value": 99.9
+        },
         {
           "player_id": "232016281",
           "player_key": "kevcedes",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 135.0,
+          "cumulative_points": 375.0,
           "team_value": 99.9
         },
         {
           "player_id": "191134213",
           "player_key": "grahhh",
-          "round_points": null,
-          "cumulative_points": null,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "178336081",
-          "player_key": "juice",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 129.0,
+          "cumulative_points": 359.0,
           "team_value": 99.9
         },
         {
           "player_id": "178339760",
           "player_key": "leclaren",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 111.0,
+          "cumulative_points": 333.0,
           "team_value": 99.9
         },
         {
           "player_id": "178798446",
           "player_key": "thumbi",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 107.0,
+          "cumulative_points": 302.0,
           "team_value": 99.9
         }
       ],
@@ -927,8 +927,8 @@
         {
           "player_id": "232016281",
           "player_key": "kevcedes",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 135.0,
+          "cumulative_points": 375.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -1014,8 +1014,8 @@
         {
           "player_id": "191134213",
           "player_key": "grahhh",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 129.0,
+          "cumulative_points": 359.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -1101,8 +1101,8 @@
         {
           "player_id": "178336081",
           "player_key": "juice",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 145.0,
+          "cumulative_points": 340.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -1188,8 +1188,8 @@
         {
           "player_id": "178339760",
           "player_key": "leclaren",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 111.0,
+          "cumulative_points": 333.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [
@@ -1275,8 +1275,8 @@
         {
           "player_id": "178798446",
           "player_key": "thumbi",
-          "round_points": null,
-          "cumulative_points": null,
+          "round_points": 107.0,
+          "cumulative_points": 302.0,
           "team_value": 99.9,
           "budget_remaining": 0.1,
           "picks": [

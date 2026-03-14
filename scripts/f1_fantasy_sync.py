@@ -170,10 +170,19 @@ async def sync(force: bool = False):
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     existing = load_existing()
+    def has_valid_points(r: dict) -> bool:
+        """True if this confirmed round has real point data (not all-null)."""
+        return any(
+            s.get("round_points") is not None
+            for s in r.get("standings", [])
+        )
+
     cached_confirmed: dict[int, dict] = {} if force else {
         r["round"]: r
         for r in existing.get("rounds", [])
-        if r.get("confirmed") and any(t.get("picks") for t in r.get("teams", []))
+        if r.get("confirmed")
+        and any(t.get("picks") for t in r.get("teams", []))
+        and has_valid_points(r)
     }
     if cached_confirmed:
         print(f"  Cached confirmed rounds: {sorted(cached_confirmed)}")
@@ -293,20 +302,20 @@ async def sync(force: bool = False):
         all_mdids = sorted(matchdays)
         next_round = next((m for m in all_mdids if m not in completed), None)
 
+        # Only fetch rounds that are completed but not yet properly cached,
+        # plus the next upcoming round (for picks) — but ONLY if not already cached.
         to_fetch: set[int] = {m for m in completed if m not in cached_confirmed}
-        if next_round:
+        if next_round and next_round not in cached_confirmed:
             to_fetch.add(next_round)
-        # Always re-fetch the most recently completed round so final scores replace
-        # any provisional data that was cached mid-weekend
-        if completed and not force:
-            most_recent_confirmed = max(completed)
-            to_fetch.add(most_recent_confirmed)
-            if most_recent_confirmed in cached_confirmed:
-                del cached_confirmed[most_recent_confirmed]
 
         print(f"  Fetching picks for rounds: {sorted(to_fetch) or 'none (all cached)'}")
 
         # ── 6. Build rounds ────────────────────────────────────────────────────
+        # overall_cur_pts: the true cumulative total for each player after ALL
+        # completed rounds so far. Used as the authoritative cumulative for the
+        # latest completed round (no future rounds have added to it yet).
+        overall_cur_pts: dict[str, float] = {p["id"]: float(p.get("cur_points") or 0) for p in league_players}
+
         prev_cumul: dict[str, float] = {}   # pid → last cumulative
         rounds_out: list[dict] = []
 
@@ -314,8 +323,10 @@ async def sync(force: bool = False):
             md  = matchdays.get(mdid, {"round": mdid, "gp": f"Round {mdid}", "date": "", "finished": False})
             confirmed = mdid in completed
 
-            # ── Reuse cached confirmed round ──────────────────────────────────
-            if mdid in cached_confirmed and mdid not in to_fetch:
+            # ── Reuse cached round — ALWAYS, if it has valid data ────────────
+            # Once a round is in cache with real points it is NEVER re-fetched.
+            # This prevents the API's stale ovpoints from overwriting good data.
+            if mdid in cached_confirmed:
                 r = dict(cached_confirmed[mdid])
                 r["gp"] = md["gp"]  # refresh GP name in case override changed
                 rounds_out.append(r)
@@ -339,14 +350,7 @@ async def sync(force: bool = False):
             }
             cumul_this: dict[str, float] = {}
 
-            # ── Source cumulative points for this round ───────────────────
-            # For the LATEST completed round: use cur_points from the overall
-            # leaderboard (already in league_players) — this is always accurate.
-            # For older rounds: we rely on cached data (handled above), so we
-            # never need to fetch historical per-round leaderboard data.
-            # ovpoints from getteam is unreliable and is NOT used.
-            is_latest_completed = confirmed and (mdid == max(completed, default=0))
-            overall_pts: dict[str, float] = {p["id"]: p["cur_points"] for p in league_players}
+            # No pre-round setup needed — cumulative built per-player from mdpoints below.
 
             for player in league_players:
                 pid    = player["id"]
@@ -366,18 +370,30 @@ async def sync(force: bool = False):
                 team   = teams[0] if teams else {}
                 picks_raw = team.get("playerid", [])
 
-                # For the latest confirmed round: overall cur_points IS the cumulative.
-                # For provisional / future rounds: cumulative is not yet known.
-                if is_latest_completed:
-                    cumul = overall_pts.get(pid) or float(team.get("ovpoints") or 0) or None
+                # Cumulative strategy for confirmed rounds:
+                #   LATEST completed round → use cur_points (overall API total). This is
+                #     accurate because no future rounds have added to it yet.
+                #   OLDER rounds (shouldn't normally reach here since they're cached) →
+                #     try mdpoints; if absent, leave null and warn.
+                # round_points = cumulative_this - cumulative_prev (computed below).
+                is_latest = confirmed and (mdid == max(completed, default=0))
+
+                if confirmed and is_latest:
+                    cumul = overall_cur_pts.get(pid)   # cur_points = exact cumul for latest round
                 elif confirmed:
-                    # Older confirmed round — should have been served from cache above.
-                    # Fallback: use ovpoints (may be stale but better than nothing).
-                    cumul = float(team.get("ovpoints") or 0) or None
+                    mdpts_raw = team.get("mdpoints")
+                    if mdpts_raw is not None:
+                        cumul = round((prev_cumul.get(pid) or 0) + float(mdpts_raw), 1)
+                    else:
+                        print(f"    ⚠️  Older confirmed R{mdid} not cached and mdpoints missing for {player['name']}")
+                        cumul = None
                 else:
+                    # Provisional round — not finalised yet.
                     cumul = None
+
+                prev_pts = prev_cumul.get(pid) or 0
+                rpts = round(cumul - prev_pts, 1) if cumul is not None else None
                 cumul_this[pid] = cumul or 0
-                rpts    = round_pts(cumul, prev_cumul.get(pid))
 
                 picks: list[dict] = []
                 for pk in picks_raw:
