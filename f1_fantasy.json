@@ -1,0 +1,340 @@
+{
+  "last_updated": "2026-03-14 13:38:23 UTC",
+  "overall": {
+    "drivers": [
+      {
+        "id": "18",
+        "short_name": "GAS",
+        "full_name": "Pierre Gasly",
+        "team": "Alpine",
+        "team_tag": "GAS",
+        "price": 12.2,
+        "total_points": 15.0,
+        "points_this_gw": 4.0
+      },
+      {
+        "id": "11059",
+        "short_name": "COL",
+        "full_name": "Franco Colapinto",
+        "team": "Alpine",
+        "team_tag": "COL",
+        "price": 6.4,
+        "total_points": 15.0,
+        "points_this_gw": 9.0
+      },
+      {
+        "id": "12",
+        "short_name": "ALO",
+        "full_name": "Fernando Alonso",
+        "team": "Aston Martin",
+        "team_tag": "ALO",
+        "price": 9.4,
+        "total_points": -8.0,
+        "points_this_gw": 6.0
+      },
+      {
+        "id": "129",
+        "short_name": "STR",
+        "full_name": "Lance Stroll",
+        "team": "Aston Martin",
+        "team_tag": "STR",
+        "price": 7.4,
+        "total_points": -18.0,
+        "points_this_gw": 5.0
+      },
+      {
+        "id": "11051",
+        "short_name": "BOR",
+        "full_name": "Gabriel Bortoleto",
+        "team": "Audi",
+        "team_tag": "BOR",
+        "price": 7.0,
+        "total_points": 19.0,
+        "points_this_gw": 6.0
+      },
+      {
+        "id": "111",
+        "short_name": "HUL",
+        "full_name": "Nico Hulkenberg",
+        "team": "Audi",
+        "team_tag": "HUL",
+        "price": 6.2,
+        "total_points": -23.0,
+        "points_this_gw": -3.0
+      },
+      {
+        "id": "121",
+        "short_name": "PER",
+        "full_name": "Sergio Perez",
+        "team": "Cadillac",
+        "team_tag": "PER",
+        "price": 5.8,
+        "total_points": 13.0,
+        "points_this_gw": 9.0
+      },
+      {
+        "id": "13",
+        "short_name": "BOT",
+        "full_name": "Valtteri Bottas",
+        "team": "Cadillac",
+        "team_tag": "BOT",
+        "price": 5.3,
+        "total_points": -24.0,
+        "points_this_gw": -8.0
+      },
+      {
+        "id": "115",
+        "short_name": "LEC",
+        "full_name": "Charles Leclerc",
+        "team": "Ferrari",
+        "team_tag": "LEC",
+        "price": 23.1,
+        "total_points": 57.0,
+        "points_this_gw": 28.0
+      },
+      {
+        "id": "110",
+        "short_name": "HAM",
+        "full_name": "Lewis Hamilton",
+        "team": "Ferrari",
+        "team_tag": "HAM",
+        "price": 22.6,
+        "total_points": 48.0,
+        "points_this_gw": 23.0
+      },
+      {
+        "id": "11031",
+        "short_name": "BEA",
+        "full_name": "Oliver Bearman",
+        "team": "Haas F1 Team",
+        "team_tag": "BEA",
+        "price": 8.0,
+        "total_points": 26.0,
+        "points_this_gw": 6.0
+      },
+      {
+        "id": "118",
+        "short_name": "OCO",
+        "full_name": "Esteban Ocon",
+        "team": "Haas F1 Team",
+        "team_tag": "OCO",
+        "price": 7.9,
+        "total_points": 18.0,
+        "points_this_gw": 9.0
+      },
+      {
+        "id": "117",
+        "short_name": "NOR",
+        "full_name": "Lando Norris",
+        "team": "McLaren",
+        "team_tag": "NOR",
+        "price": 27.1,
+        "total_points": 31.0,
+        "points_this_gw": 10.0
+      },
+      {
+        "id": "1982",
+        "short_name": "PIA",
+        "full_name": "Oscar Piastri",
+        "team": "McLaren",
+        "team_tag": "PIA",
+        "price": 25.2,
+        "total_points": -1.0,
+        "points_this_gw": 13.0
+      },
+      {
+        "id": "124",
+        "short_name": "RUS",
+        "full_name": "George Russell",
+        "team": "Mercedes",
+        "team_tag": "RUS",
+        "price": 27.7,
+        "total_points": 60.0,
+        "points_this_gw": 21.0
+      },
+      {
+        "id": "11161",
+        "short_name": "ANT",
+        "full_name": "Kimi Antonelli",
+        "team": "Mercedes",
+        "team_tag": "ANT",
+        "price": 23.5,
+        "total_points": 53.0,
+        "points_this_gw": 21.0
+      },
+      {
+        "id": "11149",
+        "short_name": "LIN",
+        "full_name": "Arvid Lindblad",
+        "team": "Racing Bulls",
+        "team_tag": "LIN",
+        "price": 6.8,
+        "total_points": 11.0,
+        "points_this_gw": -4.0
+      },
+      {
+        "id": "114",
+        "short_name": "LAW",
+        "full_name": "Liam Lawson",
+        "team": "Racing Bulls",
+        "team_tag": "LAW",
+        "price": 6.3,
+        "total_points": 19.0,
+        "points_this_gw": 14.0
+      },
+      {
+        "id": "131",
+        "short_name": "VER",
+        "full_name": "Max Verstappen",
+        "team": "Red Bull Racing",
+        "team_tag": "VER",
+        "price": 28.0,
+        "total_points": 68.0,
+        "points_this_gw": 18.0
+      },
+      {
+        "id": "11032",
+        "short_name": "HAD",
+        "full_name": "Isack Hadjar",
+        "team": "Red Bull Racing",
+        "team_tag": "HAD",
+        "price": 14.5,
+        "total_points": -3.0,
+        "points_this_gw": 5.0
+      },
+      {
+        "id": "125",
+        "short_name": "SAI",
+        "full_name": "Carlos Sainz",
+        "team": "Williams",
+        "team_tag": "SAI",
+        "price": 11.6,
+        "total_points": 21.0,
+        "points_this_gw": 12.0
+      },
+      {
+        "id": "11",
+        "short_name": "ALB",
+        "full_name": "Alexander Albon",
+        "team": "Williams",
+        "team_tag": "ALB",
+        "price": 11.4,
+        "total_points": 21.0,
+        "points_this_gw": 13.0
+      }
+    ],
+    "constructors": [
+      {
+        "id": "28",
+        "short_name": "MER",
+        "full_name": "Mercedes",
+        "team": "Mercedes",
+        "team_tag": "MER",
+        "price": 29.6,
+        "total_points": 148.0,
+        "points_this_gw": 52.0
+      },
+      {
+        "id": "27",
+        "short_name": "MCL",
+        "full_name": "McLaren",
+        "team": "McLaren",
+        "team_tag": "MCL",
+        "price": 28.8,
+        "total_points": 52.0,
+        "points_this_gw": 33.0
+      },
+      {
+        "id": "29",
+        "short_name": "RBR",
+        "full_name": "Red Bull Racing",
+        "team": "Red Bull Racing",
+        "team_tag": "RBR",
+        "price": 28.5,
+        "total_points": 75.0,
+        "points_this_gw": 33.0
+      },
+      {
+        "id": "25",
+        "short_name": "FER",
+        "full_name": "Ferrari",
+        "team": "Ferrari",
+        "team_tag": "FER",
+        "price": 23.6,
+        "total_points": 130.0,
+        "points_this_gw": 61.0
+      },
+      {
+        "id": "23",
+        "short_name": "ALP",
+        "full_name": "Alpine",
+        "team": "Alpine",
+        "team_tag": "ALP",
+        "price": 13.1,
+        "total_points": 40.0,
+        "points_this_gw": 18.0
+      },
+      {
+        "id": "210",
+        "short_name": "WIL",
+        "full_name": "Williams",
+        "team": "Williams",
+        "team_tag": "WIL",
+        "price": 12.6,
+        "total_points": 44.0,
+        "points_this_gw": 24.0
+      },
+      {
+        "id": "24",
+        "short_name": "AST",
+        "full_name": "Aston Martin",
+        "team": "Aston Martin",
+        "team_tag": "AST",
+        "price": 9.7,
+        "total_points": -28.0,
+        "points_this_gw": 10.0
+      },
+      {
+        "id": "26",
+        "short_name": "HAA",
+        "full_name": "Haas F1 Team",
+        "team": "Haas F1 Team",
+        "team_tag": "HAA",
+        "price": 8.0,
+        "total_points": 54.0,
+        "points_this_gw": 20.0
+      },
+      {
+        "id": "2636",
+        "short_name": "RBS",
+        "full_name": "Racing Bulls",
+        "team": "Racing Bulls",
+        "team_tag": "RBS",
+        "price": 6.9,
+        "total_points": 48.0,
+        "points_this_gw": 13.0
+      },
+      {
+        "id": "2640",
+        "short_name": "AUD",
+        "full_name": "Audi",
+        "team": "Audi",
+        "team_tag": "AUD",
+        "price": 6.0,
+        "total_points": 6.0,
+        "points_this_gw": 6.0
+      },
+      {
+        "id": "2641",
+        "short_name": "CAD",
+        "full_name": "Cadillac",
+        "team": "Cadillac",
+        "team_tag": "CAD",
+        "price": 5.4,
+        "total_points": -13.0,
+        "points_this_gw": 0.0
+      }
+    ]
+  },
+  "gameweeks": []
+}

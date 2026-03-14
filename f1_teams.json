@@ -1,0 +1,152 @@
+{
+  "last_updated": "2026-03-14 13:38:23 UTC",
+  "league_id": "5008603",
+  "league_name": "Baby Formula Championship",
+  "players": [],
+  "rounds": [
+    {
+      "round": 1,
+      "gp": "R1",
+      "confirmed": true,
+      "teams": []
+    },
+    {
+      "round": 2,
+      "gp": "R2",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 3,
+      "gp": "R3",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 4,
+      "gp": "R4",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 5,
+      "gp": "R5",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 6,
+      "gp": "R6",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 7,
+      "gp": "R7",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 8,
+      "gp": "R8",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 9,
+      "gp": "R9",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 10,
+      "gp": "R10",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 11,
+      "gp": "R11",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 12,
+      "gp": "R12",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 13,
+      "gp": "R13",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 14,
+      "gp": "R14",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 15,
+      "gp": "R15",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 16,
+      "gp": "R16",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 17,
+      "gp": "R17",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 18,
+      "gp": "R18",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 19,
+      "gp": "R19",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 20,
+      "gp": "R20",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 21,
+      "gp": "R21",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 22,
+      "gp": "R22",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 23,
+      "gp": "R23",
+      "confirmed": false,
+      "teams": []
+    },
+    {
+      "round": 24,
+      "gp": "R24",
+      "confirmed": false,
+      "teams": []
+    }
+  ]
+}
