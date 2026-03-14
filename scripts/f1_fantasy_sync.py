@@ -1,22 +1,17 @@
 """
 f1_fantasy_sync.py
 ──────────────────
-Pulls data from the official F1 Fantasy API and writes two JSON files:
+Pulls data from the F1 Fantasy API and writes:
 
-  f1_fantasy.json  — driver / constructor prices & points (overall + per GW)
-  f1_teams.json    — Baby Formula Championship league team picks per round
+  f1_fantasy.json  — driver / constructor prices & points
+  f1_teams.json    — Baby Formula Championship league team picks
 
-Secrets expected as environment variables (set in bat file):
-  F1_FANTASY_EMAIL     — your login email
-  F1_FANTASY_PASSWORD  — your login password
-  F1_FANTASY_LEAGUE_ID — your private league ID (numeric string)
+AUTH:
+  Reads scripts/f1_session.json — update this file weekly with fresh cookies.
+  See run_fantasy_sync.bat for instructions on how to get the values.
 
-WHY PLAYWRIGHT FOR AUTH:
-  The F1 API auth endpoint (api.formula1.com) is protected by Distil Networks
-  bot-detection. It checks TLS fingerprints, JS execution, and IP reputation.
-  Playwright runs a real Chromium browser which passes all checks and obtains
-  a valid session token. All subsequent API calls use that token via aiohttp.
-  This ONLY works from a residential/home IP — not VPNs or datacenters.
+REQUIRES:
+  pip install httpx
 """
 
 import asyncio
@@ -24,22 +19,14 @@ import json
 import os
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
+from urllib.parse import unquote
 
-import aiohttp
-from playwright.async_api import async_playwright
+import httpx
 
-# ─────────────────────────────────────────────────────────────────
-BASE      = "https://fantasy-api.formula1.com/f1/2026"
-AUTH_URL  = "https://api.formula1.com/v2/account/subscriber/authenticate/by-password"
-
-EMAIL     = os.environ.get("F1_FANTASY_EMAIL", "")
-PASSWORD  = os.environ.get("F1_FANTASY_PASSWORD", "")
-LEAGUE_ID = os.environ.get("F1_FANTASY_LEAGUE_ID", "")
-
-TEAM_TAG_MAP = {
-    1:'MER', 2:'FER', 3:'RED', 4:'MCL', 5:'AMR',
-    6:'ALP', 7:'WIL', 8:'HAA', 9:'AUD', 10:'VRB', 11:'CAD',
-}
+BASE         = "https://fantasy.formula1.com"
+SESSION_FILE = Path(__file__).parent / "f1_session.json"
+LEAGUE_ID    = os.environ.get("F1_FANTASY_LEAGUE_ID", "")
 
 PLAYER_MAP = {
     # "232016281": "kevcedes",
@@ -49,276 +36,247 @@ PLAYER_MAP = {
     # "178798446": "thumbi",
 }
 
-# ─────────────────────────────────────────────────────────────────
-# AUTH — uses real Chromium browser via Playwright
-# ─────────────────────────────────────────────────────────────────
-async def authenticate(_session) -> str:
-    """
-    Launch a real Chromium browser to post credentials to the F1 auth endpoint.
-    This bypasses Distil Networks bot-detection (TLS fingerprint + JS challenge).
 
-    MUST be run from a home/residential IP. VPNs and datacenter IPs will still
-    be blocked at the CDN edge regardless of browser type.
-    """
-    print("  Launching Chromium browser for auth...")
-
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/124.0.0.0 Safari/537.36"
-            ),
-            extra_http_headers={
-                "Accept-Language": "en-US,en;q=0.9",
-            },
-        )
-        page = await context.new_page()
-
-        # Visit F1 account page first so cookies/JS are initialized
-        print("  Visiting F1 account page to initialise session...")
-        try:
-            await page.goto(
-                "https://account.formula1.com/",
-                wait_until="domcontentloaded",
-                timeout=30000,
-            )
-        except Exception:
-            pass  # page may redirect — that's fine, we just need the cookies
-
-        # Small delay to let JS challenges complete
-        await asyncio.sleep(2)
-
-        # POST credentials via Playwright's fetch (uses browser's network stack)
-        print("  Posting credentials...")
-        response = await page.request.post(
-            AUTH_URL,
-            data=json.dumps({
-                "Login":               EMAIL,
-                "Password":            PASSWORD,
-                "DistributionChannel": "d861e38f-05ea-4063-8776-a7e2b6d885a4",
-            }),
-            headers={
-                "Content-Type":    "application/json",
-                "apikey":          "fCUCjWrKPu9ylJwRAv8BpGLEgiAuThx7",
-                "origin":          "https://account.formula1.com",
-                "referer":         "https://account.formula1.com/",
-                "accept":          "application/json, text/javascript, */*; q=0.01",
-                "accept-language": "en-US,en;q=0.9",
-                "sec-fetch-site":  "same-site",
-                "sec-fetch-mode":  "cors",
-                "sec-fetch-dest":  "empty",
-            },
-        )
-
-        status = response.status
-        body   = await response.text()
-        await browser.close()
-
-    if status != 200:
-        if "Pardon Our Interruption" in body or status == 403:
-            print()
-            print("  ❌ BLOCKED BY DISTIL NETWORKS (403)")
-            print("  → Make sure you are on HOME internet with NO VPN active.")
-            print("  → Disable any proxy software and try again.")
-            print("  → If on a work/office network, switch to your home Wi-Fi.")
-        raise RuntimeError(f"Auth failed {status}: {body[:300]}")
-
-    try:
-        data = json.loads(body)
-    except Exception:
-        raise RuntimeError(f"Auth response not JSON: {body[:300]}")
-
-    token = data.get("data", {}).get("subscriptionToken") or data.get("subscriptionToken")
-    if not token:
-        raise RuntimeError(f"No token in auth response: {data}")
-
-    print("  ✅ Authenticated successfully.")
-    return token
-
-
-# ─────────────────────────────────────────────────────────────────
-# API HELPERS
-# ─────────────────────────────────────────────────────────────────
-async def api_get(session: aiohttp.ClientSession, path: str, token: str) -> dict:
-    url = f"{BASE}{path}"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "apikey":        "fCUCjWrKPu9ylJwRAv8BpGLEgiAuThx7",
-    }
-    async with session.get(url, headers=headers) as r:
-        if r.status != 200:
-            print(f"  ⚠️  GET {path} → {r.status}")
-            return {}
-        return await r.json()
-
-
-# ─────────────────────────────────────────────────────────────────
-# HELPERS
-# ─────────────────────────────────────────────────────────────────
-def clean_driver(d: dict) -> dict:
-    return {
-        "id":             d.get("id"),
-        "short_name":     d.get("short_name", ""),
-        "full_name":      f"{d.get('first_name','')} {d.get('last_name','')}".strip(),
-        "team":           d.get("team_name", ""),
-        "team_tag":       TEAM_TAG_MAP.get(d.get("team_id"), ""),
-        "price":          round(d.get("price", 0) / 1_000_000, 1),
-        "total_points":   d.get("total_points", 0),
-        "points_this_gw": d.get("score", 0),
-    }
-
-
-def clean_constructor(c: dict) -> dict:
-    return {
-        "id":             c.get("id"),
-        "short_name":     c.get("short_name", c.get("name", "")),
-        "full_name":      c.get("name", ""),
-        "team_tag":       TEAM_TAG_MAP.get(c.get("id"), ""),
-        "price":          round(c.get("price", 0) / 1_000_000, 1),
-        "total_points":   c.get("total_points", 0),
-        "points_this_gw": c.get("score", 0),
-    }
-
-
-# ─────────────────────────────────────────────────────────────────
-# MAIN SYNC
-# ─────────────────────────────────────────────────────────────────
-async def sync(session: aiohttp.ClientSession, token: str):
-    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-
-    # ── 1. Gameweeks ─────────────────────────────────────────────
-    all_gws_raw = await api_get(session, "/gameweeks", token)
-    all_gws     = (
-        all_gws_raw.get("gameweeks", all_gws_raw)
-        if isinstance(all_gws_raw, dict) else all_gws_raw
-    )
-
-    # ── 2. Overall players ────────────────────────────────────────
-    players_raw = await api_get(session, "/players", token)
-    all_players = players_raw.get("players", [])
-    drivers_all = [clean_driver(p)      for p in all_players if not p.get("is_constructor", False)]
-    constrs_all = [clean_constructor(p) for p in all_players if     p.get("is_constructor", False)]
-    print(f"  Players: {len(drivers_all)} drivers, {len(constrs_all)} constructors")
-
-    # ── 3. Per-gameweek stats ─────────────────────────────────────
-    gw_records = []
-    for gw in (all_gws if isinstance(all_gws, list) else []):
-        gw_id    = gw.get("id") or gw.get("gameweek_id")
-        gw_round = gw.get("race_id") or gw.get("round") or gw_id
-        gw_label = gw.get("name") or f"R{gw_round}"
-        if not gw.get("finished", False):
-            continue
-        gw_data    = await api_get(session, f"/players?gameweek={gw_id}", token)
-        gw_players = gw_data.get("players", [])
-        gw_records.append({
-            "round":        gw_round,
-            "gp":           gw_label,
-            "date":         gw.get("deadline_date", "")[:10],
-            "drivers":      [clean_driver(p)      for p in gw_players if not p.get("is_constructor", False)],
-            "constructors": [clean_constructor(p) for p in gw_players if     p.get("is_constructor", False)],
-        })
-
-    with open("f1_fantasy.json", "w", encoding="utf-8") as f:
-        json.dump({
-            "last_updated": ts,
-            "overall":      {"drivers": drivers_all, "constructors": constrs_all},
-            "gameweeks":    gw_records,
-        }, f, indent=2, ensure_ascii=False)
-    print(f"✅ f1_fantasy.json — {len(drivers_all)} drivers, {len(constrs_all)} constructors, {len(gw_records)} GWs")
-
-    # ── 4. League teams ───────────────────────────────────────────
-    if not LEAGUE_ID:
-        print("⚠️  F1_FANTASY_LEAGUE_ID not set — skipping league sync.")
-        return
-
-    league_raw       = await api_get(session, f"/leagues/{LEAGUE_ID}", token)
-    league_standings = league_raw.get("standings", league_raw.get("league", {}).get("standings", []))
-
-    teams_output = {
-        "last_updated": ts,
-        "league_id":    LEAGUE_ID,
-        "league_name":  league_raw.get("name", "Baby Formula Championship"),
-        "players":      [],
-        "rounds":       [],
-    }
-
-    for entry in league_standings:
-        uid    = str(entry.get("user_id") or entry.get("id", ""))
-        our_id = PLAYER_MAP.get(uid, uid)
-        teams_output["players"].append({
-            "id":          our_id,
-            "name":        entry.get("team_name") or entry.get("name") or our_id,
-            "emoji":       "👤",
-            "f1_user_id":  uid,
-        })
-
-    for gw in (all_gws if isinstance(all_gws, list) else []):
-        gw_id    = gw.get("id") or gw.get("gameweek_id")
-        gw_round = gw.get("race_id") or gw.get("round") or gw_id
-        finished = gw.get("finished", False)
-
-        round_record = {
-            "round":     gw_round,
-            "gp":        gw.get("name", f"R{gw_round}"),
-            "confirmed": finished,
-            "teams":     [],
-        }
-
-        for entry in league_standings:
-            uid       = str(entry.get("user_id") or entry.get("id", ""))
-            our_id    = PLAYER_MAP.get(uid, uid)
-            picks_raw = await api_get(session, f"/picks/{uid}?gameweek={gw_id}", token)
-            picks     = picks_raw.get("picks", [])
-
-            pick_list = []
-            for p in picks:
-                is_con = p.get("is_constructor", False)
-                pid    = p.get("player_id") or p.get("id")
-                match  = next((x for x in all_players if x.get("id") == pid), {})
-                pick_list.append({
-                    "id":           pid,
-                    "short_name":   match.get("short_name", p.get("short_name", "")),
-                    "full_name":    f"{match.get('first_name','')} {match.get('last_name','')}".strip() or p.get("name",""),
-                    "team":         match.get("team_name", ""),
-                    "team_tag":     TEAM_TAG_MAP.get(match.get("id") if is_con else match.get("team_id"), ""),
-                    "type":         "constructor" if is_con else "driver",
-                    "is_star":      p.get("is_captain") or p.get("is_star") or False,
-                    "price":        round((p.get("price") or match.get("price", 0)) / 1_000_000, 1),
-                    "price_change": round((p.get("selling_price", 0) - p.get("purchase_price", p.get("price", 0))) / 1_000_000, 2) if finished else None,
-                    "points":       p.get("points") if finished else None,
-                })
-
-            round_record["teams"].append({
-                "player_id":        our_id,
-                "total_points":     sum(pk["points"] or 0 for pk in pick_list) if finished else None,
-                "team_value":       round(sum(pk["price"] or 0 for pk in pick_list), 1),
-                "budget_remaining": round((picks_raw.get("budget") or picks_raw.get("bank", 0)) / 1_000_000, 1),
-                "picks":            pick_list,
-            })
-
-        teams_output["rounds"].append(round_record)
-
-    with open("f1_teams.json", "w", encoding="utf-8") as f:
-        json.dump(teams_output, f, indent=2, ensure_ascii=False)
-    print(f"✅ f1_teams.json — {len(teams_output['players'])} players, {len(teams_output['rounds'])} rounds")
-
-
-async def main():
-    if not EMAIL or not PASSWORD:
-        print("❌ F1_FANTASY_EMAIL / F1_FANTASY_PASSWORD not set.")
-        print("   Set them as environment variables or edit this script directly.")
+def load_session() -> tuple[str, str]:
+    """Returns (guid, raw_cookie_string). Supports both new and old session formats."""
+    if not SESSION_FILE.exists():
+        print("❌ scripts/f1_session.json not found.")
+        print()
+        print("Create it with this content:")
+        print('  {')
+        print('    "guid": "your-guid-here",')
+        print('    "raw_cookies": "your-cookie-string-here"')
+        print('  }')
+        print()
+        print("See run_fantasy_sync.bat for instructions.")
         sys.exit(1)
 
-    print("F1 Fantasy Sync — run from home/residential IP only")
-    print(f"  Email: {EMAIL[:4]}***")
-    print()
+    session     = json.loads(SESSION_FILE.read_text())
+    guid        = session.get("guid", "")
+    raw_cookies = session.get("raw_cookies", "")
 
-    async with aiohttp.ClientSession() as session:
-        token = await authenticate(session)
-        await sync(session, token)
+    # Old Playwright format fallback: rebuild cookie string from cookies list
+    if not raw_cookies and "cookies" in session:
+        raw_cookies = "; ".join(f"{c['name']}={c['value']}" for c in session["cookies"])
+
+    if not guid:
+        print("❌ 'guid' missing from f1_session.json.")
+        print("   Your GUID is: 62ff616e-135e-11f1-bcc9-110b22c295d5")
+        sys.exit(1)
+
+    if not raw_cookies:
+        print("❌ 'raw_cookies' missing from f1_session.json.")
+        print("   See run_fantasy_sync.bat for instructions.")
+        sys.exit(1)
+
+    return guid, raw_cookies
+
+
+def build_headers(raw_cookies: str) -> dict:
+    return {
+        "accept":             "application/json, text/plain, */*",
+        "accept-language":    "en-US,en;q=0.9",
+        "referer":            "https://fantasy.formula1.com/en/",
+        "user-agent":         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua":          '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"',
+        "sec-ch-ua-mobile":   "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "sec-fetch-dest":     "empty",
+        "sec-fetch-mode":     "cors",
+        "sec-fetch-site":     "same-origin",
+        "cookie":             raw_cookies,
+    }
+
+
+async def fetch(client: httpx.AsyncClient, url: str) -> dict:
+    try:
+        resp = await client.get(url)
+    except Exception as e:
+        print(f"  ⚠️  Request failed: {e}")
+        return {}
+
+    if resp.status_code == 401:
+        print()
+        print("  ❌ 401 — Cookies have expired.")
+        print()
+        print("  Open Chrome → fantasy.formula1.com → F12 → Network tab")
+        print("  Filter: getusergamedaysv1 → Refresh page")
+        print("  Right-click request → Copy → Copy as cURL (bash)")
+        print("  Extract the cookie string (between -b ' and ')")
+        print("  Paste it as 'raw_cookies' in scripts/f1_session.json")
+        sys.exit(1)
+
+    if resp.status_code != 200:
+        print(f"  ⚠️  {resp.status_code} → {url[:80]}")
+        return {}
+
+    try:
+        return resp.json()
+    except Exception:
+        return {}
+
+
+async def sync():
+    guid, raw_cookies = load_session()
+    print(f"  Session loaded (GUID: {guid[:8]}...)")
+
+    ts      = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    headers = build_headers(raw_cookies)
+
+    async with httpx.AsyncClient(headers=headers, timeout=30, follow_redirects=True) as client:
+
+        # 1. Schedule
+        print("  Fetching schedule...")
+        sched    = await fetch(client, f"{BASE}/feeds/v2/schedule/raceday_en.json")
+        fixtures = sched.get("Data", {}).get("fixtures", [])
+        matchdays = {}
+        for fx in fixtures:
+            mdid = fx.get("MatchdayId") or fx.get("GamedayId")
+            if not mdid:
+                continue
+            mdid = int(mdid)
+            if mdid not in matchdays:
+                matchdays[mdid] = {
+                    "round":    mdid,
+                    "gp":       fx.get("Venue", fx.get("RaceName", f"R{mdid}")),
+                    "date":     fx.get("GameDate", "")[:10],
+                    "finished": int(fx.get("GDIsLocked", 0)) == 1,
+                }
+        print(f"  Matchdays: {len(matchdays)}")
+
+        # 2. Players
+        print("  Fetching players...")
+        players_raw = await fetch(client, f"{BASE}/feeds/drivers/2_en.json")
+        all_players = players_raw.get("Data", {}).get("Value", [])
+        drivers_all, constrs_all, player_lookup = [], [], {}
+        constructor_ids = set()
+
+        for pl in all_players:
+            pid   = str(pl.get("PlayerId", ""))
+            skill = pl.get("Skill", 1)
+            entry = {
+                "id":             pid,
+                "short_name":     pl.get("DriverTLA", pl.get("DisplayName", "")),
+                "full_name":      pl.get("FUllName", ""),
+                "team":           pl.get("TeamName", "") or pl.get("FUllName", ""),
+                "team_tag":       pl.get("DriverTLA", ""),
+                "price":          float(pl.get("Value", 0)),
+                "total_points":   float(pl.get("OverallPpints", 0) or 0),
+                "points_this_gw": float(pl.get("GamedayPoints", 0) or 0),
+            }
+            player_lookup[pid] = entry
+            if skill == 2:
+                constrs_all.append(entry)
+                constructor_ids.add(pid)
+            else:
+                drivers_all.append(entry)
+
+        print(f"  Players: {len(drivers_all)} drivers, {len(constrs_all)} constructors")
+
+        with open("f1_fantasy.json", "w", encoding="utf-8") as f:
+            json.dump({
+                "last_updated": ts,
+                "overall": {"drivers": drivers_all, "constructors": constrs_all},
+                "gameweeks": [],
+            }, f, indent=2, ensure_ascii=False)
+        print("✅ f1_fantasy.json written")
+
+        if not LEAGUE_ID:
+            print("⚠️  F1_FANTASY_LEAGUE_ID not set — skipping league sync.")
+            return
+
+        # 3. User gamedays
+        print("  Fetching user gamedays...")
+        gd_raw  = await fetch(client, f"{BASE}/services/user/gameplay/{guid}/getusergamedaysv1/1")
+        gd_list = gd_raw.get("Data", {}).get("Value", [])
+        if not gd_list:
+            print("  ❌ Empty response — cookies may be expired.")
+            sys.exit(1)
+
+        completed_mds = {int(k) for k, v in gd_list[0].get("mddetails", {}).items() if v.get("mds") == 3}
+
+        # 4. League standings
+        print("  Fetching league standings...")
+        league_raw    = await fetch(client, f"{BASE}/services/user/leagues/{LEAGUE_ID}/leaguedetails/1/1/100/1")
+        league_val    = league_raw.get("Data", {}).get("Value", {})
+        league_name   = league_val.get("leagueName", "Baby Formula Championship") if isinstance(league_val, dict) else "Baby Formula Championship"
+        standings_raw = league_val.get("leagueStandings", []) if isinstance(league_val, dict) else (league_val if isinstance(league_val, list) else [])
+
+        teams_output = {
+            "last_updated": ts,
+            "league_id":    LEAGUE_ID,
+            "league_name":  league_name,
+            "players":      [],
+            "rounds":       [],
+        }
+
+        for entry in standings_raw:
+            uid    = str(entry.get("socialId") or entry.get("userId") or entry.get("teamId", ""))
+            our_id = PLAYER_MAP.get(uid, uid)
+            teams_output["players"].append({
+                "id":         our_id,
+                "name":       unquote(entry.get("teamName") or entry.get("name") or our_id),
+                "emoji":      "👤",
+                "f1_user_id": uid,
+                "guid":       entry.get("guid", ""),
+            })
+
+        if teams_output["players"]:
+            print()
+            print("  League players (add IDs to PLAYER_MAP at top of this file if needed):")
+            for p in teams_output["players"]:
+                print(f"    \"{p['f1_user_id']}\": \"{p['id']}\",  # {p['name']}")
+            print()
+
+        # 5. Per-matchday picks
+        for mdid in sorted(matchdays.keys()):
+            finished     = mdid in completed_mds
+            round_record = {"round": mdid, "gp": matchdays[mdid]["gp"], "confirmed": finished, "teams": []}
+
+            for player in teams_output["players"]:
+                p_guid = player.get("guid", "")
+                if not p_guid:
+                    round_record["teams"].append({"player_id": player["id"], "picks": []})
+                    continue
+
+                picks_raw  = await fetch(client, f"{BASE}/services/user/gameplay/{p_guid}/getteam/1/{mdid}/1/1")
+                team_data  = picks_raw.get("Data", {}).get("Value", {})
+                user_teams = team_data.get("userTeam", [])
+                team       = user_teams[0] if user_teams else {}
+                raw_picks  = team.get("playerid", [])
+
+                pick_list = [{
+                    "id":         str(pk.get("id", "")),
+                    "short_name": player_lookup.get(str(pk.get("id", "")), {}).get("short_name", ""),
+                    "full_name":  player_lookup.get(str(pk.get("id", "")), {}).get("full_name", ""),
+                    "team":       player_lookup.get(str(pk.get("id", "")), {}).get("team", ""),
+                    "team_tag":   player_lookup.get(str(pk.get("id", "")), {}).get("team_tag", ""),
+                    "type":       "constructor" if str(pk.get("id", "")) in constructor_ids else "driver",
+                    "is_star":    bool(pk.get("iscaptain") or pk.get("ismgcaptain")),
+                    "price":      player_lookup.get(str(pk.get("id", "")), {}).get("price", 0),
+                    "points":     None,
+                } for pk in raw_picks]
+
+                round_record["teams"].append({
+                    "player_id":        player["id"],
+                    "total_points":     float(team.get("ovpoints") or 0) if finished else None,
+                    "team_value":       float(team.get("teamval", 0)),
+                    "budget_remaining": float(team.get("teambal", 0)),
+                    "picks":            pick_list,
+                })
+
+            teams_output["rounds"].append(round_record)
+
+        with open("f1_teams.json", "w", encoding="utf-8") as f:
+            json.dump(teams_output, f, indent=2, ensure_ascii=False)
+        print(f"✅ f1_teams.json — {len(teams_output['players'])} players, {len(teams_output['rounds'])} rounds")
+
+
+def main():
+    print("F1 Fantasy Sync")
+    print()
+    asyncio.run(sync())
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
