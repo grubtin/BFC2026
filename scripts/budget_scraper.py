@@ -31,7 +31,30 @@ CONSTRUCTOR_TAGS = {
 }
 
 def clean_price(raw: str) -> str:
-    return raw.replace("$", "").strip()
+    """Strip $, M suffix, and whitespace. Returns bare numeric string e.g. '28.5'."""
+    return raw.replace("$", "").replace("M", "").replace("m", "").strip()
+
+
+def extract_price(texts: list[str]) -> str:
+    """
+    Find the price from a data row's text cells.
+    Tries texts[1] first (standard position), then scans texts[1..4]
+    looking for a numeric value in the plausible F1 price range (1–60).
+    Handles formats: '28', '$28', '28M', '$28.5M', '28.0M'.
+    """
+    for fi in range(1, min(5, len(texts))):
+        candidate = clean_price(texts[fi])
+        # Strip any remaining non-numeric chars except decimal point
+        numeric = re.sub(r'[^\d.]', '', candidate)
+        if not numeric:
+            continue
+        try:
+            val = float(numeric)
+            if 1.0 <= val <= 60.0:   # plausible F1 fantasy price
+                return numeric
+        except ValueError:
+            continue
+    return ""
 
 
 def is_round_label(t: str) -> bool:
@@ -237,30 +260,15 @@ async def identify_and_scrape(table) -> tuple[str | None, list[dict]]:
         if tag not in DRIVER_TAGS and tag not in CONSTRUCTOR_TAGS:
             continue
 
-        # Build entry using col_map for maximum resilience
-        # Price: read from col_map[1] = texts[1]. If empty, scan forward for
-        # the first cell that looks like a price (numeric, 1-40 range).
-        raw_price = clean_price(texts[1]) if len(texts) > 1 else ""
-        if not raw_price:
-            # Fallback: find first non-empty numeric value in cols 1-3
-            for fi in range(1, min(4, len(texts))):
-                candidate = clean_price(texts[fi])
-                try:
-                    val = float(candidate)
-                    if 1.0 <= val <= 60.0:   # plausible F1 fantasy price range
-                        raw_price = candidate
-                        break
-                except ValueError:
-                    continue
-
+        # Build entry
         entry = {
             "name":          tag,
             "tier":          current_tier,
             "tier_label":    current_tier_label,
             "price_changes": list(current_pc_labels),
-            "price":         raw_price,
-            "race_pts":      {},   # { "R0": "50", "R1": "32", … }
-            "req_pts":       {},   # { "-0.3": "≤-17", "+0.1": "1", … }
+            "price":         extract_price(texts),
+            "race_pts":      {},
+            "req_pts":       {},
         }
 
         for col_idx, field in current_col_map.items():
