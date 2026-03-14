@@ -748,13 +748,12 @@ function renderBudgetTable() {
 
     const raw = dataMode === 'drivers' ? (F1_DATA.drivers || []) : (F1_DATA.constructors || []);
 
-    // ── Tier split: use scraped tier field, fall back to price threshold ──
-    // Drivers: Tier A >= 18.5M | Constructors: Tier A >= 18.5M (matches site)
+    // ── Tier split: scraped tier field, fallback to 18.5M threshold ──
     const THRESH = 18.5;
     const tierA = raw.filter(d => d.tier === 'A' || (d.tier == null && parseFloat(d.price) >= THRESH));
     const tierB = raw.filter(d => d.tier === 'B' || (d.tier == null && parseFloat(d.price) <  THRESH));
-    const tierALabel = raw.find(d => d.tier === 'A')?.tier_label || `Tier A (>= ${THRESH}M)`;
-    const tierBLabel = raw.find(d => d.tier === 'B')?.tier_label || `Tier B (< ${THRESH}M)`;
+    const tierALabel = raw.find(d => d.tier === 'A')?.tier_label || 'Tier A (>=18.5M)';
+    const tierBLabel = raw.find(d => d.tier === 'B')?.tier_label || 'Tier B (<18.5M)';
 
     function sortGroup(arr) {
         const col = dataSort.col;
@@ -767,45 +766,48 @@ function renderBudgetTable() {
         return arr;
     }
 
-    // ── Format a pts value (R0/R1/R2 columns) ──
+    // ── Format a pts value (R0 / R1 / R2 xPts columns) ──
     const fmtPts = (val) => {
-        if (val == null || val === '' || val === '-') return '<span style="color:var(--muted)">-</span>';
+        if (val == null || val === '' || val === '-')
+            return '<span style="color:var(--muted)">-</span>';
         const n = parseNum(val);
         const c = n > 0 ? '#2ec4b6' : n < 0 ? '#ff4757' : 'var(--subtext)';
         return '<span style="color:' + c + ';font-size:10px">' + val + '</span>';
     };
 
-    // ── Format an odds cell: "87% (≤28)" → coloured % + muted pts below ──
+    // ── Format an odds cell: "87% (≤28)" → coloured % + grey pts ──
     const fmtOdds = (val) => {
         if (val == null || val === '' || val === '-' || val === '—')
-            return '<span style="color:var(--muted)">0%</span>';
+            return '<div style="text-align:center"><span style="color:var(--muted);font-size:10px">0%</span></div>';
         const s = String(val).trim();
         const m = s.match(/^(\d+)%\s*\(([^)]+)\)/);
         if (m) {
             const pct = parseInt(m[1]);
-            // Colour tiers matching screenshots: >=90 bright teal/red, >=50 amber, else muted
-            const dropCols  = ['#ff4757','#ff4757','#f4a100','var(--subtext)'];
-            const riseCols  = ['#2ec4b6','#2ec4b6','#f4a100','var(--subtext)'];
-            // We don't know direction here so use intensity only
-            const col = pct >= 90 ? '#2ec4b6' : pct >= 60 ? '#f4a100' : pct >= 30 ? 'var(--subtext)' : 'var(--muted)';
+            const col = pct >= 90 ? '#2ec4b6'
+                      : pct >= 60 ? '#f4a100'
+                      : pct >= 1  ? 'var(--subtext)'
+                      :             'var(--muted)';
             const bold = pct >= 60 ? 'bold' : 'normal';
-            const bg   = pct >= 90 ? 'rgba(46,196,182,.15)' : pct >= 60 ? 'rgba(244,161,0,.10)' : 'transparent';
-            return '<div style="text-align:center;line-height:1.2;background:' + bg + ';border-radius:4px;padding:1px 2px">'
+            const bg   = pct >= 90 ? 'rgba(46,196,182,.18)'
+                       : pct >= 60 ? 'rgba(244,161,0,.12)'
+                       :             'transparent';
+            return '<div style="text-align:center;line-height:1.25;background:' + bg
+                 + ';border-radius:4px;padding:1px 3px">'
                  + '<div style="color:' + col + ';font-weight:' + bold + ';font-size:10px">' + pct + '%</div>'
                  + '<div style="color:var(--muted);font-size:8px">(' + m[2] + ')</div>'
                  + '</div>';
         }
-        // plain value fallback
-        return '<span style="color:var(--muted);font-size:9px">' + s + '</span>';
+        return '<div style="text-align:center"><span style="color:var(--muted);font-size:9px">' + s + '</span></div>';
     };
 
     // ── Format xΔ$ ──
-    const fmtR2 = (val) => {
+    const fmtDelta = (val) => {
         if (!val || val === '-') return '<span style="color:var(--muted)">—</span>';
         const n = parseFloat(String(val));
         if (isNaN(n)) return '<span style="color:var(--muted);font-size:9px">' + val + '</span>';
         const c = n > 0 ? '#2ec4b6' : n < 0 ? '#ff4757' : 'var(--muted)';
-        return '<span style="color:' + c + ';font-weight:bold;font-size:10px">' + (n > 0 ? '+' : '') + n.toFixed(2) + '</span>';
+        return '<span style="color:' + c + ';font-weight:bold;font-size:10px">'
+             + (n > 0 ? '+' : '') + n.toFixed(2) + '</span>';
     };
 
     const TAG_COLORS = {
@@ -822,12 +824,12 @@ function renderBudgetTable() {
         'HAD':'#cc0000','PER':'#cc0000',
     };
 
-    // ── 10 columns matching both screenshots exactly ──
-    // DR/CR | $ | R0 Pts | R1 Pts | R2 xPts | -0.3 | -0.1 | +0.1 | +0.3 | xΔ$
+    // Exactly 10 columns matching both screenshots:
+    // Tag | $ | R0 Pts | R1 Pts | R2 xPts | -0.3 | -0.1 | +0.1 | +0.3 | xΔ$
     const buildRows = (arr) => arr.map(d => {
-        const tag   = d.name || '—';
-        const tc    = TAG_COLORS[tag] || '#9090b8';
-        const price = d.price ? d.price : '—';
+        const tag = d.name || '—';
+        const tc  = TAG_COLORS[tag] || '#9090b8';
+        const px  = d.price || '—';
         return '<tr class="border-b last:border-0 transition-colors" style="border-color:var(--border)"'
              + ' onmouseover="this.style.background=\'var(--card2)\'" onmouseout="this.style.background=\'\'">'
              // Tag
@@ -836,66 +838,68 @@ function renderBudgetTable() {
              +   'padding:2px 6px;border-radius:5px;font-family:\'Share Tech Mono\',monospace">' + tag + '</span>'
              + '</td>'
              // Price
-             + '<td class="p-2 text-center font-mono text-[10px]" style="color:var(--subtext);white-space:nowrap">' + price + '</td>'
+             + '<td class="p-2 text-center font-mono text-[10px] whitespace-nowrap" style="color:var(--subtext)">' + px + '</td>'
              // R0 Pts (season total)
              + '<td class="p-2 text-center font-mono text-[10px]">' + fmtPts(d.pts) + '</td>'
              // R1 Pts
              + '<td class="p-2 text-center font-mono text-[10px]">' + fmtPts(d.pts_r1) + '</td>'
              // R2 xPts
-             + '<td class="p-2 text-center font-mono text-[10px]" style="border-right:1px solid var(--border)">' + fmtPts(d.xpts) + '</td>'
-             // Odds columns (left border separates from pts cols)
+             + '<td class="p-2 text-center font-mono text-[10px]" style="border-right:2px solid var(--border)">' + fmtPts(d.xpts) + '</td>'
+             // -0.3 odds
              + '<td class="p-1 text-center" style="border-left:1px solid var(--border)">' + fmtOdds(d.odds_m03) + '</td>'
+             // -0.1 odds
              + '<td class="p-1 text-center">' + fmtOdds(d.odds_m01) + '</td>'
+             // +0.1 odds
              + '<td class="p-1 text-center">' + fmtOdds(d.odds_p01) + '</td>'
+             // +0.3 odds
              + '<td class="p-1 text-center">' + fmtOdds(d.odds_p03) + '</td>'
              // xΔ$
-             + '<td class="p-2 text-center" style="border-left:1px solid var(--border)">' + fmtR2(d.r2_change) + '</td>'
+             + '<td class="p-2 text-center" style="border-left:2px solid var(--border)">' + fmtDelta(d.r2_change) + '</td>'
              + '</tr>';
     }).join('');
 
-    const ac = (col) => dataSort.col === col ? '#3a86ff' : 'var(--muted)';
-    const thR = (col, lbl, style='') =>
-        '<th rowspan="2" class="p-2 text-center text-[8px] font-normal cursor-pointer select-none whitespace-nowrap"'
-        + ' style="color:' + ac(col) + ';' + style + '" onclick="sortDataCol(\'' + col + '\')">' + lbl + '</th>';
-    const thS = (col, lbl, style='') =>
+    const ac  = (col) => dataSort.col === col ? '#3a86ff' : 'var(--muted)';
+    const thR = (col, lbl, extra='') =>
+        '<th rowspan="2" class="p-2 text-[8px] font-normal cursor-pointer select-none whitespace-nowrap"'
+        + ' style="color:' + ac(col) + ';' + extra + '" onclick="sortDataCol(\'' + col + '\')">' + lbl + ' ↕</th>';
+    const thS = (col, lbl, col2='var(--muted)', extra='') =>
         '<th class="p-1 text-center text-[8px] font-normal cursor-pointer select-none whitespace-nowrap"'
-        + ' style="color:' + ac(col) + ';' + style + '" onclick="sortDataCol(\'' + col + '\')">' + lbl + '</th>';
+        + ' style="color:' + (dataSort.col===col ? '#3a86ff' : col2) + ';' + extra
+        + '" onclick="sortDataCol(\'' + col + '\')">' + lbl + ' ↕</th>';
 
     const nameLabel = dataMode === 'drivers' ? 'DR' : 'CR';
 
-    // Two-row header — row 1 has group spans, row 2 has individual odds sub-headers
+    // Two-row header matching the source site layout
     const groupHead = '<thead>'
-        // ─ Header row 1 ─
+        // Row 1: column group labels
         + '<tr style="background:var(--card2);border-bottom:1px solid var(--border)">'
-        + thR('name',     nameLabel, 'text-align:left;padding-left:10px')
-        + thR('price',    '$')
-        + thR('pts',      'R0', 'color:var(--muted)')
-        + thR('pts_r1',   'R1', 'color:var(--muted)')
-        + thR('xpts',     'R2', 'color:var(--muted)')
-        // Price Drop group header (spans 2)
-        + '<th colspan="2" class="p-1 text-center text-[8px] font-bold"'
-        +   ' style="background:rgba(180,30,30,.25);color:#ff6b6b;border-left:1px solid var(--border);border-bottom:1px solid var(--border)">'
-        +   '-0.3 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -0.1</th>'
-        // Price Rise group header (spans 2)
-        + '<th colspan="2" class="p-1 text-center text-[8px] font-bold"'
-        +   ' style="background:rgba(30,120,80,.25);color:#2ec4b6;border-bottom:1px solid var(--border)">'
-        +   '+0.1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +0.3</th>'
-        + thR('r2_change', 'xΔ$', 'border-left:1px solid var(--border)')
+        + thR('name',   nameLabel, 'text-align:left;padding-left:10px')
+        + thR('price',  '$',       'text-align:center')
+        + thR('pts',    'R0',      'text-align:center;color:var(--muted)')
+        + thR('pts_r1', 'R1',      'text-align:center;color:var(--muted)')
+        + thR('xpts',   'R2',      'text-align:center;color:var(--muted)')
+        + '<th colspan="2" style="background:rgba(160,20,20,.35);color:#ff6b6b;font-size:8px;font-weight:bold;'
+        +   'text-align:center;padding:3px;border-left:1px solid var(--border);border-bottom:1px solid var(--border)">'
+        +   '-0.3 &nbsp; -0.1</th>'
+        + '<th colspan="2" style="background:rgba(20,100,70,.35);color:#2ec4b6;font-size:8px;font-weight:bold;'
+        +   'text-align:center;padding:3px;border-bottom:1px solid var(--border)">'
+        +   '+0.1 &nbsp; +0.3</th>'
+        + thR('r2_change', 'xΔ$', 'text-align:center;border-left:2px solid var(--border)')
         + '</tr>'
-        // ─ Header row 2 — odds sub-headers ─
+        // Row 2: individual odds sub-headers
         + '<tr style="background:var(--card2);border-bottom:2px solid var(--border)">'
-        + thS('odds_m03_pct', '-0.3', 'color:#ff6b6b;border-left:1px solid var(--border)')
-        + thS('odds_m01_pct', '-0.1', 'color:#ffaaaa')
-        + thS('odds_p01_pct', '+0.1', 'color:#74d9d0')
-        + thS('odds_p03_pct', '+0.3', 'color:#2ec4b6')
+        + thS('odds_m03_pct', '-0.3', '#ff6b6b', 'border-left:1px solid var(--border)')
+        + thS('odds_m01_pct', '-0.1', '#ffaaaa')
+        + thS('odds_p01_pct', '+0.1', '#74d9d0')
+        + thS('odds_p03_pct', '+0.3', '#2ec4b6')
         + '</tr>'
         + '</thead>';
 
     // Tier divider row
-    const tierHdr = (label, col) =>
-        '<tr style="background:' + col + '22;border-top:2px solid ' + col + '66;border-bottom:1px solid ' + col + '44">'
-        + '<td colspan="10" style="padding:4px 10px">'
-        + '<span style="color:' + col + ';font-size:8px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase">'
+    const tierHdr = (label, accentCol) =>
+        '<tr style="background:' + accentCol + '22;border-top:2px solid ' + accentCol + '66;border-bottom:1px solid ' + accentCol + '44">'
+        + '<td colspan="10" style="padding:5px 10px">'
+        + '<span style="color:' + accentCol + ';font-size:8px;font-weight:bold;letter-spacing:.07em;text-transform:uppercase">'
         + label + '</span>'
         + '</td></tr>';
 

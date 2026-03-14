@@ -5,107 +5,66 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 
 # ─────────────────────────────────────────────────────────────────
-# Budget Builder actual DOM column layout (10 cells per data row):
+# f1fantasytools.com/budget-builder table structure:
 #
-#  0  : Tag          e.g. "RUS"
-#  1  : Price        e.g. "27.7"
-#  2  : Pts          season rolling total (may be "-" mid-week)
-#  3  : Pts R1       points from most recent completed race
-#  4  : xPts         expected points
-#  5  : -0.3 Odds    e.g. "10% (≤-6)"
-#  6  : -0.1 Odds    e.g. "1% (-5)"
-#  7  : +0.1 Odds    e.g. "2% (11)"
-#  8  : +0.3 Odds    e.g. "87% (28)"
-#  9  : R2 xΔ$       e.g. "+0.23"
+# Each table (Drivers / Constructors) has:
+#   <thead>
+#     row 0: group headers
+#     row 1: col headers  (DR/CR | $ | Pts | Pts | xPts | Odds(pts)×4 | xΔ$)
+#   <tbody>
+#     Tier A header row   (single <td colspan=N>  "Tier A (>=18.5M)")
+#     data rows           (10 cells each)
+#     Tier B header row   (single <td colspan=N>  "Tier B (<18.5M)")
+#     data rows           (10 cells each)
 #
-# Tables:  index 0 = Drivers,  index 1 = Constructors
-# Tier rows: single <td colspan=N> with text like "Tier A (>=18.5M)"
+# Data row columns (0-indexed):
+#   0  Tag      e.g. "RUS"
+#   1  Price    e.g. "27.7"
+#   2  R0 Pts   season total  (may be "-")
+#   3  R1 Pts   last race     (may be "-")
+#   4  R2 xPts  expected      e.g. "43.3"
+#   5  -0.3     e.g. "10% (≤-6)"
+#   6  -0.1     e.g. "1% (-5)"
+#   7  +0.1     e.g. "2% (11)"
+#   8  +0.3     e.g. "87% (28)"
+#   9  xΔ$      e.g. "+0.23"
 # ─────────────────────────────────────────────────────────────────
+
+SKIP_TAGS = {"-", "DR", "CR", "Pts", "xPts", "$", "R0", "R1", "R2",
+             "Odds (pts)", "Odds(pts)", "xΔ$", ""}
 
 
 def parse_pct(raw: str) -> int | None:
-    """Extract leading integer percentage from a string like '87% (≤28)'."""
+    """Extract leading integer % from '87% (≤28)' → 87"""
     if not raw:
         return None
     m = re.match(r"(\d+)%", raw.strip())
     return int(m.group(1)) if m else None
 
 
-def clean_val(raw: str) -> str:
-    """Strip stray currency symbols and whitespace."""
+def clean_price(raw: str) -> str:
     return raw.replace("$", "").strip()
 
 
-async def scrape_table(table, table_index: int) -> list[dict]:
+async def scrape_table(table) -> list[dict]:
     """
-    Scrape one <table> (index 0 = Drivers, index 1 = Constructors).
-
-    Reads <thead> first to detect actual column positions, so it works
-    regardless of how many columns the site is currently showing.
-
-    Expected column names the site uses:
-        DR / CR       → name
-        $             → price
-        Pts  (no R)   → pts  (season total, R0)
-        Pts R1        → pts_r1
-        xPts          → xpts
-        -0.3          → odds_m03
-        -0.1          → odds_m01
-        +0.1          → odds_p01
-        +0.3          → odds_p03
-        xΔ$ / R2      → r2_change
+    Scrape one <table> and return list of driver/constructor dicts.
+    Iterates ALL rows (thead + tbody) so nothing is missed.
     """
-    entries        = []
-    current_tier   = None
+    entries            = []
+    current_tier       = None
     current_tier_label = None
+    col_pos            = None   # field -> column index, detected from sub-header row
 
-    # ── Detect column positions from <thead> ──────────────────────
-    col_map = {}  # field_name -> column index
-    try:
-        all_header_rows = await table.locator("thead tr").all()
-        # Use the last header row — it has the most granular labels
-        for hrow in all_header_rows:
-            cells = await hrow.locator("th, td").all()
-            for i, cell in enumerate(cells):
-                raw = (await cell.inner_text()).strip()
-                t   = raw.lower().replace("\n", " ").strip()
-                if t in ("dr", "cr"):                              col_map["name"]      = i
-                elif t == "$":                                     col_map["price"]     = i
-                elif t in ("pts", "r0", "pts r0"):                col_map.setdefault("pts", i)
-                elif "r1" in t and "pts" in t:                    col_map["pts_r1"]    = i
-                elif "xpts" in t or t == "r2 xpts" or (t.startswith("x") and "pt" in t):
-                    col_map["xpts"] = i
-                elif "-0.3" in t or "−0.3" in t:                  col_map["odds_m03"]  = i
-                elif "-0.1" in t or "−0.1" in t:                  col_map["odds_m01"]  = i
-                elif "+0.1" in t:                                  col_map["odds_p01"]  = i
-                elif "+0.3" in t:                                  col_map["odds_p03"]  = i
-                elif "xδ" in t or "xΔ" in raw or ("r2" in t and "x" in t):
-                    col_map["r2_change"] = i
+    all_rows = await table.locator("tr").all()
 
-        print(f"  📋  Table {table_index} column map: {col_map}")
-    except Exception as e:
-        print(f"  ⚠️  Header detection failed: {e}")
-
-    # Fallback to known 10-column layout if detection got < 4 fields
-    if len(col_map) < 4:
-        print("  ℹ️  Falling back to default 10-col layout")
-        col_map = {
-            "name": 0, "price": 1, "pts": 2, "pts_r1": 3, "xpts": 4,
-            "odds_m03": 5, "odds_m01": 6, "odds_p01": 7, "odds_p03": 8,
-            "r2_change": 9,
-        }
-
-    def pick(texts: list[str], key: str, default: str = "") -> str:
-        idx = col_map.get(key)
-        return texts[idx] if idx is not None and idx < len(texts) else default
-
-    # ── Scrape body rows ──────────────────────────────────────────
-    rows = await table.locator("tbody tr").all()
-    for row in rows:
-        cells = await row.locator("td").all()
+    for row in all_rows:
+        cells = await row.locator("td, th").all()
         texts = [(await c.inner_text()).strip() for c in cells]
+        if not texts:
+            continue
 
-        # Tier header — single cell spanning all cols
+        # ── Tier header row (single spanning cell) ──────────────
         if len(texts) == 1:
             m = re.search(r"Tier\s+([AB])", texts[0], re.IGNORECASE)
             if m:
@@ -113,29 +72,52 @@ async def scrape_table(table, table_index: int) -> list[dict]:
                 current_tier_label = texts[0].strip()
             continue
 
-        # Need at least 6 cells for a data row
+        # ── Column label row: detect col positions ───────────────
+        if texts[0] in ("DR", "CR") or (len(texts) > 1 and texts[1] == "$"):
+            col_pos = {}
+            for i, t in enumerate(texts):
+                tl = t.lower()
+                if t in ("DR", "CR"):                      col_pos["name"]      = i
+                elif t == "$":                              col_pos["price"]     = i
+                elif tl in ("pts", "r0"):                  col_pos.setdefault("pts", i)
+                elif "r1" in tl and "pts" in tl:           col_pos["pts_r1"]    = i
+                elif "xpts" in tl or tl == "r2 xpts":      col_pos["xpts"]      = i
+                elif "-0.3" in t or "−0.3" in t:           col_pos["odds_m03"]  = i
+                elif "-0.1" in t or "−0.1" in t:           col_pos["odds_m01"]  = i
+                elif "+0.1" in t:                           col_pos["odds_p01"]  = i
+                elif "+0.3" in t:                           col_pos["odds_p03"]  = i
+                elif "xδ" in tl or "xΔ" in t or tl == "r2": col_pos["r2_change"] = i
+            print(f"    col_pos: {col_pos}")
+            continue
+
+        # ── Skip rows with fewer than 6 cells ───────────────────
         if len(texts) < 6:
             continue
 
-        tag = pick(texts, "name") or texts[0]
+        # ── Data row ─────────────────────────────────────────────
+        def get(key, fallback_idx, default=""):
+            if col_pos and key in col_pos:
+                i = col_pos[key]
+                return texts[i] if i < len(texts) else default
+            return texts[fallback_idx] if fallback_idx < len(texts) else default
 
-        # Skip column-header ghost rows
-        if not tag or tag in ("-", "DR", "CR", "Pts", "xPts", "$", "R0", "R1", "R2"):
+        tag = get("name", 0)
+        if not tag or tag in SKIP_TAGS:
             continue
 
-        odds_m03  = pick(texts, "odds_m03")
-        odds_m01  = pick(texts, "odds_m01")
-        odds_p01  = pick(texts, "odds_p01")
-        odds_p03  = pick(texts, "odds_p03")
+        odds_m03 = get("odds_m03", 5)
+        odds_m01 = get("odds_m01", 6)
+        odds_p01 = get("odds_p01", 7)
+        odds_p03 = get("odds_p03", 8)
 
-        entry = {
+        entries.append({
             "name":         tag,
             "tier":         current_tier,
             "tier_label":   current_tier_label,
-            "price":        clean_val(pick(texts, "price")),
-            "pts":          pick(texts, "pts"),
-            "pts_r1":       pick(texts, "pts_r1"),
-            "xpts":         pick(texts, "xpts"),
+            "price":        clean_price(get("price",     1)),
+            "pts":          get("pts",       2),
+            "pts_r1":       get("pts_r1",    3),
+            "xpts":         get("xpts",      4),
             "odds_m03":     odds_m03,
             "odds_m01":     odds_m01,
             "odds_p01":     odds_p01,
@@ -144,9 +126,8 @@ async def scrape_table(table, table_index: int) -> list[dict]:
             "odds_m01_pct": parse_pct(odds_m01),
             "odds_p01_pct": parse_pct(odds_p01),
             "odds_p03_pct": parse_pct(odds_p03),
-            "r2_change":    pick(texts, "r2_change"),
-        }
-        entries.append(entry)
+            "r2_change":    get("r2_change", 9),
+        })
 
     return entries
 
@@ -165,7 +146,7 @@ async def run_scraper():
         }
 
         try:
-            print("Fetching Budget Builder data …")
+            print("Fetching Budget Builder …")
             await page.goto(
                 "https://f1fantasytools.com/budget-builder",
                 wait_until="networkidle",
@@ -173,49 +154,43 @@ async def run_scraper():
             )
             await page.wait_for_selector("table", timeout=30_000)
 
-            # ── Grab simulation label e.g. "China, Post-SQ v2." ──
+            # Grab simulation label
             try:
                 sim_label = await page.evaluate(
                     "() => { const s = document.querySelector('select'); "
                     "return s ? s.options[s.selectedIndex].text.trim() : ''; }"
                 )
-                if not sim_label:
-                    sim_el    = page.locator("select").first
-                    sim_label = (await sim_el.input_value()).strip()
-                data_output["simulation_label"] = sim_label
+                data_output["simulation_label"] = sim_label or ""
             except Exception as e:
-                print(f"  ⚠️  Could not read simulation label: {e}")
+                print(f"  ⚠️  sim label: {e}")
 
-            # ── Scrape Drivers (table 0) and Constructors (table 1) ──
             tables = await page.locator("table").all()
+            print(f"  Found {len(tables)} table(s) on page")
+
             if len(tables) < 2:
-                raise RuntimeError(
-                    f"Expected ≥2 tables on page, found {len(tables)}"
-                )
+                print("  ⚠️  Expected ≥2 tables. Dumping page text snippet:")
+                txt = await page.inner_text("body")
+                print(txt[:3000])
+                raise RuntimeError(f"Only {len(tables)} table(s) found")
 
-            data_output["drivers"]      = await scrape_table(tables[0], 0)
-            data_output["constructors"] = await scrape_table(tables[1], 1)
-
+            # Drivers
+            print("  Scraping drivers …")
+            data_output["drivers"] = await scrape_table(tables[0])
             d_count = len(data_output["drivers"])
-            c_count = len(data_output["constructors"])
-            print(f"  ✅  Drivers: {d_count} rows   Constructors: {c_count} rows")
+            print(f"  ✅  Drivers: {d_count} rows")
 
-            # If we got nothing, print debug rows to diagnose column layout changes
             if d_count == 0:
-                print("  ⚠️  No driver rows — printing thead + first 4 tbody rows:")
-                try:
-                    hrows = await tables[0].locator("thead tr").all()
-                    for i, hr in enumerate(hrows):
-                        ths = await hr.locator("th, td").all()
-                        htexts = [(await t.inner_text()).strip() for t in ths]
-                        print(f"     thead row {i} ({len(htexts)} cols): {htexts}")
-                except Exception as he:
-                    print(f"     Could not read thead: {he}")
-                rows = await tables[0].locator("tbody tr").all()
-                for i, row in enumerate(rows[:4]):
-                    cells = await row.locator("td").all()
-                    texts = [(await c.inner_text()).strip() for c in cells]
-                    print(f"     tbody row {i} ({len(texts)} cols): {texts}")
+                print("  ⚠️  No drivers found — raw rows dump:")
+                for i, row in enumerate((await tables[0].locator("tr").all())[:10]):
+                    cells = await row.locator("td, th").all()
+                    txts  = [(await c.inner_text()).strip() for c in cells]
+                    print(f"     row {i} ({len(txts)} cells): {txts}")
+
+            # Constructors
+            print("  Scraping constructors …")
+            data_output["constructors"] = await scrape_table(tables[1])
+            c_count = len(data_output["constructors"])
+            print(f"  ✅  Constructors: {c_count} rows")
 
         except Exception as e:
             print(f"Scraper error: {e}")
