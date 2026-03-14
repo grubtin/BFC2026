@@ -366,6 +366,7 @@ async function syncF1Teams() {
         renderTeamsPanel();
         renderHomeWeekly();
         document.getElementById('teams-error').style.display = 'none';
+        refreshFantasyRoundsIfNeeded();
     } catch(e) {
         console.warn('f1_teams.json not found:', e);
     }
@@ -381,6 +382,14 @@ async function syncF1Fantasy() {
         document.getElementById('fantasy-error').style.display = 'none';
     } catch(e) {
         console.warn('f1_fantasy.json not found:', e);
+    }
+}
+
+// Re-populate fantasy rounds after teams load (for provisional round detection)
+function refreshFantasyRoundsIfNeeded() {
+    if (F1_FANTASY) {
+        populateFantasyRounds();
+        renderFantasyTable();
     }
 }
 
@@ -603,29 +612,53 @@ function toggleTeamCard(header) {
 // ═══════════════════════════════════════════════════════════════════
 function renderHomeWeekly() {
     if (!F1_TEAMS) return;
+    // Ensure PLAYERS is initialized even if history hasn't loaded yet
+    if (!Object.keys(PLAYERS).length) PLAYERS = { ...PLAYER_CONFIG };
     const confirmedRounds = (F1_TEAMS.rounds || []).filter(r => r.confirmed && r.teams?.length > 0);
-    if (!confirmedRounds.length) return;
+    const provisionalRounds = (F1_TEAMS.rounds || []).filter(r => !r.confirmed && r.teams?.some(t => t.picks?.length > 0));
+    const allRelevantRounds = [...confirmedRounds, ...provisionalRounds].sort((a,b)=>a.round-b.round);
+    if (!allRelevantRounds.length) return;
 
-    const latest = confirmedRounds[confirmedRounds.length - 1];
+    const latest = allRelevantRounds[allRelevantRounds.length - 1];
+    const isProvisional = !latest.confirmed;
     const section = document.getElementById('home-weekly-section');
     const title   = document.getElementById('home-weekly-title');
     const table   = document.getElementById('home-weekly-table');
 
+    // Map round number to GP name from schedule
+    const schedRound = F1_SCHEDULE.find(r => r.round === latest.round);
+    const gpName = schedRound ? schedRound.gp : (latest.gp || `Round ${latest.round}`);
+    const roundFlag = GP_FLAGS[gpName] || '🏁';
+    const provLabel = isProvisional ? ' <span style="font-size:9px;background:rgba(244,161,0,.15);color:#f4a100;padding:1px 5px;border-radius:4px;vertical-align:middle;">PROVISIONAL</span>' : '';
+
     section.style.display = '';
-    title.textContent = `${GP_FLAGS[latest.gp]||'🏁'} ${latest.gp || `Round ${latest.round}`} — Team Points`;
+    title.innerHTML = `${roundFlag} ${gpName} — Team Points${provLabel}`;
 
-    // Sort teams by total_points desc
-    const teams = [...latest.teams].filter(t => t.total_points != null).sort((a,b) => b.total_points - a.total_points);
+    // For confirmed rounds, show ALL teams (including those with null per-round pts)
+    // Use overall cur_points as fallback display value
+    const allTeams = [...latest.teams].filter(t => t.picks?.length > 0);
+    const teamsWithPts = allTeams.map(t => {
+        // Find cur_points from F1_TEAMS.players as fallback
+        const playerMeta = (F1_TEAMS.players||[]).find(p => p.id === t.player_id);
+        return { ...t, _displayPts: t.total_points ?? playerMeta?.cur_points ?? null };
+    }).sort((a,b) => (b._displayPts??-999) - (a._displayPts??-999));
 
-    if (!teams.length) {
-        table.innerHTML = '<div class="p-4 text-center text-[10px]" style="color:var(--muted)">Points not yet confirmed for this round.</div>';
+    if (!teamsWithPts.length) {
+        if (isProvisional) {
+            table.innerHTML = '<div class="p-4 text-center text-[10px]" style="color:var(--muted)">Provisional picks loaded — points not yet available.</div>';
+        } else {
+            table.innerHTML = '<div class="p-4 text-center text-[10px]" style="color:var(--muted)">Points not yet confirmed for this round.</div>';
+        }
         return;
     }
 
-    table.innerHTML = teams.map((t, i) => {
+    const provBannerHtml = isProvisional ? `<div style="background:rgba(244,161,0,.08);border-bottom:1px solid rgba(244,161,0,.2);padding:7px 14px;font-size:9px;color:#f4a100;">⚠️ Provisional data — points not confirmed yet</div>` : '';
+
+    table.innerHTML = provBannerHtml + teamsWithPts.map((t, i) => {
         const pid = PLAYER_ID_MAP[t.player_id] || t.player_id;
         const p   = PLAYERS[pid] || { name: t.player_id, color:'#aaa', emoji:'👤' };
         const mc  = i < 3 ? MEDAL_COLOR[i] : (p.color || '#aaa');
+        const pts = t._displayPts ?? '—';
 
         // Get drivers for this team
         const drivers = (t.picks||[]).filter(pk => pk.type==='driver').map(pk => {
@@ -646,7 +679,7 @@ function renderHomeWeekly() {
                 <div class="flex-1 min-w-0">
                     <div class="fun text-[14px] leading-tight" style="color:${p.color}">${p.emoji} ${p.name}</div>
                 </div>
-                <div class="fun text-lg" style="color:${mc}">${t.total_points}</div>
+                <div class="fun text-lg" style="color:${mc}">${pts}</div>
             </div>
             <div class="ml-9 flex flex-wrap gap-0.5">
                 ${drivers} ${constrs}
@@ -780,25 +813,61 @@ function populateFantasyRounds() {
     const sel = document.getElementById('fantasy-round-select');
     if (!sel) return;
     const gws = F1_FANTASY.gameweeks || [];
+
+    // Build synthetic rounds from overall points_this_gw if no gameweeks exist
+    // R1 = Australian GP (confirmed), R2 = Chinese GP (provisional if in f1_teams unconfirmed)
+    const syntheticOptions = [];
+    if (!gws.length) {
+        // R1: synthesize from overall data's points_this_gw
+        syntheticOptions.push({ value:'synth_r1', label:'🇦🇺 R01 · Australian Grand Prix' });
+        // R2: check if f1_teams has unconfirmed round 2 data
+        if (F1_TEAMS) {
+            const r2 = (F1_TEAMS.rounds||[]).find(r=>r.round===2 && !r.confirmed && r.teams?.some(t=>t.picks?.length>0));
+            if (r2) {
+                syntheticOptions.push({ value:'synth_r2', label:'🇨🇳 R02 · Chinese Grand Prix [PROVISIONAL]' });
+            }
+        }
+    }
+
     sel.innerHTML = `<option value="overall">📊 Overall (Season)</option>` +
+        [...syntheticOptions].reverse().map(o => `<option value="${o.value}">${o.label}</option>`).join('') +
         [...gws].reverse().map(gw =>
-            `<option value="${gw.round}">${GP_FLAGS[gw.gp]||'🏁'} R${String(gw.round).padStart(2,'0')} · ${gw.gp||''}</option>`
+            `<option value="${gw.round}">${GP_FLAGS[gw.gp]||'🏁'} R${String(gw.round).padStart(2,'0')} · ${gw.gp||''}${gw.confirmed===false?' [PROVISIONAL]':''}</option>`
         ).join('');
 }
 
 function renderFantasyTable() {
     if (!F1_FANTASY) return;
     const gwVal = document.getElementById('fantasy-round-select')?.value || 'overall';
-    let drivers = [], constructors = [];
+    let drivers = [], constructors = [], isProvisional = false, roundLabel = '';
+
     if (gwVal === 'overall') {
         drivers      = F1_FANTASY.overall?.drivers      || [];
         constructors = F1_FANTASY.overall?.constructors || [];
         document.getElementById('fantasy-updated-chip').textContent = F1_FANTASY.last_updated?.split(' ')[0] || '';
+        roundLabel = 'Overall (Season)';
+    } else if (gwVal === 'synth_r1') {
+        // Synthesize R1 data: use points_this_gw from overall as the round points
+        drivers = (F1_FANTASY.overall?.drivers||[]).map(d => ({...d, points_this_gw: d.points_this_gw ?? 0}));
+        constructors = (F1_FANTASY.overall?.constructors||[]).map(d => ({...d, points_this_gw: d.points_this_gw ?? 0}));
+        document.getElementById('fantasy-updated-chip').textContent = 'R01 · Australian GP ✅';
+        roundLabel = 'R01 · Australian Grand Prix';
+        fantasySort = { col:'points_this_gw', dir:-1 };
+    } else if (gwVal === 'synth_r2') {
+        // R2 provisional: use overall data (prices may reflect R2 changes), mark as provisional
+        drivers = (F1_FANTASY.overall?.drivers||[]).map(d => ({...d, points_this_gw: null}));
+        constructors = (F1_FANTASY.overall?.constructors||[]).map(d => ({...d, points_this_gw: null}));
+        document.getElementById('fantasy-updated-chip').textContent = 'R02 · China 🔄 PROVISIONAL';
+        roundLabel = 'R02 · Chinese Grand Prix [PROVISIONAL]';
+        isProvisional = true;
+        fantasySort = { col:'price', dir:-1 };
     } else {
         const gw = (F1_FANTASY.gameweeks||[]).find(g => String(g.round)===String(gwVal));
         drivers      = gw?.drivers      || [];
         constructors = gw?.constructors || [];
+        isProvisional = gw?.confirmed === false;
         document.getElementById('fantasy-updated-chip').textContent = gw?.date || '';
+        roundLabel = gw?.gp || '';
     }
 
     const raw    = fantasyMode === 'drivers' ? drivers : constructors;
@@ -807,6 +876,9 @@ function renderFantasyTable() {
         const bv = b[fantasySort.col] ?? -Infinity;
         return fantasySort.dir * (bv - av);
     });
+
+    const isRoundView = gwVal !== 'overall';
+    const ptsField = isRoundView ? 'points_this_gw' : 'total_points';
 
     const th = (col, label, extra='') => {
         const active = fantasySort.col === col;
@@ -819,7 +891,7 @@ function renderFantasyTable() {
     const rows = sorted.map((d, i) => {
         const tag    = d.short_name || d.name || '—';
         const tc     = TEAM_TAG_COLORS[d.team_tag || tag] || '#9090b8';
-        const pts    = gwVal === 'overall' ? (d.total_points ?? '—') : (d.points_this_gw ?? d.total_points ?? '—');
+        const pts    = isProvisional ? '—' : (d[ptsField] ?? '—');
         const price  = d.price != null ? `$${d.price}M` : '—';
         const ptsNum = typeof pts === 'number' ? pts : 0;
         const rankCol = i===0?'#f4a100':i===1?'#9a9aaa':i===2?'#cd7f32':'var(--muted)';
@@ -838,18 +910,21 @@ function renderFantasyTable() {
         </tr>`;
     }).join('');
 
+    const ptsColLabel = isRoundView ? 'Rnd Pts' : 'Pts';
     const label = fantasyMode === 'drivers' ? 'Driver' : 'Constructor';
-    document.getElementById('fantasy-table').innerHTML = rows.length ? `
+    const provBanner = isProvisional ? `<div style="background:rgba(244,161,0,.1);border:1px solid rgba(244,161,0,.3);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:9px;color:#f4a100;display:flex;align-items:center;gap:6px;">⚠️ <strong>${roundLabel}</strong> — Data is PROVISIONAL. Points not yet confirmed.</div>` : '';
+    document.getElementById('fantasy-table').innerHTML = (rows.length ? `
+    ${provBanner}
     <div style="overflow-x:auto">
     <table class="w-full" style="min-width:280px">
         <thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)">
             <th class="p-2 text-center text-[8px] font-normal w-6" style="color:var(--muted)">#</th>
             ${th('name', label, 'text-left pl-3')}
             ${th('price', 'Price')}
-            ${th('total_points', 'Pts')}
+            ${th(ptsField, ptsColLabel)}
         </tr></thead>
         <tbody>${rows}</tbody>
-    </table></div>` : `<div class="p-6 text-center text-[10px]" style="color:var(--muted)">No data for this selection</div>`;
+    </table></div>` : `<div class="p-6 text-center text-[10px]" style="color:var(--muted)">No data for this selection</div>`);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -858,14 +933,18 @@ function renderFantasyTable() {
 function populateTeamsDropdowns() {
     if (!F1_TEAMS) return;
 
-    // Round dropdown — overall + completed rounds with picks
+    // Round dropdown — overall + rounds with picks (confirmed or provisional with picks)
     const rSel = document.getElementById('teams-round-select');
     const rounds = (F1_TEAMS.rounds||[]).filter(r => r.teams?.some(t => t.picks?.length > 0));
     rSel.innerHTML = `<option value="overall">📊 Overall Standings</option>` +
         [...rounds].reverse().map(r => {
-            const flag   = GP_FLAGS[r.gp] || '🏁';
+            // Use F1_SCHEDULE for proper GP name
+            const schedRound = F1_SCHEDULE.find(s => s.round === r.round);
+            const gpName = schedRound ? schedRound.gp : (r.gp || `Round ${r.round}`);
+            const flag   = GP_FLAGS[gpName] || '🏁';
             const status = r.confirmed ? '✅' : '🔄';
-            return `<option value="${r.round}">${status} R${String(r.round).padStart(2,'0')} · ${flag} ${r.gp||r.label}</option>`;
+            const provTag = r.confirmed ? '' : ' [PROVISIONAL]';
+            return `<option value="${r.round}">${status} R${String(r.round).padStart(2,'0')} · ${flag} ${gpName}${provTag}</option>`;
         }).join('');
     if (rounds.length) rSel.value = rounds[rounds.length-1].round;
 
@@ -944,7 +1023,12 @@ function renderTeamsRound(roundNum) {
     if (!playerId) return;
 
     const playerData = (roundData.teams||[]).find(t => t.player_id === playerId);
-    document.getElementById('teams-updated-chip').textContent = roundData.confirmed ? 'Confirmed ✅' : 'Provisional 🔄';
+    const isProvisional = !roundData.confirmed;
+    document.getElementById('teams-updated-chip').textContent = isProvisional ? 'Provisional 🔄' : 'Confirmed ✅';
+
+    // Get proper GP name from schedule
+    const schedRound = F1_SCHEDULE.find(s => s.round === roundNum);
+    const gpName = schedRound ? schedRound.gp : (roundData.gp || `Round ${roundNum}`);
 
     if (!playerData || !playerData.picks?.length) {
         document.getElementById('teams-summary').innerHTML = '';
@@ -956,7 +1040,13 @@ function renderTeamsRound(roundNum) {
     const budget   = playerData.budget_remaining != null ? `$${playerData.budget_remaining}M` : '—';
     const teamVal  = playerData.team_value != null ? `$${playerData.team_value}M` : '—';
 
+    const provBanner = isProvisional ? `
+        <div style="background:rgba(244,161,0,.1);border:1px solid rgba(244,161,0,.3);border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:9px;color:#f4a100;display:flex;align-items:center;gap:6px;">
+            ⚠️ <strong>R${String(roundNum).padStart(2,'0')} · ${gpName}</strong> — PROVISIONAL data. Points not yet confirmed.
+        </div>` : '';
+
     document.getElementById('teams-summary').innerHTML = `
+        ${provBanner}
         <div class="card p-3 text-center">
             <div class="text-[8px] uppercase tracking-wide mb-1" style="color:var(--muted)">Total Pts</div>
             <div class="fun text-lg" style="color:#2ec4b6">${totalPts}</div>
@@ -993,7 +1083,7 @@ function renderTeamsRound(roundNum) {
 
     document.getElementById('teams-picks-table').innerHTML = `
     <div style="padding:10px 14px 8px;border-bottom:1px solid var(--border)">
-        <span class="text-[8px] uppercase tracking-widest" style="color:var(--muted)">Picks · ${roundData.confirmed?'Final Points':'Provisional'}</span>
+        <span class="text-[8px] uppercase tracking-widest" style="color:var(--muted)">Picks · ${isProvisional ? `R${String(roundNum).padStart(2,'0')} ${gpName} · <span style="color:#f4a100">PROVISIONAL</span>` : 'Final Points'}</span>
     </div>
     <table class="w-full">
         <thead><tr class="border-b" style="background:var(--card2);border-color:var(--border)">
@@ -1168,11 +1258,11 @@ function renderBudgetTable() {
 const SEED_ROUND = {
     round:1,key:'R01',label:'R01 · Australian GP 🇦🇺',flag:'🇦🇺',gp:'Australian GP',date:'2026-03-16',
     standings:[
-        {player_key:'kevcedes',player_name:'Kevcedes',    owner:'Kevin Liang',    points:240,race_points:240,team_value:102.4},
-        {player_key:'grahhh',  player_name:'GRAHHH racing',owner:'Vivian Nguyen',  points:230,race_points:230,team_value:100.8},
-        {player_key:'leclaren',player_name:'LeClaren F1', owner:'Selina Le Khac', points:222,race_points:222,team_value:101.5},
-        {player_key:'juice',   player_name:'RACING JUICE',owner:'Justin Tran',    points:195,race_points:195,team_value:99.2},
-        {player_key:'thumbi',  player_name:'Thumbi',      owner:'Thomas George',  points:195,race_points:195,team_value:100.1},
+        {player_key:'kevcedes',player_name:'Kevcedes',    owner:'Kevin Liang',    points:340,race_points:340,team_value:99.9},
+        {player_key:'grahhh',  player_name:'GRAHHH racing',owner:'Vivian Nguyen',  points:340,race_points:340,team_value:99.9},
+        {player_key:'juice',   player_name:'RACING JUICE',owner:'Justin Tran',    points:340,race_points:340,team_value:99.9},
+        {player_key:'leclaren',player_name:'LeClaren F1', owner:'Selina Le Khac', points:340,race_points:340,team_value:99.9},
+        {player_key:'thumbi',  player_name:'Thumbi',      owner:'Thomas George',  points:195,race_points:195,team_value:99.9},
     ],
     drivers:[],constructors:[],
 };
@@ -1216,7 +1306,7 @@ const F1_SCHEDULE = [
   {round:20,gp:'Mexico City Grand Prix',location:'Mexico City',circuit:'Autódromo Hermanos Rodríguez',type:'traditional',date:'Nov 01',full_dates:'Oct 30-Nov 01',sessions:[{key:'fp1',label:'Free Practice 1',y:2026,mo:9,d:30,h:19,m:30},{key:'fp2',label:'Free Practice 2',y:2026,mo:9,d:30,h:23,m:0},{key:'fp3',label:'Free Practice 3',y:2026,mo:9,d:31,h:19,m:30},{key:'quali',label:'Qualifying',y:2026,mo:9,d:31,h:23,m:0},{key:'race',label:'Race',y:2026,mo:10,d:1,h:20,m:0}]},
   {round:21,gp:'São Paulo Grand Prix',location:'São Paulo',circuit:'Autódromo José Carlos Pace',type:'traditional',date:'Nov 08',full_dates:'Nov 06-08',sessions:[{key:'fp1',label:'Free Practice 1',y:2026,mo:10,d:6,h:14,m:30},{key:'fp2',label:'Free Practice 2',y:2026,mo:10,d:6,h:18,m:0},{key:'fp3',label:'Free Practice 3',y:2026,mo:10,d:7,h:14,m:30},{key:'quali',label:'Qualifying',y:2026,mo:10,d:7,h:18,m:0},{key:'race',label:'Race',y:2026,mo:10,d:8,h:17,m:0}]},
   {round:22,gp:'Las Vegas Grand Prix',location:'Las Vegas',circuit:'Las Vegas Strip Circuit',type:'traditional',date:'Nov 21',full_dates:'Nov 19-21',sessions:[{key:'fp1',label:'Free Practice 1',y:2026,mo:10,d:20,h:2,m:30},{key:'fp2',label:'Free Practice 2',y:2026,mo:10,d:20,h:6,m:30},{key:'fp3',label:'Free Practice 3',y:2026,mo:10,d:21,h:2,m:0},{key:'quali',label:'Qualifying',y:2026,mo:10,d:21,h:6,m:0},{key:'race',label:'Race',y:2026,mo:10,d:22,h:6,m:0}]},
-  {round:23,gp:'Qatar Grand Prix',location:'Lusail',circuit:'Lusail International Circuit',type:'sprint',date:'Nov 29',full_dates:'Nov 27-29',sessions:[{key:'fp1',label:'Free Practice 1',y:2026,mo:10,d:27,h:13,m:30},{key:'sq',label:'Sprint Qualifying',y:2026,mo:10,d:27,h:17,m:30},{key:'sprint',label:'Sprint Race',y:2026,mo:10,d:28,h:13,m:0},{key:'quali',label:'Qualifying',y:2026,mo:10,d:28,h:17,m:0},{key:'race',label:'Race',y:2026,mo:10,d:29,h:15,m:0}]},
+  {round:23,gp:'Qatar Grand Prix',location:'Lusail',circuit:'Lusail International Circuit',type:'traditional',date:'Nov 29',full_dates:'Nov 27-29',sessions:[{key:'fp1',label:'Free Practice 1',y:2026,mo:10,d:27,h:13,m:30},{key:'fp2',label:'Free Practice 2',y:2026,mo:10,d:27,h:17,m:0},{key:'fp3',label:'Free Practice 3',y:2026,mo:10,d:28,h:12,m:30},{key:'quali',label:'Qualifying',y:2026,mo:10,d:28,h:16,m:0},{key:'race',label:'Race',y:2026,mo:10,d:29,h:15,m:0}]},
   {round:24,gp:'Abu Dhabi Grand Prix',location:'Yas Island',circuit:'Yas Marina Circuit',type:'traditional',date:'Dec 06',full_dates:'Dec 04-06',sessions:[{key:'fp1',label:'Free Practice 1',y:2026,mo:11,d:4,h:9,m:30},{key:'fp2',label:'Free Practice 2',y:2026,mo:11,d:4,h:13,m:0},{key:'fp3',label:'Free Practice 3',y:2026,mo:11,d:5,h:9,m:30},{key:'quali',label:'Qualifying',y:2026,mo:11,d:5,h:13,m:0},{key:'race',label:'Race',y:2026,mo:11,d:6,h:13,m:0}]},
 ];
 
