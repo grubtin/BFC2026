@@ -1,0 +1,49 @@
+import asyncio
+import json
+from datetime import datetime
+from playwright.async_api import async_playwright
+
+async def run_scraper():
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+        
+        data_output = {
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "drivers": [],
+            "constructors": []
+        }
+
+        try:
+            print("Fetching Budget Data...")
+            await page.goto("https://f1fantasytools.com/budget-builder", wait_until="networkidle")
+            await page.wait_for_selector("table")
+            
+            # Identify tables - usually Drivers is the first, Constructors is the second
+            tables = await page.locator("table").all()
+            
+            for i, table in enumerate(tables):
+                rows = await table.locator("tbody tr").all()
+                for row in rows:
+                    cols = await row.locator("td").all_inner_texts()
+                    if len(cols) >= 3:
+                        entry = {
+                            "name": cols[0].strip(),
+                            "price": cols[1].strip(),
+                            "change": cols[2].strip()
+                        }
+                        # Assign to correct list based on table index
+                        if i == 0: data_output["drivers"].append(entry)
+                        else: data_output["constructors"].append(entry)
+
+            with open("f1_data.json", "w") as f:
+                json.dump(data_output, f, indent=4)
+            print("Successfully updated f1_data.json")
+
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            await browser.close()
+
+if __name__ == "__main__":
+    asyncio.run(run_scraper())
