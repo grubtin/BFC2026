@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-14 17:01:46 UTC",
+  "last_updated": "2026-03-18 11:31:43 UTC",
   "league_id": "C4JXU0PEO03",
   "league_name": "Baby Formula Championship",
   "f1_players": {
@@ -11,8 +11,8 @@
         "team": "Alpine",
         "team_tag": "GAS",
         "price": 12.2,
-        "total_points": 15.0,
-        "points_this_gw": 4.0
+        "total_points": 31.0,
+        "points_this_gw": 20.0
       },
       {
         "id": "11059",
@@ -21,8 +21,8 @@
         "team": "Alpine",
         "team_tag": "COL",
         "price": 6.4,
-        "total_points": 15.0,
-        "points_this_gw": 9.0
+        "total_points": 24.0,
+        "points_this_gw": 18.0
       },
       {
         "id": "12",
@@ -31,8 +31,8 @@
         "team": "Aston Martin",
         "team_tag": "ALO",
         "price": 9.4,
-        "total_points": -8.0,
-        "points_this_gw": 6.0
+        "total_points": -21.0,
+        "points_this_gw": -7.0
       },
       {
         "id": "129",
@@ -41,8 +41,8 @@
         "team": "Aston Martin",
         "team_tag": "STR",
         "price": 7.4,
-        "total_points": -18.0,
-        "points_this_gw": 5.0
+        "total_points": -37.0,
+        "points_this_gw": -14.0
       },
       {
         "id": "11051",
@@ -51,8 +51,8 @@
         "team": "Audi",
         "team_tag": "BOR",
         "price": 7.0,
-        "total_points": 19.0,
-        "points_this_gw": 6.0
+        "total_points": -1.0,
+        "points_this_gw": -14.0
       },
       {
         "id": "111",
@@ -61,8 +61,8 @@
         "team": "Audi",
         "team_tag": "HUL",
         "price": 6.2,
-        "total_points": -23.0,
-        "points_this_gw": -3.0
+        "total_points": -13.0,
+        "points_this_gw": 7.0
       },
       {
         "id": "121",
@@ -71,8 +71,8 @@
         "team": "Cadillac",
         "team_tag": "PER",
         "price": 5.8,
-        "total_points": 13.0,
-        "points_this_gw": 9.0
+        "total_points": 24.0,
+        "points_this_gw": 20.0
       },
       {
         "id": "13",
@@ -81,8 +81,8 @@
         "team": "Cadillac",
         "team_tag": "BOT",
         "price": 5.3,
-        "total_points": -24.0,
-        "points_this_gw": -8.0
+        "total_points": -13.0,
+        "points_this_gw": 3.0
       },
       {
         "id": "115",
@@ -91,8 +91,8 @@
         "team": "Ferrari",
         "team_tag": "LEC",
         "price": 23.1,
-        "total_points": 57.0,
-        "points_this_gw": 28.0
+        "total_points": 80.0,
+        "points_this_gw": 51.0
       },
       {
         "id": "110",
@@ -101,8 +101,8 @@
         "team": "Ferrari",
         "team_tag": "HAM",
         "price": 22.6,
-        "total_points": 48.0,
-        "points_this_gw": 23.0
+        "total_points": 73.0,
+        "points_this_gw": 48.0
       },
       {
         "id": "11031",
@@ -111,8 +111,8 @@
         "team": "Haas F1 Team",
         "team_tag": "BEA",
         "price": 8.0,
-        "total_points": 26.0,
-        "points_this_gw": 6.0
+        "total_points": 54.0,
+        "points_this_gw": 34.0
       },
       {
         "id": "118",
@@ -121,8 +121,8 @@
         "team": "Haas F1 Team",
         "team_tag": "OCO",
         "price": 7.9,
-        "total_points": 18.0,
-        "points_this_gw": 9.0
+        "total_points": 33.0,
+        "points_this_gw": 24.0
       },
       {
         "id": "117",
@@ -131,8 +131,8 @@
         "team": "McLaren",
         "team_tag": "NOR",
         "price": 27.1,
-        "total_points": 31.0,
-        "points_this_gw": 10.0
+        "total_points": 11.0,
+        "points_this_gw": -10.0
       },
       {
         "id": "1982",
@@ -141,8 +141,8 @@
         "team": "McLaren",
         "team_tag": "PIA",
         "price": 25.2,
-        "total_points": -1.0,
-        "points_this_gw": 13.0
+        "total_points": -21.0,
+        "points_this_gw": -7.0
       },
       {
         "id": "124",
@@ -151,8 +151,8 @@
         "team": "Mercedes",
         "team_tag": "RUS",
         "price": 27.7,
-        "total_points": 60.0,
-        "points_this_gw": 21.0
+        "total_points": 84.0,
+        "points_this_gw": 45.0
       },
       {
         "id": "11161",
@@ -161,8 +161,8 @@
         "team": "Mercedes",
         "team_tag": "ANT",
         "price": 23.5,
-        "total_points": 53.0,
-        "points_this_gw": 21.0
+        "total_points": 100.0,
+        "points_this_gw": 68.0
       },
       {
         "id": "11149",
@@ -171,8 +171,8 @@
         "team": "Racing Bulls",
         "team_tag": "LIN",
         "price": 6.8,
-        "total_points": 11.0,
-        "points_this_gw": -4.0
+        "total_points": 22.0,
+        "points_this_gw": 7.0
       },
       {
         "id": "114",
@@ -181,8 +181,8 @@
         "team": "Racing Bulls",
         "team_tag": "LAW",
         "price": 6.3,
-        "total_points": 19.0,
-        "points_this_gw": 14.0
+        "total_points": 40.0,
+        "points_this_gw": 35.0
       },
       {
         "id": "131",
@@ -191,8 +191,8 @@
         "team": "Red Bull Racing",
         "team_tag": "VER",
         "price": 28.0,
-        "total_points": 68.0,
-        "points_this_gw": 18.0
+        "total_points": 64.0,
+        "points_this_gw": 14.0
       },
       {
         "id": "11032",
@@ -201,8 +201,8 @@
         "team": "Red Bull Racing",
         "team_tag": "HAD",
         "price": 14.5,
-        "total_points": -3.0,
-        "points_this_gw": 5.0
+        "total_points": 11.0,
+        "points_this_gw": 19.0
       },
       {
         "id": "125",
@@ -211,8 +211,8 @@
         "team": "Williams",
         "team_tag": "SAI",
         "price": 11.6,
-        "total_points": 21.0,
-        "points_this_gw": 12.0
+        "total_points": 37.0,
+        "points_this_gw": 28.0
       },
       {
         "id": "11",
@@ -221,8 +221,8 @@
         "team": "Williams",
         "team_tag": "ALB",
         "price": 11.4,
-        "total_points": 21.0,
-        "points_this_gw": 13.0
+        "total_points": 1.0,
+        "points_this_gw": -7.0
       }
     ],
     "constructors": [
@@ -233,8 +233,8 @@
         "team": "",
         "team_tag": "MER",
         "price": 29.6,
-        "total_points": 148.0,
-        "points_this_gw": 52.0
+        "total_points": 211.0,
+        "points_this_gw": 115.0
       },
       {
         "id": "27",
@@ -243,8 +243,8 @@
         "team": "",
         "team_tag": "MCL",
         "price": 28.8,
-        "total_points": 52.0,
-        "points_this_gw": 33.0
+        "total_points": 12.0,
+        "points_this_gw": -7.0
       },
       {
         "id": "29",
@@ -253,8 +253,8 @@
         "team": "",
         "team_tag": "RBR",
         "price": 28.5,
-        "total_points": 75.0,
-        "points_this_gw": 33.0
+        "total_points": 87.0,
+        "points_this_gw": 45.0
       },
       {
         "id": "25",
@@ -263,8 +263,8 @@
         "team": "",
         "team_tag": "FER",
         "price": 23.6,
-        "total_points": 130.0,
-        "points_this_gw": 61.0
+        "total_points": 188.0,
+        "points_this_gw": 119.0
       },
       {
         "id": "23",
@@ -273,8 +273,8 @@
         "team": "",
         "team_tag": "ALP",
         "price": 13.1,
-        "total_points": 40.0,
-        "points_this_gw": 18.0
+        "total_points": 67.0,
+        "points_this_gw": 45.0
       },
       {
         "id": "210",
@@ -283,8 +283,8 @@
         "team": "",
         "team_tag": "WIL",
         "price": 12.6,
-        "total_points": 44.0,
-        "points_this_gw": 24.0
+        "total_points": 42.0,
+        "points_this_gw": 22.0
       },
       {
         "id": "24",
@@ -293,8 +293,8 @@
         "team": "",
         "team_tag": "AST",
         "price": 9.7,
-        "total_points": -28.0,
-        "points_this_gw": 10.0
+        "total_points": -58.0,
+        "points_this_gw": -20.0
       },
       {
         "id": "26",
@@ -303,8 +303,8 @@
         "team": "",
         "team_tag": "HAA",
         "price": 8.0,
-        "total_points": 54.0,
-        "points_this_gw": 20.0
+        "total_points": 99.0,
+        "points_this_gw": 65.0
       },
       {
         "id": "2636",
@@ -313,8 +313,8 @@
         "team": "",
         "team_tag": "RBS",
         "price": 6.9,
-        "total_points": 48.0,
-        "points_this_gw": 13.0
+        "total_points": 85.0,
+        "points_this_gw": 50.0
       },
       {
         "id": "2640",
@@ -323,8 +323,8 @@
         "team": "",
         "team_tag": "AUD",
         "price": 6.0,
-        "total_points": 6.0,
-        "points_this_gw": 6.0
+        "total_points": -4.0,
+        "points_this_gw": -4.0
       },
       {
         "id": "2641",
@@ -333,12 +333,24 @@
         "team": "",
         "team_tag": "CAD",
         "price": 5.4,
-        "total_points": -13.0,
-        "points_this_gw": 0.0
+        "total_points": 9.0,
+        "points_this_gw": 22.0
       }
     ]
   },
   "players": [
+    {
+      "id": "178336081",
+      "player_key": "juice",
+      "name": "RACING JUICE",
+      "owner": "Justin Tran",
+      "emoji": "👑",
+      "color": "#2ec4b6",
+      "f1_user_id": "178336081",
+      "guid": "62ff616e-135e-11f1-bcc9-110b22c295d5-0-178336081",
+      "cur_points": 606.0,
+      "cur_rank": 1
+    },
     {
       "id": "232016281",
       "player_key": "kevcedes",
@@ -348,8 +360,8 @@
       "color": "#f4a100",
       "f1_user_id": "232016281",
       "guid": "09f0d560-15c7-11f1-b8b0-770fb5163e61-0-232016281",
-      "cur_points": 375.0,
-      "cur_rank": 1
+      "cur_points": 605.0,
+      "cur_rank": 2
     },
     {
       "id": "191134213",
@@ -360,19 +372,7 @@
       "color": "#ff4757",
       "f1_user_id": "191134213",
       "guid": "00b3ea04-15c8-11f1-b359-87b38b7ef4aa-0-191134213",
-      "cur_points": 359.0,
-      "cur_rank": 2
-    },
-    {
-      "id": "178336081",
-      "player_key": "juice",
-      "name": "RACING JUICE",
-      "owner": "Justin Tran",
-      "emoji": "👑",
-      "color": "#2ec4b6",
-      "f1_user_id": "178336081",
-      "guid": "62ff616e-135e-11f1-bcc9-110b22c295d5-0-178336081",
-      "cur_points": 340.0,
+      "cur_points": 579.0,
       "cur_rank": 3
     },
     {
@@ -384,7 +384,7 @@
       "color": "#3a86ff",
       "f1_user_id": "178339760",
       "guid": "935c43e2-13de-11f1-8f6a-fb9f00e58a8a-0-178339760",
-      "cur_points": 333.0,
+      "cur_points": 544.0,
       "cur_rank": 4
     },
     {
@@ -396,1146 +396,490 @@
       "color": "#c77dff",
       "f1_user_id": "178798446",
       "guid": "0ee6757e-14fb-11f1-860a-85ccc2f43a95-0-178798446",
-      "cur_points": 302.0,
+      "cur_points": 454.0,
       "cur_rank": 5
     }
   ],
   "rounds": [
     {
-      "round": 1,
-      "gp": "Australian Grand Prix",
-      "date": "03/07/2026",
-      "confirmed": true,
-      "standings": [
-        {
-          "player_id": "232016281",
-          "player_key": "kevcedes",
-          "round_points": 240.0,
-          "cumulative_points": 240.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "191134213",
-          "player_key": "grahhh",
-          "round_points": 230.0,
-          "cumulative_points": 230.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "178339760",
-          "player_key": "leclaren",
-          "round_points": 222.0,
-          "cumulative_points": 222.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "178336081",
-          "player_key": "juice",
-          "round_points": 195.0,
-          "cumulative_points": 195.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "178798446",
-          "player_key": "thumbi",
-          "round_points": 195.0,
-          "cumulative_points": 195.0,
-          "team_value": 99.9
-        }
-      ],
-      "teams": [
-        {
-          "player_id": "232016281",
-          "player_key": "kevcedes",
-          "round_points": 240.0,
-          "cumulative_points": 240.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "191134213",
-          "player_key": "grahhh",
-          "round_points": 230.0,
-          "cumulative_points": 230.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "178336081",
-          "player_key": "juice",
-          "round_points": 195.0,
-          "cumulative_points": 195.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "178339760",
-          "player_key": "leclaren",
-          "round_points": 222.0,
-          "cumulative_points": 222.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "178798446",
-          "player_key": "thumbi",
-          "round_points": 195.0,
-          "cumulative_points": 195.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "round": 2,
-      "gp": "Chinese Grand Prix",
-      "date": "03/14/2026",
-      "confirmed": true,
-      "standings": [
-        {
-          "player_id": "178336081",
-          "player_key": "juice",
-          "round_points": 145.0,
-          "cumulative_points": 340.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "232016281",
-          "player_key": "kevcedes",
-          "round_points": 135.0,
-          "cumulative_points": 375.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "191134213",
-          "player_key": "grahhh",
-          "round_points": 129.0,
-          "cumulative_points": 359.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "178339760",
-          "player_key": "leclaren",
-          "round_points": 111.0,
-          "cumulative_points": 333.0,
-          "team_value": 99.9
-        },
-        {
-          "player_id": "178798446",
-          "player_key": "thumbi",
-          "round_points": 107.0,
-          "cumulative_points": 302.0,
-          "team_value": 99.9
-        }
-      ],
-      "teams": [
-        {
-          "player_id": "232016281",
-          "player_key": "kevcedes",
-          "round_points": 135.0,
-          "cumulative_points": 375.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "191134213",
-          "player_key": "grahhh",
-          "round_points": 129.0,
-          "cumulative_points": 359.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "178336081",
-          "player_key": "juice",
-          "round_points": 145.0,
-          "cumulative_points": 340.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "178339760",
-          "player_key": "leclaren",
-          "round_points": 111.0,
-          "cumulative_points": 333.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        },
-        {
-          "player_id": "178798446",
-          "player_key": "thumbi",
-          "round_points": 107.0,
-          "cumulative_points": 302.0,
-          "team_value": 99.9,
-          "budget_remaining": 0.1,
-          "picks": [
-            {
-              "id": "124",
-              "short_name": "RUS",
-              "full_name": "George Russell",
-              "team": "Mercedes",
-              "team_tag": "RUS",
-              "type": "driver",
-              "is_star": true,
-              "price": 27.7,
-              "round_points": null
-            },
-            {
-              "id": "111",
-              "short_name": "HUL",
-              "full_name": "Nico Hulkenberg",
-              "team": "Audi",
-              "team_tag": "HUL",
-              "type": "driver",
-              "is_star": false,
-              "price": 6.2,
-              "round_points": null
-            },
-            {
-              "id": "2636",
-              "short_name": "RBS",
-              "full_name": "Racing Bulls",
-              "team": "",
-              "team_tag": "RBS",
-              "type": "constructor",
-              "is_star": false,
-              "price": 6.9,
-              "round_points": null
-            },
-            {
-              "id": "115",
-              "short_name": "LEC",
-              "full_name": "Charles Leclerc",
-              "team": "Ferrari",
-              "team_tag": "LEC",
-              "type": "driver",
-              "is_star": false,
-              "price": 23.1,
-              "round_points": null
-            },
-            {
-              "id": "11031",
-              "short_name": "BEA",
-              "full_name": "Oliver Bearman",
-              "team": "Haas F1 Team",
-              "team_tag": "BEA",
-              "type": "driver",
-              "is_star": false,
-              "price": 8.0,
-              "round_points": null
-            },
-            {
-              "id": "13",
-              "short_name": "BOT",
-              "full_name": "Valtteri Bottas",
-              "team": "Cadillac",
-              "team_tag": "BOT",
-              "type": "driver",
-              "is_star": false,
-              "price": 5.3,
-              "round_points": null
-            },
-            {
-              "id": "25",
-              "short_name": "FER",
-              "full_name": "Ferrari",
-              "team": "",
-              "team_tag": "FER",
-              "type": "constructor",
-              "is_star": false,
-              "price": 23.6,
-              "round_points": null
-            }
-          ]
-        }
-      ]
-    },
-    {
       "round": 3,
       "gp": "Japanese Grand Prix",
       "date": "03/28/2026",
       "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 4,
-      "gp": "Bahrain Grand Prix",
-      "date": "04/11/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 5,
-      "gp": "Saudi Arabian Grand Prix",
-      "date": "04/18/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 6,
-      "gp": "Miami Grand Prix",
-      "date": "05/02/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 7,
-      "gp": "Canadian Grand Prix",
-      "date": "05/23/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 8,
-      "gp": "Monaco Grand Prix",
-      "date": "06/06/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 9,
-      "gp": "Spanish Grand Prix",
-      "date": "06/13/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 10,
-      "gp": "Austrian Grand Prix",
-      "date": "06/27/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 11,
-      "gp": "British Grand Prix",
-      "date": "07/04/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 12,
-      "gp": "Belgian Grand Prix",
-      "date": "07/18/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 13,
-      "gp": "Hungarian Grand Prix",
-      "date": "07/25/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 14,
-      "gp": "Dutch Grand Prix",
-      "date": "08/22/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 15,
-      "gp": "Italian Grand Prix",
-      "date": "09/05/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 16,
-      "gp": "Spanish Grand Prix (Madrid)",
-      "date": "09/12/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 17,
-      "gp": "Azerbaijan Grand Prix",
-      "date": "09/25/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 18,
-      "gp": "Singapore Grand Prix",
-      "date": "10/10/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 19,
-      "gp": "United States Grand Prix",
-      "date": "10/24/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 20,
-      "gp": "Mexico City Grand Prix",
-      "date": "10/31/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 21,
-      "gp": "São Paulo Grand Prix",
-      "date": "11/07/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 22,
-      "gp": "Las Vegas Grand Prix",
-      "date": "11/21/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 23,
-      "gp": "Qatar Grand Prix",
-      "date": "11/28/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
-    },
-    {
-      "round": 24,
-      "gp": "Abu Dhabi Grand Prix",
-      "date": "12/05/2026",
-      "confirmed": false,
-      "standings": [],
-      "teams": []
+      "standings": [
+        {
+          "player_id": "178336081",
+          "player_key": "juice",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9
+        },
+        {
+          "player_id": "232016281",
+          "player_key": "kevcedes",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9
+        },
+        {
+          "player_id": "191134213",
+          "player_key": "grahhh",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9
+        },
+        {
+          "player_id": "178339760",
+          "player_key": "leclaren",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9
+        },
+        {
+          "player_id": "178798446",
+          "player_key": "thumbi",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9
+        }
+      ],
+      "teams": [
+        {
+          "player_id": "178336081",
+          "player_key": "juice",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9,
+          "budget_remaining": 0.1,
+          "picks": [
+            {
+              "id": "124",
+              "short_name": "RUS",
+              "full_name": "George Russell",
+              "team": "Mercedes",
+              "team_tag": "RUS",
+              "type": "driver",
+              "is_star": true,
+              "price": 27.7,
+              "round_points": null
+            },
+            {
+              "id": "111",
+              "short_name": "HUL",
+              "full_name": "Nico Hulkenberg",
+              "team": "Audi",
+              "team_tag": "HUL",
+              "type": "driver",
+              "is_star": false,
+              "price": 6.2,
+              "round_points": null
+            },
+            {
+              "id": "2636",
+              "short_name": "RBS",
+              "full_name": "Racing Bulls",
+              "team": "",
+              "team_tag": "RBS",
+              "type": "constructor",
+              "is_star": false,
+              "price": 6.9,
+              "round_points": null
+            },
+            {
+              "id": "115",
+              "short_name": "LEC",
+              "full_name": "Charles Leclerc",
+              "team": "Ferrari",
+              "team_tag": "LEC",
+              "type": "driver",
+              "is_star": false,
+              "price": 23.1,
+              "round_points": null
+            },
+            {
+              "id": "11031",
+              "short_name": "BEA",
+              "full_name": "Oliver Bearman",
+              "team": "Haas F1 Team",
+              "team_tag": "BEA",
+              "type": "driver",
+              "is_star": false,
+              "price": 8.0,
+              "round_points": null
+            },
+            {
+              "id": "13",
+              "short_name": "BOT",
+              "full_name": "Valtteri Bottas",
+              "team": "Cadillac",
+              "team_tag": "BOT",
+              "type": "driver",
+              "is_star": false,
+              "price": 5.3,
+              "round_points": null
+            },
+            {
+              "id": "25",
+              "short_name": "FER",
+              "full_name": "Ferrari",
+              "team": "",
+              "team_tag": "FER",
+              "type": "constructor",
+              "is_star": false,
+              "price": 23.6,
+              "round_points": null
+            }
+          ]
+        },
+        {
+          "player_id": "232016281",
+          "player_key": "kevcedes",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9,
+          "budget_remaining": 0.1,
+          "picks": [
+            {
+              "id": "124",
+              "short_name": "RUS",
+              "full_name": "George Russell",
+              "team": "Mercedes",
+              "team_tag": "RUS",
+              "type": "driver",
+              "is_star": true,
+              "price": 27.7,
+              "round_points": null
+            },
+            {
+              "id": "111",
+              "short_name": "HUL",
+              "full_name": "Nico Hulkenberg",
+              "team": "Audi",
+              "team_tag": "HUL",
+              "type": "driver",
+              "is_star": false,
+              "price": 6.2,
+              "round_points": null
+            },
+            {
+              "id": "2636",
+              "short_name": "RBS",
+              "full_name": "Racing Bulls",
+              "team": "",
+              "team_tag": "RBS",
+              "type": "constructor",
+              "is_star": false,
+              "price": 6.9,
+              "round_points": null
+            },
+            {
+              "id": "115",
+              "short_name": "LEC",
+              "full_name": "Charles Leclerc",
+              "team": "Ferrari",
+              "team_tag": "LEC",
+              "type": "driver",
+              "is_star": false,
+              "price": 23.1,
+              "round_points": null
+            },
+            {
+              "id": "11031",
+              "short_name": "BEA",
+              "full_name": "Oliver Bearman",
+              "team": "Haas F1 Team",
+              "team_tag": "BEA",
+              "type": "driver",
+              "is_star": false,
+              "price": 8.0,
+              "round_points": null
+            },
+            {
+              "id": "13",
+              "short_name": "BOT",
+              "full_name": "Valtteri Bottas",
+              "team": "Cadillac",
+              "team_tag": "BOT",
+              "type": "driver",
+              "is_star": false,
+              "price": 5.3,
+              "round_points": null
+            },
+            {
+              "id": "25",
+              "short_name": "FER",
+              "full_name": "Ferrari",
+              "team": "",
+              "team_tag": "FER",
+              "type": "constructor",
+              "is_star": false,
+              "price": 23.6,
+              "round_points": null
+            }
+          ]
+        },
+        {
+          "player_id": "191134213",
+          "player_key": "grahhh",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9,
+          "budget_remaining": 0.1,
+          "picks": [
+            {
+              "id": "124",
+              "short_name": "RUS",
+              "full_name": "George Russell",
+              "team": "Mercedes",
+              "team_tag": "RUS",
+              "type": "driver",
+              "is_star": true,
+              "price": 27.7,
+              "round_points": null
+            },
+            {
+              "id": "111",
+              "short_name": "HUL",
+              "full_name": "Nico Hulkenberg",
+              "team": "Audi",
+              "team_tag": "HUL",
+              "type": "driver",
+              "is_star": false,
+              "price": 6.2,
+              "round_points": null
+            },
+            {
+              "id": "2636",
+              "short_name": "RBS",
+              "full_name": "Racing Bulls",
+              "team": "",
+              "team_tag": "RBS",
+              "type": "constructor",
+              "is_star": false,
+              "price": 6.9,
+              "round_points": null
+            },
+            {
+              "id": "115",
+              "short_name": "LEC",
+              "full_name": "Charles Leclerc",
+              "team": "Ferrari",
+              "team_tag": "LEC",
+              "type": "driver",
+              "is_star": false,
+              "price": 23.1,
+              "round_points": null
+            },
+            {
+              "id": "11031",
+              "short_name": "BEA",
+              "full_name": "Oliver Bearman",
+              "team": "Haas F1 Team",
+              "team_tag": "BEA",
+              "type": "driver",
+              "is_star": false,
+              "price": 8.0,
+              "round_points": null
+            },
+            {
+              "id": "13",
+              "short_name": "BOT",
+              "full_name": "Valtteri Bottas",
+              "team": "Cadillac",
+              "team_tag": "BOT",
+              "type": "driver",
+              "is_star": false,
+              "price": 5.3,
+              "round_points": null
+            },
+            {
+              "id": "25",
+              "short_name": "FER",
+              "full_name": "Ferrari",
+              "team": "",
+              "team_tag": "FER",
+              "type": "constructor",
+              "is_star": false,
+              "price": 23.6,
+              "round_points": null
+            }
+          ]
+        },
+        {
+          "player_id": "178339760",
+          "player_key": "leclaren",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9,
+          "budget_remaining": 0.1,
+          "picks": [
+            {
+              "id": "124",
+              "short_name": "RUS",
+              "full_name": "George Russell",
+              "team": "Mercedes",
+              "team_tag": "RUS",
+              "type": "driver",
+              "is_star": true,
+              "price": 27.7,
+              "round_points": null
+            },
+            {
+              "id": "111",
+              "short_name": "HUL",
+              "full_name": "Nico Hulkenberg",
+              "team": "Audi",
+              "team_tag": "HUL",
+              "type": "driver",
+              "is_star": false,
+              "price": 6.2,
+              "round_points": null
+            },
+            {
+              "id": "2636",
+              "short_name": "RBS",
+              "full_name": "Racing Bulls",
+              "team": "",
+              "team_tag": "RBS",
+              "type": "constructor",
+              "is_star": false,
+              "price": 6.9,
+              "round_points": null
+            },
+            {
+              "id": "115",
+              "short_name": "LEC",
+              "full_name": "Charles Leclerc",
+              "team": "Ferrari",
+              "team_tag": "LEC",
+              "type": "driver",
+              "is_star": false,
+              "price": 23.1,
+              "round_points": null
+            },
+            {
+              "id": "11031",
+              "short_name": "BEA",
+              "full_name": "Oliver Bearman",
+              "team": "Haas F1 Team",
+              "team_tag": "BEA",
+              "type": "driver",
+              "is_star": false,
+              "price": 8.0,
+              "round_points": null
+            },
+            {
+              "id": "13",
+              "short_name": "BOT",
+              "full_name": "Valtteri Bottas",
+              "team": "Cadillac",
+              "team_tag": "BOT",
+              "type": "driver",
+              "is_star": false,
+              "price": 5.3,
+              "round_points": null
+            },
+            {
+              "id": "25",
+              "short_name": "FER",
+              "full_name": "Ferrari",
+              "team": "",
+              "team_tag": "FER",
+              "type": "constructor",
+              "is_star": false,
+              "price": 23.6,
+              "round_points": null
+            }
+          ]
+        },
+        {
+          "player_id": "178798446",
+          "player_key": "thumbi",
+          "round_points": null,
+          "cumulative_points": null,
+          "team_value": 99.9,
+          "budget_remaining": 0.1,
+          "picks": [
+            {
+              "id": "124",
+              "short_name": "RUS",
+              "full_name": "George Russell",
+              "team": "Mercedes",
+              "team_tag": "RUS",
+              "type": "driver",
+              "is_star": true,
+              "price": 27.7,
+              "round_points": null
+            },
+            {
+              "id": "111",
+              "short_name": "HUL",
+              "full_name": "Nico Hulkenberg",
+              "team": "Audi",
+              "team_tag": "HUL",
+              "type": "driver",
+              "is_star": false,
+              "price": 6.2,
+              "round_points": null
+            },
+            {
+              "id": "2636",
+              "short_name": "RBS",
+              "full_name": "Racing Bulls",
+              "team": "",
+              "team_tag": "RBS",
+              "type": "constructor",
+              "is_star": false,
+              "price": 6.9,
+              "round_points": null
+            },
+            {
+              "id": "115",
+              "short_name": "LEC",
+              "full_name": "Charles Leclerc",
+              "team": "Ferrari",
+              "team_tag": "LEC",
+              "type": "driver",
+              "is_star": false,
+              "price": 23.1,
+              "round_points": null
+            },
+            {
+              "id": "11031",
+              "short_name": "BEA",
+              "full_name": "Oliver Bearman",
+              "team": "Haas F1 Team",
+              "team_tag": "BEA",
+              "type": "driver",
+              "is_star": false,
+              "price": 8.0,
+              "round_points": null
+            },
+            {
+              "id": "13",
+              "short_name": "BOT",
+              "full_name": "Valtteri Bottas",
+              "team": "Cadillac",
+              "team_tag": "BOT",
+              "type": "driver",
+              "is_star": false,
+              "price": 5.3,
+              "round_points": null
+            },
+            {
+              "id": "25",
+              "short_name": "FER",
+              "full_name": "Ferrari",
+              "team": "",
+              "team_tag": "FER",
+              "type": "constructor",
+              "is_star": false,
+              "price": 23.6,
+              "round_points": null
+            }
+          ]
+        }
+      ]
     }
   ]
 }
